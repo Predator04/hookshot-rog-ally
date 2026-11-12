@@ -66,6 +66,11 @@ std::unordered_map<int,int>& handle_hits() { static std::unordered_map<int,int> 
 struct BankCache { uint64_t at=0; };
 std::array<std::array<BankCache,2>,2>& bank_cache() { static std::array<std::array<BankCache,2>,2> b;return b; }
 void make_dummies() {}
+// (hookshot-rog-ally, issue 4: the held mesh fallback draws a recording's start and submit check; none held here)
+thread_local int fb_held = 0;
+thread_local bool fb_recording = false;
+thread_local VkCommandBuffer fb_cmd{};
+void fb_record_held() {}
 /* FLUSH */
 /* BEGIN */
 struct Recording { int slot;VkCommandBuffer cmd,upload,init; VkFence fence;uint64_t value=1,batch=0;bool submitted=false; };

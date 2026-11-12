@@ -6089,7 +6089,7 @@ struct FbItem {
     NvnState s;
 };
 TLS_OBJECT(fb_items, std::vector<FbItem>)
-int64_t st_fb_draws, st_fb_batches, st_fb_most;
+thread_local int64_t st_fb_draws, st_fb_batches, st_fb_most;   // (each recording thread's own: its log line says its runs)
 
 /// The push constants' addresses of held draw k (push_constants reads them)
 void fb_addresses(const FbBuffers& b, const FbItem& it, int k) {

@@ -117,6 +117,11 @@ constexpr int kNvnStages = 8;
 /* BANK_CACHE */
 std::array<std::array<BankCache, kNvnStages>, 2>& bank_cache() { static thread_local std::array<std::array<BankCache, kNvnStages>, 2> b; return b; }
 void make_dummies() {}
+// (hookshot-rog-ally, issue 4: the held mesh fallback draws a recording's start and submit check; none held here)
+thread_local int fb_held = 0;
+thread_local bool fb_recording = false;
+thread_local VkCommandBuffer fb_cmd{};
+void fb_record_held() {}
 /* BEGIN */
 #define FINE_SCOPE(...) ((void)0)
 #define FINE_N(...) ((void)0)
