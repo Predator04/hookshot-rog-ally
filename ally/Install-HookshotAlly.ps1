@@ -193,7 +193,7 @@ if (-not $NoShortcut) {
 Write-Host @"
 
 Done: $Out
-Start it from the desktop shortcut (or $Out\hookshot.exe).
+Start $(if ($NoShortcut) { "$Out\hookshot.exe" } else { "it from the desktop shortcut (or $Out\hookshot.exe)" }).
 The first start builds every shader: about 45 minutes on the Ally, with a progress screen. Keep the charger in and let it
 finish once; later starts take about 2 minutes.
 To update later, run this installer again: it builds the newest release into the same folder and keeps your saves.
