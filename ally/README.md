@@ -169,6 +169,24 @@ The tested setup uses 3 draws of 21 MB each: about 130 MB a recording thread (th
   match. The only differences are moving things (leaves, Navi, the mist).
 - 10 loads with batching on, none lost the device.
 
+**Checked again on the fixed route** (`route-bench.ps1`, 3 alternating pairs, GPU ms a frame, the mean of 3 runs a build):
+
+| Spot and view | Reference | Batches of 3 |
+|---|---|---|
+| Hyrule Field, as loaded | 21.5 | 20.7 |
+| Hyrule Field, camera left | 19.8 | 19.1 |
+| Hyrule Field, camera right | 24.6 | 23.6 |
+| Kokiri Forest, as loaded | 21.9 | 21.8 |
+| Kokiri Forest, camera left | 14.2 | 14.5 |
+| Kokiri Forest, camera right | 14.5 | 14.8 |
+
+- In Hyrule Field every batched view was faster than the same view in its pair, 9 of 9: about 0.8 ms (3.6%) less, and
+  game fps 38.6 against 37.7.
+- In Kokiri Forest's route views there was no difference to measure.
+- Over the whole route, game fps (41.8 against 41.7) and 1% low (44.4 against 43.9) were about the same.
+- So the gain is real but small, and it shows where fallback draws are many (the field's grass and far trees). The walk
+  results above overstated it: their scenes differed.
+
 ## Tested setup
 
 **Environment:** [`ally/hookshot_env.txt`](hookshot_env.txt), copied into the game folder.
@@ -254,8 +272,8 @@ Never attach game files.
 
 ## Test tools
 
-They are in [`ally/tools`](tools) and run in PowerShell on the Ally. Each run opens the game, loads the save and walks
-a fixed Kokiri Forest route.
+They are in [`ally/tools`](tools) and run in PowerShell on the Ally. A walk run opens the game, loads the save and walks a
+timed route through Kokiri Forest; a route run stands at fixed spots and turns the camera.
 
 - **`mem-bench.ps1 -Tag <name> -EnvFile <env file> [-Game <folder>] [-Walks 4] [-Ini <options file>]`**: one run.
   - It writes a result line to `tools\hs\mem_results.txt`: start-up time, fps, 1% low, stutters, memory and paging,
@@ -263,6 +281,17 @@ a fixed Kokiri Forest route.
   - It stops at once on battery (exit 3), and a run that touches battery during the walks is thrown away.
 - **`run-queue.ps1 -List <file>`**: runs a list of runs, one per line as `tag;game folder;env file;walks;options file`.
   - It waits for 60 s of steady AC power before each run, and retries a run thrown away for battery twice.
+- **`route-bench.ps1 -Tag <name> -Game <folder> -EnvFile <env file> [-Spots Kokiri,HyruleField] [-HoldS 20] [-Shots]`**:
+  the same places and views every run, for changes to GPU time.
+  - Each spot is one game start from a save standing there. Link stands still while the camera turns: as loaded, left,
+    right, half-way back. Each view is measured for 20 s.
+  - It writes a line a spot (fps, 1% low, GPU ms, draws, passes, each view's GPU ms) and one for the route to
+    `tools\hs\route_results.txt`. With `-Shots` it saves a picture of each view, for comparing two builds' pictures.
+  - It takes about 3 minutes a spot. It presses A from the first frames, which skips the intro.
+  - The saves: for each spot, play there, save, close the game, and copy its `user\save` folder to
+    `tools\hs\route-saves\<spot>` (the newest slot is the one Continue loads). They are game data, so they stay on the PC.
+  - Two runs of one build agreed within about 0.3 ms over the route; walk runs of one build were up to 2 ms apart,
+    because Link ends up in different places. Still alternate the builds: the whole Ally drifts a little over an hour.
 - **`prof_parse.py OLD.log NEW.log`**: compares two logs made with `RX_VK_PASS_TIMING=2`, by kind of GPU work, span and
   program.
 - **`build-rog-ally.ps1`**: the build script from Install, Options A and C.
