@@ -1406,6 +1406,37 @@ const uint8_t* replay_handle(VkCommandBuffer& cmd, const uint8_t* h, bool may_st
         suspend_ok = false;
         return suspend_at;
     }
+    // (local, ROG Ally) RX_VK_PARALLEL_MIN=<draws and dispatches>: a command buffer that had fewer than that the last frame, at
+    // the same place in the frame (its k-th replay since the last present), is replayed here alone, without the dry pass. The
+    // dry pass is a second walk of the whole command buffer: on one that ends up as one segment it was ~30-50% more CPU work for
+    // nothing, and on a power-limited handheld (one budget for the CPU and the GPU) that cost GPU clock in the lighter views.
+    // Unset or 0: the dry pass for every command buffer, as upstream
+    static const int64_t par_min = getenv("RX_VK_PARALLEL_MIN") ? std::max(0, atoi(getenv("RX_VK_PARALLEL_MIN"))) : 0;
+    static int64_t par_hist[64];
+    static bool par_hist_init = false;
+    static int64_t par_hist_present = -1;
+    static int par_hist_k = 0;
+    if (!par_hist_init) {
+        for (int64_t& v : par_hist) v = -1;
+        par_hist_init = true;
+    }
+    if (presents_now != par_hist_present) par_hist_present = presents_now, par_hist_k = 0;
+    const int par_slot = par_hist_k < 63 ? par_hist_k : 63;
+    par_hist_k++;
+    if (par_min > 0 && par_hist[par_slot] >= 0 && par_hist[par_slot] < par_min) {
+        int64_t d0, s0, c0, p0, d1, s1, c1, p1;
+        draw_stats(&d0, &s0, &c0, &p0);
+        suspend_ok = may_stop;
+        replay(cmd, state, h);
+        suspend_ok = false;
+        draw_stats(&d1, &s1, &c1, &p1);
+        par_hist[par_slot] = (d1 - d0) + (s1 - s0) + (c1 - c0);
+        static int64_t serial_n = 0;
+        if (++serial_n % 6000 == 1)
+            logf("vk: parallel replay: %lld small command buffers replayed without the dry pass (RX_VK_PARALLEL_MIN=%lld)",
+                 (long long)serial_n, (long long)par_min);
+        return suspend_at;
+    }
     // the dry pass: the state at every 64 draws and dispatches, the render conditions, the uniform updates
     const auto t_dry0 = std::chrono::steady_clock::now();
     const NvnState start = state;
@@ -1420,6 +1451,7 @@ const uint8_t* replay_handle(VkCommandBuffer& cmd, const uint8_t* h, bool may_st
     rmode = Mode::Serial;
     const uint8_t* const stop = suspend_at;   // (the segments end there)
     const int64_t total = dry_work;
+    par_hist[par_slot] = total;   // (RX_VK_PARALLEL_MIN: this place's size for the next frame)
     static double dry_ms, seg_ms, segs_n;
     static int64_t timed;
     dry_ms += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t_dry0).count();
@@ -2715,7 +2747,7 @@ void log_slow_frame() {
     if (!limit) return;
     static auto last_t = std::chrono::steady_clock::now();
     static int64_t last[PROF_COUNT];
-    static int64_t last_pl, last_tr, last_d, last_up;
+    static int64_t last_pl, last_tr, last_d, last_up, last_di, last_astc;
     static int logged;
     const auto now = std::chrono::steady_clock::now();
     const double ms = std::chrono::duration<double, std::milli>(now - last_t).count();
@@ -2732,7 +2764,13 @@ void log_slow_frame() {
              "%lld uploads", (long long)presents, ms, dp(PROF_SUBMIT), dp(PROF_DRAW), dp(PROF_DESC), dp(PROF_PIPE), dp(PROF_PROGRAM),
              dp(PROF_CMDS), dp(PROF_MEMSYNC), dp(PROF_QSUBMIT), dp(PROF_SLOTWAIT), (long long)(d - last_d), (long long)(pl - last_pl),
              (long long)(tr - last_tr), (long long)(up - last_up));
+        // (local, Ally) the phases the line above leaves out (texture lookups, uploads, dispatch, present): the walks' slow frames had
+        // most of their submit time in none of the phases it names
+        logf("vk: slow frame at present %lld, the rest: present %.1f, texture lookups %.1f, uploads %.1f, dispatch %.1f; %lld dispatches, %lld ASTC",
+             (long long)presents, dp(PROF_PRESENT), dp(PROF_TEXGET), dp(PROF_UPLOAD), dp(PROF_DISPATCH), (long long)(di - last_di),
+             (long long)(astc - last_astc));
     }
+    last_di = di, last_astc = astc;
     for (int i = 0; i < PROF_COUNT; i++) last[i] = prof_ns[i];
     last_pl = pl, last_tr = tr, last_d = d, last_up = up;
 }

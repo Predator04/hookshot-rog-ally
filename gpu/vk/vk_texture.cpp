@@ -1840,6 +1840,7 @@ bool texture_size_ok(VkImageType type, uint32_t w, uint32_t h, uint32_t z, uint3
 }
 Texture* create(const Key& key, const nvn_tex* t, VkFormat vf, bool astc, int bw, int bh, int bpb, bool as_target) {
     PROF_EXACT();   // (texture_get's slow path: PROF_TEXGET samples the rest)
+    const auto cr0 = std::chrono::steady_clock::now();   // (local, Ally diagnostic: RX_VK_SLOW_TEX_MS)
     auto tex = std::make_unique<Texture>();
     Texture& x = *tex;
     x.gpu = t->gpu, x.d = t->d, x.L = t->L, x.nvn_format = t->d.format;
@@ -2113,6 +2114,15 @@ Texture* create(const Key& key, const nvn_tex* t, VkFormat vf, bool astc, int bw
                  x.levels, (int)x.format, d.format);
         return nullptr;
     }
+    {   // (local, Ally diagnostic: RX_VK_SLOW_TEX_MS, the image's making alone)
+        static const double slow_ms = getenv("RX_VK_SLOW_TEX_MS") ? atof(getenv("RX_VK_SLOW_TEX_MS")) : 0.0;
+        const double ims = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - cr0).count();
+        static int logged;
+        if (slow_ms > 0 && ims >= slow_ms / 2 && logged++ < 300)
+            logf("vk: slow image make %.1f ms: %ux%ux%u x%u levels %u format %d usage %#x%s%s", ims, x.width, x.height, x.depth,
+                 x.layers, x.levels, (int)x.format, (unsigned)x.usage, pool_key ? " (render target pool)" : "",
+                 in_textures ? " (textures' pool)" : "");
+    }
     // what it costs: the level chain's texels
     uint64_t px = 0;
     for (uint32_t l = 0; l < x.levels; l++)
@@ -2313,7 +2323,34 @@ unsigned view_layer(const nvn_view* v) {
     return v && v->set_layers ? v->min_layer : 0;
 }
 
+static Texture* texture_get_impl(const nvn_tex* t, bool for_sampling);
+// (local, Ally diagnostic) RX_VK_SLOW_TEX_MS=<ms>: a texture lookup that long is logged with what it did (the walks' slow frames
+// spent ~80 ms in "texture lookups" with no upload). 0 or unset: a straight call
 Texture* texture_get(const nvn_tex* t, bool for_sampling) {
+    static const double slow_ms = getenv("RX_VK_SLOW_TEX_MS") ? atof(getenv("RX_VK_SLOW_TEX_MS")) : 0.0;
+    if (slow_ms <= 0) return texture_get_impl(t, for_sampling);
+    const auto t0 = std::chrono::steady_clock::now();
+    const uint64_t made0 = texture_made();
+    int64_t up0 = 0, astc0 = 0, b0 = 0;
+    texture_stats(&up0, &astc0, &b0);
+    Texture* r = texture_get_impl(t, for_sampling);
+    const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    if (ms >= slow_ms) {
+        static std::atomic<int> logged{0};
+        if (logged++ < 400) {
+            int64_t up1 = 0, astc1 = 0, b1 = 0;
+            texture_stats(&up1, &astc1, &b1);
+            logf("vk: slow texture lookup %.1f ms: %#llx %ux%ux%u levels %u NVN %#x target %d%s; made %llu, uploads %lld (%lld KB), ASTC %lld%s",
+                 ms, t ? (unsigned long long)t->gpu : 0ull, t ? t->d.width : 0, t ? t->d.height : 0, t ? t->d.depth : 0,
+                 t ? t->d.levels : 0, t ? t->d.format : 0, t ? t->d.target : 0, for_sampling ? " (sampled)" : " (target)",
+                 (unsigned long long)(texture_made() - made0), (long long)(up1 - up0), (long long)((b1 - b0) >> 10),
+                 (long long)(astc1 - astc0), r ? "" : "; none");
+        }
+    }
+    return r;
+}
+
+static Texture* texture_get_impl(const nvn_tex* t, bool for_sampling) {
     PROF_HOT(PROF_TEXGET);
     if (!t || !t->gpu || t->d.target == NVN_TEXTURE_TARGET_BUFFER) return nullptr;
     const VkFormatInfo fi = vk_format(t->d.format);
@@ -2344,7 +2381,16 @@ Texture* texture_get(const nvn_tex* t, bool for_sampling) {
     Texture* tex;
     auto it = textures.find(k);
     if (it == textures.end()) {
+        const auto c0 = std::chrono::steady_clock::now();
         tex = create(k, t, fi.format, fi.astc, bw, bh, bpb, !for_sampling);
+        {   // (local, Ally diagnostic: RX_VK_SLOW_TEX_MS, the create() part of a slow lookup)
+            static const double slow_ms = getenv("RX_VK_SLOW_TEX_MS") ? atof(getenv("RX_VK_SLOW_TEX_MS")) : 0.0;
+            const double cms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count();
+            static int logged;
+            if (slow_ms > 0 && cms >= slow_ms / 2 && logged++ < 300)
+                logf("vk: slow texture create %.1f ms: %#llx %ux%u NVN %#x%s", cms, (unsigned long long)t->gpu, t->d.width,
+                     t->d.height, t->d.format, for_sampling ? "" : " (target)");
+        }
         if (!tex) return nullptr;
         static const int64_t log_from = getenv("RX_VK_LOG_MADE") ? atoll(getenv("RX_VK_LOG_MADE")) : -1;
         static int made_logged;

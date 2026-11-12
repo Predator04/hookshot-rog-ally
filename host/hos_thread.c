@@ -730,7 +730,42 @@ static uint64_t last_fastest_core(int *cores) {
         }
     free(buf);
     *cores = n;
-    return pick_reserved_core(masks, classes, n);
+    const uint64_t pick = pick_reserved_core(masks, classes, n);
+    /* (local, ROG Ally) Of the fastest kind's cores, the one Windows ranks highest (SchedulingClass: CPPC's preferred
+       cores on AMD, which boost the highest): an Ally Z1 Extreme's cores rank 0,6,1,2,3,6,5,4, and the last one, where
+       the replay went, is 4th. Ties: the last of them, as before. HOS_RESERVE_PREFERRED=0: the last core, as upstream.
+       (GetSystemCpuSetInformation looked up, and its records read by their documented offsets: Size 0, Type 4, Group
+       12, LogicalProcessorIndex 14, SchedulingClass 20, whatever the SDK's _WIN32_WINNT declares) */
+    if (pick && !(getenv("HOS_RESERVE_PREFERRED") && !atoi(getenv("HOS_RESERVE_PREFERRED")))) {
+        typedef BOOL(WINAPI * CpuSetFn)(void *, ULONG, PULONG, HANDLE, ULONG);
+        const CpuSetFn get = (CpuSetFn)(void *)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetSystemCpuSetInformation");
+        ULONG sl = 0;
+        if (get) get(NULL, 0, &sl, GetCurrentProcess(), 0);
+        unsigned char *sb = get && sl ? (unsigned char *)malloc(sl) : NULL;
+        uint64_t chosen = 0;
+        if (sb && get(sb, sl, &sl, GetCurrentProcess(), 0)) {
+            int best_eff = -1, best_sched = -1;
+            for (int i = 0; i < n; i++)
+                if (masks[i] && (int)classes[i] > best_eff) best_eff = classes[i];
+            for (int i = 0; i < n; i++) {
+                if (!masks[i] || (int)classes[i] != best_eff) continue;
+                int sched = -1;
+                for (ULONG at = 0; at + 24 <= sl;) {
+                    const unsigned char *c = sb + at;
+                    const DWORD size = *(const DWORD *)c, type = *(const DWORD *)(c + 4);
+                    if (!size) break;
+                    const WORD grp = *(const WORD *)(c + 12);
+                    const unsigned lp = c[14], sc = c[20];
+                    if (type == 0 && grp == group && lp < 64 && (masks[i] >> lp & 1) && (int)sc > sched) sched = (int)sc;
+                    at += size;
+                }
+                if (sched > best_sched || (sched == best_sched && masks[i] > chosen)) best_sched = sched, chosen = masks[i];
+            }
+        }
+        free(sb);
+        if (chosen) return chosen;
+    }
+    return pick;
 }
 #endif
 uint64_t hos_reserved_cpus(void) {

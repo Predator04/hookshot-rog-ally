@@ -1,6 +1,8 @@
 // Vulkan Memory Allocator (v3.3.0, from Eglantine's CPM cache: nx2/build.py adds its include path): images and
 // device buffers are sub-allocated from large blocks (NVIDIA allows ~4096 allocations, and the imported pools
 // already take about 2400 of them). Its Vulkan functions come from vkGetInstanceProcAddr / vkGetDeviceProcAddr.
+// (local, ROG Ally) the cpm copy of vk_mem_alloc.h carries RX_VK_VMA_KEEP_EMPTY (VmaBlockVector::Free): this note changes this file's
+// hash so its object is compiled again with it
 #define VMA_IMPLEMENTATION
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 1
@@ -17,7 +19,20 @@ namespace mkwvk {
 
 VmaAllocator vma;
 
+// (local, Ally diagnostic) RX_VK_LOG_DEVMEM=1: every memory object VMA allocates or frees, with its size and the time since
+// the last one (the walks' slow frames were images taking 50-125 ms to make: fresh blocks, or not)
+namespace {
+void VKAPI_PTR devmem_alloc_cb(VmaAllocator, uint32_t type, VkDeviceMemory, VkDeviceSize size, void*) {
+    static std::atomic<int> n{0};
+    if (n++ < 400) logf("vk: device memory allocated: %llu MB (memory type %u), %d so far", (unsigned long long)(size >> 20), type, n.load());
+}
+void VKAPI_PTR devmem_free_cb(VmaAllocator, uint32_t type, VkDeviceMemory, VkDeviceSize size, void*) {
+    static std::atomic<int> n{0};
+    if (n++ < 400) logf("vk: device memory freed: %llu MB (memory type %u), %d so far", (unsigned long long)(size >> 20), type, n.load());
+}
+}   // namespace
 bool vma_init(PFN_vkGetInstanceProcAddr gipa) {
+    static VmaDeviceMemoryCallbacks devmem_cb{devmem_alloc_cb, devmem_free_cb, nullptr};
     VmaVulkanFunctions f{};
     f.vkGetInstanceProcAddr = gipa;
     f.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
@@ -30,6 +45,7 @@ bool vma_init(PFN_vkGetInstanceProcAddr gipa) {
     ci.vulkanApiVersion = VK_API_VERSION_1_3;
     ci.pVulkanFunctions = &f;
     ci.preferredLargeHeapBlockSize = 64ull << 20;   // (64 MB blocks: Eglantine found 256 MB ones wasted VRAM)
+    if (getenv("RX_VK_LOG_DEVMEM") && atoi(getenv("RX_VK_LOG_DEVMEM")) != 0) ci.pDeviceMemoryCallbacks = &devmem_cb;
     return vmaCreateAllocator(&ci, &vma) == VK_SUCCESS;
 }
 
@@ -70,6 +86,10 @@ VmaPool target_images_pool() {
     VmaPoolCreateInfo pi{};
     pi.memoryTypeIndex = type;
     pi.blockSize = kImageBlock;
+    // (local, ROG Ally) RX_VK_TARGET_MIN_BLOCKS=<n>: blocks VMA keeps even when empty. OoT's dynamically sized shadow map is a new
+    // image at every size, and a block that emptied and went back was allocated again for the next: 50-125 ms an image on a
+    // Z1 Extreme (a fresh memory object, its pages zeroed), a stutter each time. 0 or unset: as upstream
+    pi.minBlockCount = getenv("RX_VK_TARGET_MIN_BLOCKS") ? (size_t)std::max(0, atoi(getenv("RX_VK_TARGET_MIN_BLOCKS"))) : 0;
     if (vmaCreatePool(vma, &pi, &target_image_pool) != VK_SUCCESS) target_image_pool = VK_NULL_HANDLE;
     logf("vk: render targets' images from blocks of their own (%llu MB, memory type %u)%s", (unsigned long long)(kImageBlock >> 20),
          type, target_image_pool ? "" : ": not made");
@@ -94,6 +114,8 @@ VmaPool images_pool() {
     VmaPoolCreateInfo pi{};
     pi.memoryTypeIndex = type;
     pi.blockSize = kImageBlock;
+    // (local, ROG Ally) RX_VK_IMAGE_MIN_BLOCKS=<n>: the same for the images' pool (target_images_pool above)
+    pi.minBlockCount = getenv("RX_VK_IMAGE_MIN_BLOCKS") ? (size_t)std::max(0, atoi(getenv("RX_VK_IMAGE_MIN_BLOCKS"))) : 0;
     if (vmaCreatePool(vma, &pi, &image_pool) != VK_SUCCESS) image_pool = VK_NULL_HANDLE;
     logf("vk: images from a pool of %llu MB blocks (memory type %u)%s", (unsigned long long)(kImageBlock >> 20), type,
          image_pool ? "" : ": not made");
