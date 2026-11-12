@@ -265,7 +265,7 @@ if ($Mode -ne 'Quit') {
         }
     }
     if ($Mode -eq 'Apply' -and $FixPagefile) { Invoke-FixPagefile }
-    if ($Mode -eq 'Apply' -and $applied) { Say "`nDone ($applied install(s)). Start Hookshot as usual; the first start of a new version builds its shaders (up to ~15 min)." 'Green' }
+    if ($Mode -eq 'Apply' -and $applied) { Say "`nDone ($applied install(s)). Start Hookshot as usual; the first start of a new version builds its shaders (about 45 min on the Ally; keep the charger in)." 'Green' }
     elseif ($Mode -eq 'Apply' -and $installs.Count) { Say "`nNothing was changed: close Hookshot and run the setup again." 'Yellow' }
 }
 if ($logFile) { Say "`nLog of this run: $logFile" 'DarkGray'; try { Stop-Transcript | Out-Null } catch {} }

@@ -17,6 +17,7 @@
   -Work      the working folder: a copy of the builder's tools with this fork's sources, and the build files
              (default %LOCALAPPDATA%\HookshotBuilder-ally; about 6 GB after a build)
   -Language  the game's language code (default en-US)
+  -Version   the version the game shows, after "rog-ally-" (default: the git commit, or "src" without git)
 #>
 param(
     [string]$From = "$env:USERPROFILE\Games\Hookshot",
@@ -24,7 +25,8 @@ param(
     [string]$Out = "$env:USERPROFILE\Games\Hookshot-Ally",
     [string]$Builder = '',
     [string]$Work = "$env:LOCALAPPDATA\HookshotBuilder-ally",
-    [string]$Language = 'en-US'
+    [string]$Language = 'en-US',
+    [string]$Version = ''
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
@@ -59,7 +61,7 @@ if ((Get-Command git -ErrorAction SilentlyContinue) -and (Test-Path (Join-Path $
     $sha = (& git -C $repo rev-parse --short HEAD 2>$null)
     $dirty = (& git -C $repo status --porcelain 2>$null)
 }
-$tag = 'rog-ally-' + $(if ($sha) { $sha } else { 'src' }) + $(if ($dirty) { '-dirty' } else { '' })
+$tag = 'rog-ally-' + $(if ($Version) { $Version -replace '[^A-Za-z0-9._-]', '' } elseif ($sha) { $sha } else { 'src' }) + $(if ($dirty) { '-dirty' } else { '' })
 Write-Host "Source:  $repo ($tag)"
 Write-Host "Builder: $Builder"
 Write-Host "Game:    $(if ($Nup) { $Nup } else { $From })"

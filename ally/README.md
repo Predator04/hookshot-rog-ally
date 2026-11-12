@@ -26,26 +26,49 @@ explains.
 
 ## Install
 
-You need a ROG Ally (RC71L; other Z1 handhelds may work), Windows 11, and your own copy of the game at the version
-upstream supports.
+You need:
+- a ROG Ally (RC71L; other Z1 handhelds may work) with Windows 11;
+- your own copy of the game, at the version upstream supports;
+- **Hookshot installed once with Hookshot Builder**, as [upstream's readme](https://github.com/NotRexed/Hookshot#install-and-play)
+  explains (`HookshotBuilder.exe` from upstream's releases). That install brings the compiler and tools and reads your
+  game files. Every option below uses it.
 
-### Option A: the tested settings on an official Hookshot (easiest)
+The release zip is small because it holds only scripts. The game itself is always built on your PC, from your copy.
 
-1. Install Hookshot with Hookshot Builder, as [upstream's readme](https://github.com/NotRexed/Hookshot#install-and-play)
-   explains (`HookshotBuilder.exe` from upstream's releases).
-2. Download `hookshot-rog-ally-setup-<date>.zip` from this repository's
+### Option A: the installer (recommended)
+
+1. Download `hookshot-rog-ally-setup-<date>.zip` from this repository's
    [Releases](https://github.com/Predator04/hookshot-rog-ally/releases) and unzip it.
-3. Close the game, double-click `setup\Run Setup.bat` and choose **1 Apply**:
+2. Double-click `Install Hookshot Ally.bat`. It:
+   - finds the Hookshot Builder and your Hookshot game folder;
+   - downloads the source of this fork's newest release from GitHub;
+   - builds it into `%USERPROFILE%\Games\Hookshot-Ally`, which takes 10 to 45 minutes;
+   - applies the tested Ally settings;
+   - copies your saves over and makes a desktop shortcut, **Hookshot (ROG Ally)**.
+
+   It leaves your Hookshot folder and the Hookshot Builder as they are.
+3. Start the game from the shortcut. The first start makes every shader (a progress screen, about 45 minutes on the
+   Ally). Keep the charger in.
+
+To update, run the installer again. It builds the newest release into the same folder and keeps your saves; it also
+copies them aside first.
+
+If Windows warns about the `.bat` file because it came from the internet, unblock it once: right-click the zip,
+choose **Properties**, tick **Unblock**, then unzip it again.
+
+### Option B: only the tested settings, on an official Hookshot
+
+1. Unzip the setup zip, close the game, double-click `setup\Run Setup.bat` and choose **1 Apply**:
    - it sets the in-game options and `hookshot_env.txt` for the Ally;
    - it keeps a backup, and **3 Undo** puts it back;
    - **2 Check** only reports.
-4. Start the game. The first start makes every shader (a progress screen, about 45 minutes on the Ally).
+2. Start the game. The first start makes every shader (about 45 minutes on the Ally).
 
 You get the settings, but not this fork's patches or its newer base.
 
-### Option B: build this fork (patches and the tested base)
+### Option C: build this fork by hand
 
-1. Install Hookshot once with Hookshot Builder (Option A, step 1). The build uses its compiler and tools, and the game
+1. Install Hookshot once with Hookshot Builder (see above). The build uses its compiler and tools, and the game
    files of that install.
 2. Get this fork's source: download `Source code (zip)` from a release, or run
    `git clone -b rog-ally https://github.com/Predator04/hookshot-rog-ally.git`.
@@ -73,8 +96,11 @@ To update the fork, pull the branch (or download the new release's source) and r
 ## Releases
 
 Each release is a tag on `rog-ally` with:
-- `hookshot-rog-ally-setup-<date>.zip`: the setup tool, the tested `hookshot_env.txt`, the build script and the
-  benchmark tools;
+- `hookshot-rog-ally-setup-<date>.zip` (made by `tools\make-release-zip.ps1`), containing:
+  - the installer;
+  - the setup tool and the tested `hookshot_env.txt`;
+  - the build script and the benchmark tools;
+  - the license;
 - the source code, which GitHub adds.
 
 There is no game executable in them, on purpose: a build is made from your game, and upstream asks that nothing made
@@ -144,6 +170,19 @@ The `vk_vma.cpp` comment mentions `RX_VK_VMA_KEEP_EMPTY`. That lived in a patche
 | Empty blocks kept (`RX_VK_VMA_KEEP_EMPTY`, `*_MIN_BLOCKS`) | less churn, but more memory held on a 16 GB machine |
 | Upstream main ef81aee7 | about 20% slower: its new shared-memory barrier and texel-fetch bounds checks cost GPU time (issue #1) |
 
+## Credits, license and disclaimer
+
+- **Hookshot** is the work of NotRexed and many contributors. Their names are in the [Credits](../readme.md#credits)
+  of upstream's readme, which this fork keeps unchanged below its banner. Everything here builds on their work.
+- **This fork's changes** are the Ally patches above and the `ally/` folder. They are by Predator04, written with the
+  help of Claude, an AI assistant, starting 2026-11-12. The commit history shows each change.
+- **License:** GPL-3.0-or-later, like Hookshot (see [LICENSE](../LICENSE)). The third-party parts keep their own licenses
+  in their folders. Each release's full source is on its release page.
+- **Disclaimer:** Hookshot and this fork are unofficial fan projects, not affiliated with or endorsed by Nintendo or
+  ASUS. The Legend of Zelda and Ocarina of Time are trademarks of Nintendo. ROG and ROG Ally are trademarks of ASUSTeK
+  Computer Inc.
+- No game, keys, executable or anything made from a game is in this repository or its releases.
+
 ## Issues
 
 Bugs and slowdowns found on the Ally are filed in [Issues](https://github.com/Predator04/hookshot-rog-ally/issues).
@@ -170,6 +209,7 @@ a fixed Kokiri Forest route.
   - It waits for 60 s of steady AC power before each run, and retries a run thrown away for battery twice.
 - **`prof_parse.py OLD.log NEW.log`**: compares two logs made with `RX_VK_PASS_TIMING=2`, by kind of GPU work, span and
   program.
-- **`build-rog-ally.ps1`**: the build script from Install, Option B.
+- **`build-rog-ally.ps1`**: the build script from Install, Options A and C.
+- **`make-release-zip.ps1 -Out <zip>`**: makes the release zip from a commit's `ally` folder and the license.
 
 Compare settings with alternating runs (A, B, A, B): single runs of the same setup vary by several percent.
