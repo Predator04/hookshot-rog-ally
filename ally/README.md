@@ -49,6 +49,8 @@ You get the settings, but not this fork's patches or its newer base.
    files of that install.
 2. Get this fork's source: download `Source code (zip)` from a release, or run
    `git clone -b rog-ally https://github.com/Predator04/hookshot-rog-ally.git`.
+   - Some of its file paths are long, and Windows can refuse them. Unzip it into a short folder such as `C:\hs`.
+   - To clone instead, run `git config --global core.longpaths true` first.
 3. In PowerShell, in the source folder:
    ```powershell
    powershell -ExecutionPolicy Bypass -File ally\tools\build-rog-ally.ps1
