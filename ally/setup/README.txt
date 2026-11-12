@@ -53,6 +53,6 @@ Measured on a ROG Ally RC71L (Z1 Extreme, 16 GB, Turbo, plugged in), Kokiri Fore
   this fork (rog-ally) .............. 47.7 game fps walking, 93.7 shown with frame generation, 1% low 56
 
 Notes
-  - The first start of a new Hookshot build makes every shader (a progress screen, 20-40 minutes on the Ally). Let it finish.
+  - The first start of a new Hookshot build makes every shader (a progress screen, about 45 minutes on the Ally). Let it finish.
   - Not used on purpose: RX_VK_NO_MESH=1 (faster but leaves objects out), RX_VK_PRECOMPILE=0 (less memory, but GPU resets
     at the load: issue #2), parallel or async replay (black/white frames).

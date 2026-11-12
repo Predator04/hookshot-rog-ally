@@ -39,7 +39,7 @@ upstream supports.
    - it sets the in-game options and `hookshot_env.txt` for the Ally;
    - it keeps a backup, and **3 Undo** puts it back;
    - **2 Check** only reports.
-4. Start the game. The first start makes every shader (a progress screen, up to 40 minutes on the Ally).
+4. Start the game. The first start makes every shader (a progress screen, about 45 minutes on the Ally).
 
 You get the settings, but not this fork's patches or its newer base.
 
@@ -60,7 +60,7 @@ You get the settings, but not this fork's patches or its newer base.
 4. Run `ally\setup\Run Setup.bat`, choose **1 Apply**, and copy your `user\save` folder over from your other Hookshot
    folder if you want your save.
 5. Start `Hookshot-Ally\hookshot.exe`. A command-line build has the game itself there, not a launcher; make a desktop
-   shortcut to it if you like. The first start makes every shader (up to 40 minutes).
+   shortcut to it if you like. The first start makes every shader (about 45 minutes). Keep the charger in.
 
 An official release won't replace the build:
 - the tested `hookshot_env.txt` turns off the update check (`HOOKSHOT_NO_UPDATE_CHECK=1`);
@@ -115,6 +115,19 @@ The `vk_vma.cpp` comment mentions `RX_VK_VMA_KEEP_EMPTY`. That lived in a patche
 - 47.7 game fps, 93.7 on screen with frame generation, 1% low 56.0;
 - 14 hitches over 100 ms in 7.7 minutes, none over 250 ms;
 - GPU 15.1 ms a frame.
+
+**A build of this branch** (made with `build-rog-ally.ps1`, same settings, same day, alternated with that build):
+
+| Run | Game fps | 1% low | GPU ms |
+|---|---|---|---|
+| this branch, run 1 | 49.1 | 46.3 | 14.2 |
+| the reference build | 45.3 | 50.5 | 16.1 |
+| this branch, run 2 | 43.4 | 45.3 | 16.7 |
+
+- It runs as fast as the reference build, within the few percent single runs vary by.
+- Its 1% low was a little lower in both runs. Its new shader caches had seen less play, which may explain it.
+- No crash or GPU reset.
+- Its first start built every shader in 45 minutes. Later starts took about 2 minutes.
 
 ## Tested and not kept
 

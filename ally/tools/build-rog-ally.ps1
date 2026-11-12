@@ -114,5 +114,5 @@ Done: $Out ($tag)
 Next:
   1. For the tested in-game options, run ally\setup\Run Setup.bat and choose Apply (or: Setup-HookshotAlly.ps1 -Mode Apply -GameDir "$Out").
   2. To keep playing your save, copy the user\save folder from your other Hookshot folder into $Out\user\ (close the game first).
-  3. Start $Out\hookshot.exe (a desktop shortcut to it is handy). The first start builds every shader (20 to 40 minutes on the Ally, with a progress screen): let it finish once.
+  3. Start $Out\hookshot.exe (a desktop shortcut to it is handy). The first start builds every shader (about 45 minutes on the Ally, with a progress screen): let it finish once.
 "@ -ForegroundColor Green
