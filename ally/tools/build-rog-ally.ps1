@@ -53,6 +53,9 @@ if ($Nup) {
     foreach ($need in 'romfs', '.hookshot_exefs') { if (-not (Test-Path (Join-Path $From $need))) { Fail "$From has no $need folder: pass -From <an installed Hookshot folder> or -Nup <your .nup>" } }
     $gameArgs = @('--romfs', (Join-Path $From 'romfs'), '--exefs', (Join-Path $From '.hookshot_exefs'))
 }
+if (Get-Process hookshot -ErrorAction SilentlyContinue) {   # (issue 5: a build takes several GB, and with the game's ~28 GB it can pass Windows' memory limit: the game then crashes)
+    Fail "Hookshot is running. Close the game first: a build and the game together can run Windows out of memory, and the game crashes."
+}
 if ((Resolve-Path $Out -ErrorAction SilentlyContinue) -and $From -and ((Resolve-Path $Out).Path -eq (Resolve-Path $From -ErrorAction SilentlyContinue).Path)) {
     Fail "-Out is the same folder as -From: build into a new folder"
 }
@@ -98,11 +101,29 @@ $log = Join-Path $Work 'build.log'
 Push-Location $tools
 # (make_game.py prints progress on stderr: with 'Stop', Windows PowerShell turns the first such line into an error and ends the build)
 $ErrorActionPreference = 'Continue'
+# (issue 5: the game wins. If Hookshot starts during the build, this build's own python and compilers are stopped, so the
+# game has the memory: the two together passed Windows' memory limit once, and the game crashed in Hyrule Field)
+$watch = Start-Job -ArgumentList $tools -ScriptBlock {
+    param($t)
+    while ($true) {
+        if (Get-Process hookshot -ErrorAction SilentlyContinue) {
+            Get-Process python, clang, 'clang++', ld.lld, lld-link -ErrorAction SilentlyContinue |
+                Where-Object { $_.Path -and $_.Path.StartsWith($t, [StringComparison]::OrdinalIgnoreCase) } | Stop-Process -Force
+            'game started'; return
+        }
+        Start-Sleep 5
+    }
+}
 try {
     & (Join-Path $tools 'python\python.exe') (Join-Path $tools 'nx2\make_game.py') @gameArgs --out $Out --language $Language --work (Join-Path $Work 'work') --no-prepare-shaders --log $log 2>&1 |
         ForEach-Object { "$_" }
     $code = $LASTEXITCODE
-} finally { Pop-Location; $ErrorActionPreference = 'Stop' }
+} finally {
+    Pop-Location; $ErrorActionPreference = 'Stop'
+    $gameStarted = (Receive-Job $watch -ErrorAction SilentlyContinue) -contains 'game started'
+    Stop-Job $watch -ErrorAction SilentlyContinue; Remove-Job $watch -Force -ErrorAction SilentlyContinue
+}
+if ($gameStarted) { Fail "Hookshot was started during the build, so the build stopped to leave the game the memory. Run it again with the game closed." }
 if ($code -ne 0) { Fail "the build stopped (exit $code). Its output is in $log" }
 
 # ---- the Ally setup ----

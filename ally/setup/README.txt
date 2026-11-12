@@ -37,9 +37,11 @@ What it checks (and tells you how to fix; it does not change these)
   - It is a ROG Ally (RC71L / Ally X / Xbox Ally)
   - Graphics memory (UMA): 4 GB on a 16 GB Ally. 8 GB ran Windows out of memory and hung the Ally.
       Armoury Crate > Settings > Performance > GPU memory
-  - Memory + page file of at least ~36 GB: Hookshot commits up to ~38 GB on the Ally's compute path.
-      Run as administrator with -FixPagefile to set a 32 GB page file (it asks first; restart afterwards), or
-      System > About > Advanced system settings > Performance > Advanced > Virtual memory
+  - Memory + page file of at least ~52 GB: Hookshot and Windows use ~38-40 GB in play. At 43.7 GB (a 32 GB page
+      file) the game crashed once in Hyrule Field with "not enough memory" while a build ran beside it (issue 5).
+      Run as administrator with -FixPagefile to set a 48 GB page file (it asks first; restart afterwards), or
+      System > About > Advanced system settings > Performance > Advanced > Virtual memory: custom size 49152 MB
+  - Don't build Hookshot, or run other heavy programs, while you play.
   - Plugged in, Turbo operating mode (Armoury Crate / Command Center)
   - AMD driver not older than ~8 months
   - Hookshot v2.1.0 or later

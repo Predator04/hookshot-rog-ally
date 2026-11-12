@@ -157,7 +157,12 @@ if (Test-Path -LiteralPath $saveOut) {   # (an update into the same folder: the 
     Copy-Item -LiteralPath $saveOut -Destination $bk -Recurse
     Info "Saves in $Out copied to $bk first"
 }
-Step 'Building (10 to 45 minutes; keep the charger in)'
+while (Get-Process hookshot -ErrorAction SilentlyContinue) {   # (issue 5: the build and the game together can run Windows out of memory)
+    if ($NoPause) { Fail 'Hookshot is running. Close the game, then run the installer again: a build and the game together can run Windows out of memory.' }
+    Write-Host "`n   Hookshot is running. Close the game first: the build and the game together can run Windows out of memory." -ForegroundColor Yellow
+    [void](Read-Host '   Press Enter once the game is closed')
+}
+Step 'Building (10 to 45 minutes; keep the charger in; do not play meanwhile)'
 $ver = if ($Tag) { $Tag -replace '^ally-', '' } else { '' }
 $bargs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $src 'ally\tools\build-rog-ally.ps1'), '-Out', $Out, '-Builder', $Builder, '-Work', $Work)
 if ($Nup) { $bargs += @('-Nup', $Nup) } else { $bargs += @('-From', $From) }

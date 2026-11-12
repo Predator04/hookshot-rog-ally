@@ -9,7 +9,7 @@
     .\Setup-HookshotAlly.ps1 -Mode Check     only report, change nothing
     .\Setup-HookshotAlly.ps1 -Mode Undo      put back the files from before the last Apply
     -GameDir <folder>                        a specific install instead of searching
-    -FixPagefile                             (with Apply, needs admin) set a 32 GB page file on C: - asks first
+    -FixPagefile                             (with Apply, needs admin) set a 48 GB page file on C: - asks first
 
   Tested on a ROG Ally RC71L (Z1 Extreme, 16 GB) with Hookshot v2.0.14 and v2.1.0.
   It changes only Hookshot's own files (hookshot_options.ini, hookshot_env.txt) unless you use -FixPagefile.
@@ -140,10 +140,16 @@ function Test-ThisPC {
 
     $os = Get-CimInstance Win32_OperatingSystem
     $commitGB = [Math]::Round($os.TotalVirtualMemorySize / 1MB, 1)   # (RAM + page file, KB -> GB)
-    if ($commitGB -lt 36) {
-        Bad "Memory + page file is only $commitGB GB. Hookshot commits up to ~31 GB with the Ally's compute path; below that it can stall or hang the Ally."
-        Info "Fix: a bigger page file (run this setup with -FixPagefile as administrator, or: System > About > Advanced system settings > Performance > Advanced > Virtual memory: 32768 MB on C:)."
-    } else { Ok "Memory + page file $commitGB GB (enough for Hookshot's ~31 GB)" }
+    # (issue 5: the game holds ~28 GB, Windows and open apps ~8-12 GB more, so the Ally's commit peaked at 38-40 GB in play;
+    # at 43.7 GB, a build running beside the game used up the rest and the game crashed in Hyrule Field, error 1455)
+    $fix = "Fix: a 48 GB page file (run this setup with -FixPagefile as administrator, or: System > About > Advanced system settings > Performance > Advanced > Virtual memory: custom size 49152 MB on C:, then restart)."
+    if ($commitGB -lt 40) {
+        Bad "Memory + page file is only $commitGB GB. Hookshot alone commits ~28 GB, and Windows and open apps add 8-12 GB: the game can crash or hang the Ally."
+        Info $fix
+    } elseif ($commitGB -lt 52) {
+        Warn "Memory + page file is $commitGB GB: only a few GB to spare while Hookshot runs (~38-40 GB in play). Anything else heavy at the same time (a browser, a build) can make the game crash with 'not enough memory'."
+        Info $fix
+    } else { Ok "Memory + page file $commitGB GB (Hookshot and Windows use ~38-40 GB in play)" }
 
     $bat = Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($bat) { if ($bat.BatteryStatus -eq 2) { Ok "Plugged in" } else { Warn "On battery: Hookshot runs best plugged in (Turbo gets more power on AC)." } }
@@ -224,16 +230,18 @@ function Invoke-Undo([string]$dir) {
 function Invoke-FixPagefile {
     $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
     if (-not $admin) { Bad "-FixPagefile needs administrator: right-click PowerShell > Run as administrator."; return }
+    $mb = 49152   # (48 GB: with the Ally's ~12 GB of RAM, ~60 GB in all, which leaves room beside Hookshot's ~38-40 GB in play: issue 5)
+    $pf = Get-CimInstance Win32_PageFileSetting | Where-Object { $_.Name -like 'C:*' }
+    if ($pf -and $pf.InitialSize -ge $mb) { Ok "Page file on C: is already $($pf.InitialSize) MB. Left as it is."; return }
     $free = [Math]::Round((Get-PSDrive C).Free / 1GB)
-    if ($free -lt 45) { Bad "Only $free GB free on C:; a 32 GB page file needs room. Skipped."; return }
-    $a = Read-Host "Set a fixed 32 GB page file on C: (a restart is needed)? [y/N]"
+    if ($free -lt 64) { Bad "Only $free GB free on C:; a 48 GB page file needs room. Skipped."; return }
+    $a = Read-Host "Set a fixed 48 GB page file on C: (a restart is needed)? [y/N]"
     if ($a -notmatch '^[yY]') { Info "Page file left as it is."; return }
     $cs = Get-CimInstance Win32_ComputerSystem
     if ($cs.AutomaticManagedPagefile) { Set-CimInstance -InputObject $cs -Property @{ AutomaticManagedPagefile = $false } }
-    $pf = Get-CimInstance Win32_PageFileSetting | Where-Object { $_.Name -like 'C:*' }
-    if ($pf) { Set-CimInstance -InputObject $pf -Property @{ InitialSize = [uint32]32768; MaximumSize = [uint32]32768 } }
-    else { New-CimInstance -ClassName Win32_PageFileSetting -Property @{ Name = 'C:\pagefile.sys'; InitialSize = [uint32]32768; MaximumSize = [uint32]32768 } | Out-Null }
-    Ok "Page file on C: set to 32768 MB. Restart the Ally for it to take effect."
+    if ($pf) { Set-CimInstance -InputObject $pf -Property @{ InitialSize = [uint32]$mb; MaximumSize = [uint32]$mb } }
+    else { New-CimInstance -ClassName Win32_PageFileSetting -Property @{ Name = 'C:\pagefile.sys'; InitialSize = [uint32]$mb; MaximumSize = [uint32]$mb } | Out-Null }
+    Ok "Page file on C: set to $mb MB. Restart the Ally for it to take effect."
 }
 
 # ---- main ------------------------------------------------------------------------------------------------------

@@ -200,7 +200,10 @@ The tested setup uses 3 draws of 21 MB each: about 130 MB a recording thread (th
 **Ally settings:**
 - play plugged in: Turbo is 30 W on AC and 25 W on battery;
 - keep the UMA frame buffer at 4 GB;
-- close Steam, launchers and browsers while playing;
+- a 48 GB page file: Hookshot and Windows use ~38-40 GB in play, and at 43.7 GB (a 32 GB page file) the game crashed
+  once with "not enough memory" (issue #5). The setup tool checks it, and sets it with `-FixPagefile`;
+- close Steam, launchers and browsers while playing, and don't build Hookshot while playing (the build script and
+  the installer refuse to build while the game runs, and stop a build if the game starts);
 - don't reset the AMD shader cache.
 
 **Result** (Kokiri Forest scripted walk, 4 x 113 s, plugged in, Turbo, 2026-11-12):
