@@ -3693,6 +3693,12 @@ struct Pass {
 };
 TLS_OBJECT(pass, Pass)
 thread_local bool work_since_barrier = false;   // (GPU work recorded since the last full barrier: a dispatch orders after it)
+// (hookshot-rog-ally, issue 4: RX_VK_FALLBACK_BATCH, the batch below fallback_record) the mesh fallback draws this thread holds,
+// and whether it is recording them now. begin_pass and end_pass record them first: whatever comes next goes after them
+thread_local int fb_held = 0;
+thread_local bool fb_recording = false;
+thread_local VkCommandBuffer fb_cmd = VK_NULL_HANDLE;   // (the command buffer they are for)
+void fb_record_held();
 // what the command buffer has bound (draws skip what is already there)
 thread_local bool last_desc_valid = false;
 thread_local const Program* last_desc_prog = nullptr;
@@ -3812,6 +3818,7 @@ bool targets_persistent(const Targets& at) {
 }
 
 void begin_pass(VkCommandBuffer cmd, const Targets& at) {
+    if (fb_held && !fb_recording) fb_record_held();   // (issue 4: the held fallback draws come first)
     bool same = pass().open && pass().depth == at.depth_view && pass().n == at.n && pass().width == at.width &&
                 pass().height == at.height;
     for (int i = 0; i < at.n && same; i++) same = pass().color[i] == at.color_view[i];
@@ -4279,6 +4286,7 @@ int64_t st_clears, st_masked_clears;
 /// before it still sampled them: a band of the picture, below or above a line that moved, for a frame (the fog's flat
 /// colour over a Grand Prix intro, the shadows' dark band in its race). RX_VK_CLEAR_IN_PASS=1: in the pass, as before.
 void clear_after_draws(VkCommandBuffer cmd) {
+    if (fb_held && !fb_recording) fb_record_held();   // (issue 4: the held fallback draws first, then this pass's check)
     static const bool in_pass = getenv("RX_VK_CLEAR_IN_PASS") != nullptr;
     if (in_pass || !pass().open || pass().draws == 0) return;
     static int logged;
@@ -4416,6 +4424,11 @@ namespace {
 } // namespace
 
 void draw_flush_recording(int slot) {
+    if (fb_held && !fb_recording) {   // (issue 4: never reached, every submit ends its pass first; recorded before it ends)
+        static std::atomic<int> told{0};
+        if (told++ < 4) logf("vk: fallback batch: %d held draws recorded at the submit", fb_held);
+        fb_record_held();
+    }
     ParLock lk;
     const RecordingRes& r = res[slot];
     // Earlier descriptors still name streams we outgrew; later retained streams were not used this recording.
@@ -4426,6 +4439,11 @@ void draw_flush_recording(int slot) {
 }
 
 void draw_begin_recording(int slot, VkCommandBuffer cmd, uint64_t value) {
+    if (fb_held && !fb_recording && fb_cmd != cmd) {   // (issue 4: never reached; their command buffer may be submitted: dropped)
+        static std::atomic<int> told{0};
+        if (told++ < 4) logf("vk: fallback batch: %d held draws of an ended recording dropped", fb_held);
+        fb_held = 0;
+    }
     rec_cmd = cmd;
     rec_value = value;
     ParLock lk;
@@ -4717,6 +4735,7 @@ namespace {
 TLS_OBJECT(dump_mesh_indirect, std::vector<std::pair<uint64_t, uint64_t>>)   // (program key, indirect address)
 } // namespace
 void end_pass(VkCommandBuffer cmd) {
+    if (fb_held && !fb_recording) fb_record_held();   // (issue 4: the held fallback draws come first)
     if (!pass().open) return;
     vkCmdEndRendering(cmd);
     pass().open = false;
@@ -5521,14 +5540,19 @@ std::mutex mesh_ring_mu;
 uint64_t mesh_ring_at = 0;
 thread_local VkBuffer mesh_conv_buf = VK_NULL_HANDLE;   // (the converted records for the draw in progress)
 thread_local uint64_t mesh_conv_off = 0;
-bool mesh_indirect_convert(VkCommandBuffer cmd, const DrawArgs& d) {
-    mesh_conv_buf = VK_NULL_HANDLE;
+/// (hookshot-rog-ally, issue 4) An indirect mesh draw's conversion, its records read and its slot of the ring taken, before it is
+/// recorded: by mesh_indirect_convert at once, or with a batch of held fallback draws (RX_VK_FALLBACK_BATCH)
+struct MeshConv {
+    BufferRef args{};
+    uint64_t off = 0;
+    uint32_t n = 0, stride = 0, word = 0;
+};
+bool mesh_indirect_prepare(const DrawArgs& d, MeshConv& c) {
     static const bool raw = getenv("RX_VK_MESH_IND_RAW") && atoi(getenv("RX_VK_MESH_IND_RAW")) != 0;
     static const uint32_t word = getenv("RX_VK_MESH_IND_COUNT_WORD") ? (uint32_t)atoi(getenv("RX_VK_MESH_IND_COUNT_WORD")) & 3 : 0;
     // (amd-fix: the rewrite with the firsts in the draw does it, RX_VK_MESH_ARGS; this one drew every draw from its first 0)
     static const bool rewrite = getenv("RX_VK_MESH_ARGS") && atoi(getenv("RX_VK_MESH_ARGS")) != 0;   // (sharkiix version: off, as upstream)
     if (raw || rewrite || !d.mesh || !d.indirect) return false;
-    PROF_EXACT();   // (a pass ended and three barriers: not one of the cheap per-draw steps PROF_DRAW samples)
     const uint32_t n = (uint32_t)std::clamp(d.max, 1, 4096);
     const uint32_t stride = d.stride > 0 ? (uint32_t)d.stride : 8;
     const BufferRef args = gpu_buffer_bind(d.indirect, (uint64_t)(n - 1) * stride + 4 * (word + 1), false);
@@ -5547,6 +5571,20 @@ bool mesh_indirect_convert(VkCommandBuffer cmd, const DrawArgs& d) {
         off = mesh_ring_at;
         mesh_ring_at += bytes;
     }
+    c.args = args, c.off = off, c.n = n, c.stride = stride, c.word = word;
+    return true;
+}
+/// The copy regions of a conversion: each record's count word over the x of its slot
+void mesh_indirect_regions(const MeshConv& c, std::vector<VkBufferCopy>& regions) {
+    regions.resize(c.n);
+    for (uint32_t i = 0; i < c.n; i++) regions[i] = {c.args.offset + (uint64_t)i * c.stride + 4 * c.word, c.off + (uint64_t)i * 12, 4};
+}
+/// A conversion recorded on its own: the pass ended, then the fill of 1s, the count words copied over x, each with its barrier
+void mesh_indirect_record(VkCommandBuffer cmd, const MeshConv& c) {
+    PROF_EXACT();   // (a pass ended and three barriers: not one of the cheap per-draw steps PROF_DRAW samples)
+    const uint32_t n = c.n;
+    const uint64_t off = c.off;
+    const BufferRef& args = c.args;
     end_pass(cmd);
     VkMemoryBarrier2 mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER_2};
     VkDependencyInfo di{VK_STRUCTURE_TYPE_DEPENDENCY_INFO};
@@ -5558,13 +5596,19 @@ bool mesh_indirect_convert(VkCommandBuffer cmd, const DrawArgs& d) {
     mb.srcStageMask = VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT, mb.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
     mb.dstStageMask = VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT, mb.dstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
     vkCmdPipelineBarrier2(cmd, &di);
-    std::vector<VkBufferCopy> regions(n);
-    for (uint32_t i = 0; i < n; i++) regions[i] = {args.offset + (uint64_t)i * stride + 4 * word, off + (uint64_t)i * 12, 4};
+    std::vector<VkBufferCopy> regions;
+    mesh_indirect_regions(c, regions);
     vkCmdCopyBuffer(cmd, args.buffer, mesh_ring, n, regions.data());
     mb.srcStageMask = VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT, mb.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
     mb.dstStageMask = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT, mb.dstAccessMask = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
     vkCmdPipelineBarrier2(cmd, &di);
-    mesh_conv_buf = mesh_ring, mesh_conv_off = off;
+}
+bool mesh_indirect_convert(VkCommandBuffer cmd, const DrawArgs& d) {
+    mesh_conv_buf = VK_NULL_HANDLE;
+    MeshConv c;
+    if (!mesh_indirect_prepare(d, c)) return false;
+    mesh_indirect_record(cmd, c);
+    mesh_conv_buf = mesh_ring, mesh_conv_off = c.off;
     return true;
 }
 } // namespace
@@ -5875,6 +5919,359 @@ bool fallback_record(VkCommandBuffer cmd, Program& p, const DrawArgs& d) {
     full_barrier(cmd);   // (the records and the draw's command, which the draw reads as indirect arguments)
     return true;
 }
+
+// ---- (hookshot-rog-ally, issue 4) RX_VK_FALLBACK_BATCH=<draws>: a run of mesh fallback draws shares its barriers ----
+// fallback_record ends the pass and records four full barriers a draw: ~100 fallback draws and ~400 full barriers a frame in
+// Kokiri Forest, the Ally's GPU idle at each. With this on, a fallback draw is held instead (draw(): its descriptors built,
+// its state copied), up to <draws> of them, and they are recorded together when anything else comes: another draw,
+// begin_pass or end_pass (every other command ends or begins a pass first), or a full batch. The pass ends once, then
+//   full barrier | the conversions' fills (mesh_indirect_convert) and every draw's header | full barrier |
+//   the conversions' copies | full barrier | every task dispatch | full barrier | every mesh dispatch | full barrier |
+//   the draws, in their passes.
+// The barriers are fallback_record's and mesh_indirect_convert's, as wide as before or wider, shared by the draws: none is
+// narrower (NotRexed/Hookshot#1636's targeted barriers broke the picture on RDNA1). Nothing else is recorded between held
+// draws, so the only new overlap is a held draw's compute stages with the graphics of the held draws before it, which the
+// console's own mesh pipeline does not order either. Each held draw has its own header, records and payloads.
+// RX_VK_FALLBACK_BATCH_MB=<n>: each held draw's records in n MB (below 64, as many as fit with their headers below 64 MB:
+// less memory, but a draw with more records than that loses those past it); by default each has the full 64 MB area.
+struct FbConfig {
+    int draws = 0;              // (the most held at once; 0: off)
+    uint64_t stride = 0;        // (bytes from a held draw's header to the next one's)
+    uint64_t room = 0;          // (a held draw's records, bytes)
+    uint64_t records_bytes = 0; // (the records buffer)
+    bool compact = false;
+};
+const FbConfig& fb_config() {
+    static const FbConfig c = [] {
+        FbConfig c;
+        const char* e = getenv("RX_VK_FALLBACK_BATCH");
+        const int n = e ? atoi(e) : 0;
+        if (n < 2) return c;
+        c.draws = std::min(n, 32);
+        constexpr uint64_t area = (uint64_t)Shader::Backend::SPIRV::MESH_FALLBACK_RECORD_WORDS * 4;   // (64 MB)
+        constexpr uint64_t header = (uint64_t)Shader::Backend::SPIRV::MESH_FALLBACK_HEADER_WORDS * 4;
+        constexpr uint64_t margin = 64ull << 10;
+        const char* m = getenv("RX_VK_FALLBACK_BATCH_MB");
+        const uint64_t mb = m ? (uint64_t)std::clamp(atoi(m), 1, 64) : 64;
+        // (compact: a held draw's records sit at the end of its 64 MB area, so the areas overlap and only their ends hold
+        // records; every header must sit below every draw's records: draws * stride within the area. fb_header says how)
+        if (mb < 64 && (uint64_t)c.draws * ((mb << 20) + margin) <= area) {
+            c.compact = true, c.stride = (mb << 20) + margin, c.room = mb << 20;
+            c.records_bytes = (uint64_t)(c.draws - 1) * c.stride + header + area + margin;
+        } else {
+            c.stride = header + area + margin, c.room = area;
+            c.records_bytes = (uint64_t)c.draws * c.stride;
+        }
+        logf("vk: RX_VK_FALLBACK_BATCH=%d: up to %d mesh fallback draws share their barriers; records %llu MB a draw, %llu MB in all",
+             n, c.draws, (unsigned long long)(c.room >> 20), (unsigned long long)(c.records_bytes >> 20));
+        return c;
+    }();
+    return c;
+}
+bool fb_on() {
+    return fb_config().draws > 0 && !par_active.load(std::memory_order_relaxed);
+}
+
+/// The held draws' buffers: every range of the records and payload buffers (a pair grown for a larger payload stays, as
+/// fallback_buffers' do: a command buffer recorded before may still read it)
+struct FbBuffers {
+    VkBuffer records = VK_NULL_HANDLE, payload = VK_NULL_HANDLE;
+    VmaAllocation records_mem = nullptr, payload_mem = nullptr;
+    uint64_t records_address = 0, payload_address = 0;
+    uint64_t payload_stride = 0;   // (bytes from a held draw's payloads to the next one's; 0: none)
+};
+TLS_OBJECT(fb_buffers, std::vector<FbBuffers>)
+
+uint64_t fb_payload_need(const Program& p) {   // (as fallback_buffers_of: the map, then a payload a task workgroup)
+    if (!p.fallback_task) return 0;
+    const uint64_t capacity = Shader::Backend::SPIRV::MESH_FALLBACK_CAPACITY;
+    const uint64_t threads = std::max(1u, p.fallback_task_threads);
+    const uint64_t bytes = capacity * 4 + (capacity + threads - 1) / threads * (uint64_t)p.fallback_payload_words * 4;
+    return (bytes + 255) & ~255ull;
+}
+
+/// The buffers for a held draw of p: the last pair when its payloads fit, else a new pair (only while nothing is held: every
+/// held draw of a batch is in one pair)
+FbBuffers* fb_buffers_for(const Program& p, bool may_grow) {
+    const FbConfig& c = fb_config();
+    const uint64_t need = fb_payload_need(p);
+    auto& sets = fb_buffers();
+    if (!sets.empty() && sets.back().payload_stride >= need) return &sets.back();
+    if (!may_grow) return nullptr;
+    FbBuffers b;
+    void* mapped = nullptr;
+    const VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                     VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    if (!create_buffer(c.records_bytes, usage | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, false, b.records, b.records_mem, &mapped))
+        return nullptr;
+    b.records_address = fallback_buffer_address(b.records);
+    if (!b.records_address) {
+        destroy_buffer(b.records, b.records_mem);
+        return nullptr;
+    }
+    // (payloads: at least 8 MB a draw once a task program comes, so a larger one rarely makes another pair)
+    const uint64_t stride = need ? std::max<uint64_t>(need, std::max<uint64_t>(8ull << 20, sets.empty() ? 0 : sets.back().payload_stride)) : 0;
+    if (stride) {
+        if (!create_buffer(stride * (uint64_t)c.draws, usage, false, b.payload, b.payload_mem, &mapped)) {
+            destroy_buffer(b.records, b.records_mem);
+            return nullptr;
+        }
+        b.payload_address = fallback_buffer_address(b.payload);
+        if (!b.payload_address) {
+            destroy_buffer(b.payload, b.payload_mem);
+            destroy_buffer(b.records, b.records_mem);
+            return nullptr;
+        }
+        b.payload_stride = stride;
+    }
+    sets.push_back(b);
+    logf("vk: fallback batch: buffers for %d draws: records %llu MB, payloads %llu MB", c.draws,
+         (unsigned long long)(c.records_bytes >> 20), (unsigned long long)((stride * (uint64_t)c.draws) >> 20));
+    return &sets.back();
+}
+
+/// A held draw's header in the records buffer, and the record its records start at. Its records start at its header, as the
+/// shaders read them (MeshFallbackEpilogue: header + record * words), and the shader takes records while they fit in the
+/// 64 MB area (fit). In compact mode the draw's allocator and first vertex start at fit - its room's records instead of 0, so
+/// it takes only the records at the end of its area, and the vertex stage's VertexIndex (first vertex on) reads those
+struct FbHeader { uint64_t offset; uint32_t start; };
+FbHeader fb_header(const Program& p, int k) {
+    const FbConfig& c = fb_config();
+    const uint32_t words = std::max(1u, p.fallback_record_words);
+    const uint32_t fit = Shader::Backend::SPIRV::MESH_FALLBACK_RECORD_WORDS / words;
+    const uint32_t take = c.compact ? (uint32_t)std::min<uint64_t>(fit, c.room / ((uint64_t)words * 4)) : fit;
+    return {(uint64_t)k * c.stride, fit - take};
+}
+
+/// The fields of the state a held draw's commands read when it is recorded (dynamic_state, target_write_mask, draw_hazards)
+void fb_state_copy(NvnState& to, const NvnState& from) {
+    std::memcpy(to.blend, from.blend, sizeof to.blend);
+    to.color = from.color, to.chmask = from.chmask, to.ms = from.ms, to.poly = from.poly, to.ds = from.ds;
+    to.rt = from.rt, to.rt_serial = from.rt_serial;
+    std::memcpy(to.viewport, from.viewport, sizeof to.viewport);
+    to.depth_near = from.depth_near, to.depth_far = from.depth_far;
+    std::memcpy(to.scissor, from.scissor, sizeof to.scissor);
+    std::memcpy(to.stencil_value_mask, from.stencil_value_mask, sizeof to.stencil_value_mask);
+    std::memcpy(to.stencil_mask, from.stencil_mask, sizeof to.stencil_mask);
+    std::memcpy(to.stencil_ref, from.stencil_ref, sizeof to.stencil_ref);
+    std::memcpy(to.poly_offset, from.poly_offset, sizeof to.poly_offset);
+    std::memcpy(to.blend_color, from.blend_color, sizeof to.blend_color);
+    to.restart = from.restart, to.restart_index = from.restart_index;
+    to.depth_clamp = from.depth_clamp, to.raster_discard = from.raster_discard, to.render_enabled = from.render_enabled;
+}
+
+/// dw() copied: its writes pointing into the copy's own infos
+void fb_desc_copy(const DescWriter& from, DescWriter& to) {
+    to.writes = from.writes, to.bufs = from.bufs, to.imgs = from.imgs, to.views = from.views, to.prog = from.prog;
+    const auto rebase = [](const auto* p, const auto& src, auto& dst) -> decltype(p) {
+        if (!p || src.empty() || p < src.data() || p >= src.data() + src.size()) return p;   // (not the writer's: kept)
+        return dst.data() + (p - src.data());
+    };
+    for (VkWriteDescriptorSet& w : to.writes) {
+        w.pBufferInfo = rebase(w.pBufferInfo, from.bufs, to.bufs);
+        w.pImageInfo = rebase(w.pImageInfo, from.imgs, to.imgs);
+        w.pTexelBufferView = rebase(w.pTexelBufferView, from.views, to.views);
+    }
+}
+
+struct FbItem {
+    Program* p = nullptr;
+    VkPipeline pl = VK_NULL_HANDLE;
+    Targets at{};
+    VkPrimitiveTopology topo{};
+    uint32_t first_task = 0, groups = 0;
+    bool indirect = false, conv = false, dropped = false;
+    MeshConv mc{};                   // (an indirect draw's conversion, recorded with the batch)
+    uint64_t indirect_input = 0;     // (fallback_indirect_input)
+    size_t stage[2]{};               // (its task and mesh stages' indices in p.stages, as fallback_record finds them)
+    DescWriter desc;
+    std::vector<const Texture*> sampled;
+    NvnState s;
+};
+TLS_OBJECT(fb_items, std::vector<FbItem>)
+int64_t st_fb_draws, st_fb_batches, st_fb_most;
+
+/// The push constants' addresses of held draw k (push_constants reads them)
+void fb_addresses(const FbBuffers& b, const FbItem& it, int k) {
+    fallback_records_address = b.records_address + fb_header(*it.p, k).offset;
+    fallback_payload_address = b.payload_stride ? b.payload_address + (uint64_t)k * b.payload_stride : 0;
+    fallback_indirect_input = it.indirect_input;
+}
+/// bind_descriptors with the held draw's own descriptors (dw() for the call)
+bool fb_bind(VkCommandBuffer cmd, VkPipelineBindPoint bp, FbItem& it) {
+    std::swap(dw(), it.desc);
+    const bool ok = bind_descriptors(cmd, bp, *it.p);
+    std::swap(dw(), it.desc);
+    return ok;
+}
+
+void fb_record_held() {
+    const int n = fb_held;
+    if (!n || fb_recording) return;
+    fb_recording = true;
+    const VkCommandBuffer cmd = fb_cmd;
+    auto& items = fb_items();
+    FbBuffers& b = fb_buffers().back();
+    const Program* was_program = cur_program;
+    std::vector<const Texture*> was_sampled;
+    was_sampled.swap(gfx_sampled());
+    constexpr uint32_t capacity = Shader::Backend::SPIRV::MESH_FALLBACK_CAPACITY;
+    end_pass(cmd);
+    // (the ranges: the last fallback draws on them, of any program, have read them before they are reset; and what the
+    // conversions copy and the dispatches read, ordered after the work before them, as fallback_record's first barrier)
+    full_barrier(cmd, "barrier (fallback batch)");
+    bool conv = false;
+    for (int k = 0; k < n; k++) {
+        FbItem& it = items[k];
+        if (it.conv) vkCmdFillBuffer(cmd, mesh_ring, it.mc.off, (uint64_t)it.mc.n * 12, 1u), conv = true;
+        // (the header: the draw's command with no vertices and one instance from its first record, the allocator there too,
+        // the mesh dispatch with no workgroups, its y and z 1: fallback_record's fills, in one update)
+        const FbHeader h = fb_header(*it.p, k);
+        const uint32_t words[8] = {0, 1, h.start, 0, h.start, 0, 1, 1};
+        static_assert(Shader::Backend::SPIRV::MESH_FALLBACK_ALLOC_WORD == 4 && Shader::Backend::SPIRV::MESH_FALLBACK_DISPATCH_WORD == 5 &&
+                      Shader::Backend::SPIRV::MESH_FALLBACK_HEADER_WORDS == 8);
+        vkCmdUpdateBuffer(cmd, b.records, h.offset, sizeof words, words);
+    }
+    full_barrier(cmd, "barrier (fallback batch)");
+    if (conv) {   // (each record's count word over x: mesh_indirect_convert's copies, after its fill)
+        static thread_local std::vector<VkBufferCopy> regions;
+        for (int k = 0; k < n; k++)
+            if (items[k].conv) {
+                mesh_indirect_regions(items[k].mc, regions);
+                vkCmdCopyBuffer(cmd, items[k].mc.args.buffer, mesh_ring, items[k].mc.n, regions.data());
+            }
+        full_barrier(cmd, "barrier (fallback batch)");
+    }
+    const auto send = [&](FbItem& it, int k, bool mesh_stage) {
+        const Program& p = *it.p;
+        const size_t stage = it.stage[mesh_stage && p.fallback_task ? 1 : 0];
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, p.fallback_compute[stage]);
+        if (!fb_bind(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, it)) return false;
+        fb_addresses(b, it, k);
+        push_constants(cmd, p, nullptr, it.first_task);
+        if (mesh_stage && p.fallback_task) {
+            vkCmdDispatchIndirect(cmd, b.records, fb_header(p, k).offset + (VkDeviceSize)Shader::Backend::SPIRV::MESH_FALLBACK_DISPATCH_WORD * 4);
+        } else if (it.indirect) {
+            vkCmdDispatchIndirect(cmd, mesh_ring, it.mc.off);
+        } else {
+            const uint32_t most{p.fallback_task ? (uint32_t)std::max(1u, capacity / std::max(1u, p.fallback_task_threads)) : it.groups};
+            const uint32_t count{mesh_stage ? it.groups : std::min(it.groups, most)};
+            if (count) vkCmdDispatch(cmd, count, 1, 1);
+        }
+        return true;
+    };
+    for (int k = 0; k < n; k++)
+        if (items[k].p->fallback_task && !send(items[k], k, false)) items[k].dropped = true;
+    full_barrier(cmd, "barrier (fallback batch)");   // (left out when no task dispatch came: full_barrier's dedupe)
+    for (int k = 0; k < n; k++)
+        if (!items[k].dropped && !send(items[k], k, true)) items[k].dropped = true;
+    full_barrier(cmd, "barrier (fallback batch)");   // (the records and the draws' commands, read as indirect arguments)
+    // (the draws, each as draw() records a fallback draw after fallback_record: its hazards and pass, pipeline, descriptors,
+    // push constants and dynamic state, from what it held)
+    for (int k = 0; k < n; k++) {
+        FbItem& it = items[k];
+        if (it.dropped) continue;
+        Program& p = *it.p;
+        cur_program = &p;
+        gfx_sampled().swap(it.sampled);
+        const uint16_t writes = draw_hazards(cmd, p, it.s, it.at);
+        begin_pass(cmd, it.at);
+        gprof_run(cmd, p.key);   // (RX_VK_PASS_TIMING=2)
+        pass().prog = p.key;
+        if (!pass().first_prog) pass().first_prog = p.key;
+        for (const Texture* t : gfx_sampled()) {
+            if (std::find(pass().sampled.begin(), pass().sampled.end(), t) != pass().sampled.end()) continue;
+            pass().sampled.push_back(t);
+            int slot = -1;
+            for (int i = 0; i < it.at.n; i++)
+                if (it.at.color[i] == t) { slot = i; break; }
+            if (slot < 0 && it.at.depth == t) slot = 8;
+            if (slot >= 0) pass().sampled_targets |= (uint16_t)(1u << slot);
+        }
+        gfx_sampled().swap(it.sampled);
+        pass().written |= writes;
+        if (it.pl != last_pipeline) vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, it.pl), last_pipeline = it.pl;
+        // (always bound: the push only sends what changed. A bind that fails leaves the draw out, and the next draw builds its own)
+        if (!fb_bind(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, it)) {
+            last_desc_valid = false;
+            st_skipped++;
+            continue;
+        }
+        fb_addresses(b, it, k);
+        push_constants(cmd, p, &it.at);
+        dynamic_state(cmd, it.s, it.at, it.topo, false);
+        vkCmdDrawIndirect(cmd, b.records, fb_header(p, k).offset, 1, sizeof(VkDrawIndirectCommand));   // (its count: the records taken)
+        st_mesh++;
+        st_draws++, pass().draws++;
+    }
+    cur_program = was_program;
+    gfx_sampled().swap(was_sampled);
+    st_fb_draws += n, st_fb_batches++, st_fb_most = std::max<int64_t>(st_fb_most, n);
+    {   // (how long the runs are: once every 1800 frames)
+        static thread_local uint64_t told_at = 0;
+        static thread_local int64_t draws0 = 0, batches0 = 0;
+        const uint64_t f = texture_frame_no();
+        if (f >= told_at + 1800) {
+            if (told_at) {
+                const int64_t d = st_fb_draws - draws0, bt = st_fb_batches - batches0;
+                logf("vk: fallback batch: %lld draws in %lld batches (%.2f a batch, most %lld) in the last 1800 frames", (long long)d,
+                     (long long)bt, bt ? (double)d / (double)bt : 0.0, (long long)st_fb_most);
+            }
+            told_at = f, draws0 = st_fb_draws, batches0 = st_fb_batches;
+        }
+    }
+    fb_held = 0;
+    fb_recording = false;
+}
+
+/// Holds a fallback draw for the batch: true when held (or left out, as fallback_record leaves it out), false when draw() is
+/// to record it itself. Called with its descriptors built (dw()) and its sampled textures in gfx_sampled()
+enum class FbHold { held, left_out, record };
+FbHold fb_hold(VkCommandBuffer cmd, const NvnState& s, Program& p, const DrawArgs& d, const Targets& at, VkPipeline pl,
+               VkPrimitiveTopology topo, const MeshConv* mc) {
+    if (d.count_addr || dw().prog != &p) return FbHold::record;   // (fallback_record says why it leaves those out)
+    if (p.fallback_record_words * 4 > 16384) return FbHold::record;   // (fb_header's margin)
+    for (const auto& w : dw().writes)   // (a bind that would fail: draw() leaves the draw out, as before)
+        if (w.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+            for (uint32_t k = 0; k < w.descriptorCount; k++)
+                if (!w.pImageInfo[k].sampler) return FbHold::record;
+    if (!fallback_pipelines_ready(p)) return FbHold::left_out;
+    size_t stages[2] = {p.stages.size(), p.stages.size()};
+    for (size_t i = 0; i < p.stages.size(); i++) {
+        if (p.stages[i].vk_stage != VK_SHADER_STAGE_COMPUTE_BIT) continue;
+        if (stages[0] == p.stages.size()) stages[0] = i;
+        else stages[1] = i;
+    }
+    for (int i = 0; i < (p.fallback_task ? 2 : 1); i++)
+        if (stages[i] >= p.fallback_compute.size() || !p.fallback_compute[stages[i]]) return FbHold::left_out;
+    if (d.indirect && !mc) {   // (fallback_record leaves these out too)
+        static std::atomic<int> told{0};
+        if (told++ < 2) logf("vk: fallback: an indirect mesh draw with no converted arguments is left out");
+        return FbHold::left_out;
+    }
+    // (another command buffer, a full batch, or a program whose payloads need a new pair: what is held goes first)
+    if (fb_held && (cmd != fb_cmd || fb_held >= fb_config().draws || !fb_buffers_for(p, false))) fb_record_held();
+    if (!fb_buffers_for(p, fb_held == 0)) return FbHold::record;
+    auto& items = fb_items();
+    if ((int)items.size() < fb_config().draws) items.resize((size_t)fb_config().draws);
+    FbItem& it = items[(size_t)fb_held];
+    it.p = &p, it.pl = pl, it.at = at, it.topo = topo;
+    it.first_task = d.first_task;
+    it.groups = (uint32_t)std::clamp(d.groups[0], 0, (int)Shader::Backend::SPIRV::MESH_FALLBACK_CAPACITY);
+    it.indirect = d.indirect != 0, it.conv = mc != nullptr, it.dropped = false;
+    if (mc) it.mc = *mc;
+    const BufferRef input = p.fallback_task && d.indirect ? gpu_buffer_bind(d.indirect, 8, false) : BufferRef{};
+    const VkDeviceAddress input_base = input ? fallback_buffer_address(input.buffer) : 0;
+    it.indirect_input = input_base ? input_base + input.offset : 0;
+    it.stage[0] = stages[0], it.stage[1] = stages[1];
+    fb_desc_copy(dw(), it.desc);
+    it.sampled = gfx_sampled();
+    fb_state_copy(it.s, s);
+    fb_cmd = cmd;
+    fb_held++;
+    if (fb_held >= fb_config().draws) fb_record_held();
+    return FbHold::held;
+}
 } // namespace
 
 /// The vertex streams already bound on this command buffer (a new recording, or a mirror made since, is not)
@@ -6094,7 +6491,17 @@ void draw(VkCommandBuffer cmd, NvnState& s, const DrawArgs& d) {
     PROF_HOT(PROF_DRAW);
     FINE_N(FC_DRAWS, 1);
     stats_tick();
-    mesh_indirect_convert(cmd, d);   // (EvilOOT: before the pass opens; sets mesh_conv_buf for the mesh draw below)
+    // (hookshot-rog-ally, issue 4: with RX_VK_FALLBACK_BATCH a mesh draw's conversion is only prepared here, and recorded with
+    // a batch of held fallback draws, or below, before the draw's own commands)
+    MeshConv mesh_conv;
+    bool conv_prepared = false;
+    if (fb_on() && d.mesh) {
+        mesh_conv_buf = VK_NULL_HANDLE;
+        conv_prepared = mesh_indirect_prepare(d, mesh_conv);
+        if (conv_prepared) mesh_conv_buf = mesh_ring, mesh_conv_off = mesh_conv.off;
+    } else {
+        mesh_indirect_convert(cmd, d);   // (EvilOOT: before the pass opens; sets mesh_conv_buf for the mesh draw below)
+    }
     VkPrimitiveTopology topo = kMeshDrawTopology;
     if (!d.mesh && !topology(d.prim, topo)) {
         static int logged[32];
@@ -6351,6 +6758,29 @@ void draw(VkCommandBuffer cmd, NvnState& s, const DrawArgs& d) {
     texture_watch_prog(p.key);
     if (!same_desc) gfx_sampled() = draw_sampled();
     static const bool barrier_every = getenv("RX_VK_BARRIER_EVERY_DRAW") != nullptr;   // (an experiment: a pass each)
+    if (fb_on()) {   // (hookshot-rog-ally, issue 4: RX_VK_FALLBACK_BATCH, a fallback draw held for a batch: fb_hold)
+        // (not with what records at this draw's end or reads its commands as they are made: the guards above, the diagnostics)
+        static const bool mesh_rewrite_on = getenv("RX_VK_MESH_ARGS") && atoi(getenv("RX_VK_MESH_ARGS")) != 0;
+        if (p.fallback && d.mesh && !barrier_every && !mesh_rewrite_on && !mask_guard.cmd && !each_guard.cmd && !dump_on() &&
+            !probe_on() && !watched(p.key) && !trace_tex_hit && !stats_frame_now()) {
+            const FbHold held = fb_hold(cmd, s, p, d, at, pl, topo, conv_prepared ? &mesh_conv : nullptr);
+            if (held == FbHold::left_out) SKIP_HERE();
+            if (held == FbHold::held) {   // (what the command buffer will have bound once it is recorded, as below)
+                if (!same_desc) {
+                    last_desc_valid = true, last_desc_prog = &p, last_desc_bind = s.bind_gen, last_desc_reg = reg_gen;
+                    last_desc_ub = ub_gen, last_desc_dgen = dgen;
+                    if (slotgen)
+                        last_desc_fp() = desc_fp(), last_desc_fp_dummy = desc_fp_dummy, last_desc_samp = desc_samp_seen,
+                        last_desc_destroy = desc_destroy_seen;
+                } else {
+                    st_desc_reused++;
+                }
+                return;
+            }
+        }
+        if (fb_held) fb_record_held();   // (anything else: the held draws first)
+        if (conv_prepared) mesh_indirect_record(cmd, mesh_conv);   // (this draw's conversion, as mesh_indirect_convert)
+    }
     if (barrier_every) end_pass(cmd);
     uint16_t writes;
     {
