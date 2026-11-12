@@ -183,6 +183,16 @@ The `vk_vma.cpp` comment mentions `RX_VK_VMA_KEEP_EMPTY`. That lived in a patche
   Computer Inc.
 - No game, keys, executable or anything made from a game is in this repository or its releases.
 
+## Removal requests
+
+If you hold rights to anything in this repository, its issues or its releases and want it taken down, either:
+- [open a removal request](https://github.com/Predator04/hookshot-rog-ally/issues/new?title=Removal%20request&body=What%20should%20be%20removed%20(links%20or%20file%20paths)%3A%0A%0AWho%20is%20asking%2C%20and%20on%20whose%20behalf%3A%0A)
+  here; or
+- use GitHub's own process: its [DMCA takedown policy](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy)
+  and [notice form](https://github.com/contact/dmca).
+
+Removal requests are handled before anything else, and what they name is taken down quickly.
+
 ## Issues
 
 Bugs and slowdowns found on the Ally are filed in [Issues](https://github.com/Predator04/hookshot-rog-ally/issues).

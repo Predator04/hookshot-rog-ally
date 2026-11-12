@@ -161,7 +161,7 @@ Step 'Building (10 to 45 minutes; keep the charger in)'
 $ver = if ($Tag) { $Tag -replace '^ally-', '' } else { '' }
 $bargs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $src 'ally\tools\build-rog-ally.ps1'), '-Out', $Out, '-Builder', $Builder, '-Work', $Work)
 if ($Nup) { $bargs += @('-Nup', $Nup) } else { $bargs += @('-From', $From) }
-if ($ver) { $bargs += @('-Version', $ver) }
+if ($ver -and (Get-Command (Join-Path $src 'ally\tools\build-rog-ally.ps1')).Parameters.ContainsKey('Version')) { $bargs += @('-Version', $ver) }   # (releases before 2026-11-12.2 have no -Version)
 & powershell.exe @bargs
 if ($LASTEXITCODE -ne 0) { Fail "The build stopped (exit $LASTEXITCODE). Its log is $Work\build.log" }
 if (-not (Test-Path -LiteralPath (Join-Path $Out 'hookshot.exe'))) { Fail "The build finished but $Out has no hookshot.exe" }
