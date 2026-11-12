@@ -78,7 +78,7 @@ function Get-HookshotVersion([string]$dir) {
 
 function Compare-Version([string]$v, [string]$min) {
     # true when v >= min (v2.1.0-rc.3 counts as 2.1.0)
-    if ($v -match '^(main|nightly)') { return $true }   # (a build of the main branch: newer than any release)
+    if ($v -match '^(main|nightly|rog-ally)') { return $true }   # (a build of the main branch, or of this fork: newer than any release)
     $a = [regex]::Match($v, '(\d+)\.(\d+)\.(\d+)'); $b = [regex]::Match($min, '(\d+)\.(\d+)\.(\d+)')
     if (-not $a.Success) { return $false }
     for ($i = 1; $i -le 3; $i++) { $x = [int]$a.Groups[$i].Value; $y = [int]$b.Groups[$i].Value; if ($x -ne $y) { return $x -gt $y } }

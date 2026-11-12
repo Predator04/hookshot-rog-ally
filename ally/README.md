@@ -59,7 +59,8 @@ You get the settings, but not this fork's patches or its newer base.
    - It takes 10 to 45 minutes.
 4. Run `ally\setup\Run Setup.bat`, choose **1 Apply**, and copy your `user\save` folder over from your other Hookshot
    folder if you want your save.
-5. Start `Hookshot-Ally\bin\hookshot.exe`. The first start makes every shader (up to 40 minutes).
+5. Start `Hookshot-Ally\hookshot.exe`. A command-line build has the game itself there, not a launcher; make a desktop
+   shortcut to it if you like. The first start makes every shader (up to 40 minutes).
 
 An official release won't replace the build:
 - the tested `hookshot_env.txt` turns off the update check (`HOOKSHOT_NO_UPDATE_CHECK=1`);

@@ -42,7 +42,9 @@ if ($Ini) {
     if (-not (Test-Path "$s\options-original.ini")) { Copy-Item "$Game\hookshot_options.ini" "$s\options-original.ini" }
     Copy-Item $Ini "$Game\hookshot_options.ini" -Force
 }
-$p = Start-Process "$Game\bin\hookshot.exe" -WorkingDirectory $Game -PassThru
+# (a Hookshot Builder install has the game in bin\ and its launcher at the top; a command-line build has the game at the top)
+$exe = if (Test-Path "$Game\bin\hookshot.exe") { "$Game\bin\hookshot.exe" } else { "$Game\hookshot.exe" }
+$p = Start-Process $exe -WorkingDirectory $Game -PassThru
 foreach ($k in 'HOS_INPUT_LIVE', 'HOS_INPUT_SCRIPT_BACKGROUND', 'HOS_INPUT_BACKGROUND', 'RX_VK_FRAME_LOG', 'HOS_ENV_FILE', 'RX_VK_SHOTS', 'RX_VK_SHOT_EVERY') { Remove-Item "env:$k" -ErrorAction SilentlyContinue }
 Start-Sleep 5
 # ---- wait for the title (the intro has run: 4560 presents), up to $StartMaxMin ----

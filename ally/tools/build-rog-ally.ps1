@@ -91,10 +91,13 @@ $env:WGPU_NATIVE = Join-Path $tools 'wgpu-native'
 Remove-Item env:HOOKSHOT_BUILDER_EXE -ErrorAction SilentlyContinue   # (no builder line: the launcher's Update can't swap this build for a release)
 $log = Join-Path $Work 'build.log'
 Push-Location $tools
+# (make_game.py prints progress on stderr: with 'Stop', Windows PowerShell turns the first such line into an error and ends the build)
+$ErrorActionPreference = 'Continue'
 try {
-    & (Join-Path $tools 'python\python.exe') (Join-Path $tools 'nx2\make_game.py') @gameArgs --out $Out --language $Language --work (Join-Path $Work 'work') --no-prepare-shaders --log $log
+    & (Join-Path $tools 'python\python.exe') (Join-Path $tools 'nx2\make_game.py') @gameArgs --out $Out --language $Language --work (Join-Path $Work 'work') --no-prepare-shaders --log $log 2>&1 |
+        ForEach-Object { "$_" }
     $code = $LASTEXITCODE
-} finally { Pop-Location }
+} finally { Pop-Location; $ErrorActionPreference = 'Stop' }
 if ($code -ne 0) { Fail "the build stopped (exit $code). Its output is in $log" }
 
 # ---- the Ally setup ----
@@ -108,5 +111,5 @@ Done: $Out ($tag)
 Next:
   1. For the tested in-game options, run ally\setup\Run Setup.bat and choose Apply (or: Setup-HookshotAlly.ps1 -Mode Apply -GameDir "$Out").
   2. To keep playing your save, copy the user\save folder from your other Hookshot folder into $Out\user\ (close the game first).
-  3. Start $Out\bin\hookshot.exe. The first start builds every shader (20 to 40 minutes on the Ally, with a progress screen): let it finish once.
+  3. Start $Out\hookshot.exe (a desktop shortcut to it is handy). The first start builds every shader (20 to 40 minutes on the Ally, with a progress screen): let it finish once.
 "@ -ForegroundColor Green

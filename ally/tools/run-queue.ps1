@@ -19,10 +19,11 @@ function WaitStableAC {
 $runs = Get-Content $List | Where-Object { $_ -and -not $_.StartsWith('#') }
 foreach ($line in $runs) {
     $q = $line.Split(';'); $tag = $q[0]; $game = $q[1]; $envf = $q[2]; $walks = [int]$q[3]; $ini = if ($q.Count -gt 4) { $q[4] } else { '' }
+    $smm = if ($q.Count -gt 5 -and $q[5]) { [int]$q[5] } else { 75 }   # (6th field: minutes allowed for the start, 75 by default; a first start that builds every shader needs more)
     for ($try = 0; $try -lt 3; $try++) {
         if (-not (WaitStableAC)) { "QUEUE STOPPED: no stable AC for 90 min before $tag"; Add-Content "$sp\hs\mem_results.txt" "$(Get-Date -Format HH:mm) queue stopped: no stable AC for 90 min before $tag"; exit 3 }
         $t = if ($try -gt 0) { "${tag}_r$try" } else { $tag }
-        if ($ini) { & "$sp\mem-bench.ps1" -Tag $t -Game $game -EnvFile $envf -Walks $walks -Ini $ini } else { & "$sp\mem-bench.ps1" -Tag $t -Game $game -EnvFile $envf -Walks $walks }
+        if ($ini) { & "$sp\mem-bench.ps1" -Tag $t -Game $game -EnvFile $envf -Walks $walks -Ini $ini -StartMaxMin $smm } else { & "$sp\mem-bench.ps1" -Tag $t -Game $game -EnvFile $envf -Walks $walks -StartMaxMin $smm }
         $code = $LASTEXITCODE
         if ($code -eq 2) { "QUEUE STOPPED: game already running"; exit 2 }
         if ($code -ne 3) { break }
