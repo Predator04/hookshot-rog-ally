@@ -54,9 +54,12 @@ if ($Nup) {
 if ((Resolve-Path $Out -ErrorAction SilentlyContinue) -and $From -and ((Resolve-Path $Out).Path -eq (Resolve-Path $From -ErrorAction SilentlyContinue).Path)) {
     Fail "-Out is the same folder as -From: build into a new folder"
 }
-$sha = (& git -C $repo rev-parse --short HEAD 2>$null)
-$dirty = (& git -C $repo status --porcelain 2>$null)
-$tag = 'rog-ally-' + $(if ($sha) { $sha } else { 'unknown' }) + $(if ($dirty) { '-dirty' } else { '' })
+$sha = ''; $dirty = ''
+if ((Get-Command git -ErrorAction SilentlyContinue) -and (Test-Path (Join-Path $repo '.git'))) {   # (a source zip has no git history, and git may not be installed)
+    $sha = (& git -C $repo rev-parse --short HEAD 2>$null)
+    $dirty = (& git -C $repo status --porcelain 2>$null)
+}
+$tag = 'rog-ally-' + $(if ($sha) { $sha } else { 'src' }) + $(if ($dirty) { '-dirty' } else { '' })
 Write-Host "Source:  $repo ($tag)"
 Write-Host "Builder: $Builder"
 Write-Host "Game:    $(if ($Nup) { $Nup } else { $From })"
