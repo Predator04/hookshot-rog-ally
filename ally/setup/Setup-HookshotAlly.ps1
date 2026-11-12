@@ -43,6 +43,8 @@ $EnvLines = [ordered]@{
     'RX_VK_IMAGE_BLOCK_MB'      = @('32', 'Ally: 32 MB image blocks instead of 128. A fresh block costs ~0.5 ms per MB to allocate on the Ally, so each such hitch is ~27 ms instead of ~65 ms (measured in Kokiri walks).')
     'RX_VK_PREDICT_S'           = @('60', 'Ally: builds of main predict ~65,000 extra pipelines at the first start (hours on the Ally): build them for 60 s at most, the rest when first drawn. Releases without prediction ignore it.')
     'RX_VK_PCACHE_LOAD'         = @('0', 'Ally: don''t load the 1-2.5 GB pipeline cache file; the AMD driver''s shader cache covers it (+3.5 game fps, better 1% lows in interleaved runs). After a driver or big Windows update the first start rebuilds every shader (~30 min). Builds without the switch ignore it.')
+    'RX_VK_FALLBACK_BATCH'      = @('3', 'Ally (this fork''s builds): mesh fallback draws in batches of 3 that share their barriers: 0.4-1 ms less GPU time a frame, better 1% lows, same picture (issue #4). Other builds ignore it.')
+    'RX_VK_FALLBACK_BATCH_MB'   = @('21', 'Ally (this fork''s builds): 21 MB of records for each batched draw (the floor grass needs up to ~17.5 MB): ~130 MB of GPU memory per recording thread. Other builds ignore it.')
 }
 
 # ---- helpers ---------------------------------------------------------------------------------------------------

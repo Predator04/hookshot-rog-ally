@@ -11,6 +11,10 @@ RX_VK_IMAGE_BLOCK_MB=32
 # ~1/3 less stutter time (interleaved runs). After an AMD driver update or a big Windows update the driver cache can be empty, and
 # the first start then rebuilds every shader (~30 min, with a progress screen). To undo: delete this line.
 RX_VK_PCACHE_LOAD=0
+# Mesh fallback draws in batches of 3 that share their barriers (issue #4): 0.4-1 ms less GPU time a frame, better 1% lows,
+# same picture (3 alternating pairs of runs). ~130 MB more GPU memory per recording thread. Builds without it ignore it.
+RX_VK_FALLBACK_BATCH=3
+RX_VK_FALLBACK_BATCH_MB=21
 # --- Optional diagnostics (this fork's patches): they only write a line when something is slow or memory is allocated.
 RX_VK_SLOW_LOG=80
 RX_VK_SLOW_TEX_MS=20

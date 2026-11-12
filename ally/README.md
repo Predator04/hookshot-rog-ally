@@ -118,10 +118,56 @@ All of them are opt-in through a switch in `hookshot_env.txt`, except the first.
 | Slow texture lookups and image makes logged | `gpu/vk/vk_texture.cpp` | `RX_VK_SLOW_TEX_MS=<ms>` | off |
 | GPU memory allocations and frees logged | `gpu/vk/vk_vma.cpp` | `RX_VK_LOG_DEVMEM=1` | off |
 | Memory blocks kept even when empty, per pool | `gpu/vk/vk_vma.cpp` | `RX_VK_TARGET_MIN_BLOCKS=<n>`, `RX_VK_IMAGE_MIN_BLOCKS=<n>` | off |
+| Mesh fallback draws in batches that share their barriers (below) | `gpu/vk/vk_draw.cpp` | `RX_VK_FALLBACK_BATCH=<n>`, `RX_VK_FALLBACK_BATCH_MB=<mb>` | off; the tested setup: 3 and 21 |
 
 The `vk_vma.cpp` comment mentions `RX_VK_VMA_KEEP_EMPTY`. That lived in a patched copy of the third-party
 `vk_mem_alloc.h` in a build cache, and it is not part of this repository. It was tested and not kept: it held about
 0.5 GB more memory for a small gain.
+
+### Mesh fallback batches (issue #4)
+
+On the Ally the mesh programs run as compute shaders (the compute fallback). Each of those draws ended the pass and put
+in four full barriers, and three more barriers to convert an indirect draw's arguments. Kokiri Forest has about 60 of
+those draws a frame, in runs of 4 to 5 on average.
+
+`RX_VK_FALLBACK_BATCH=<n>` holds up to n of those draws in a row and records them together:
+1. the pass ends once;
+2. the draws' headers and conversions, then their task dispatches, then their mesh dispatches, with one full barrier
+   after each step;
+3. the draws, in their pass.
+
+The barriers are as wide as before, only shared. Upstream's narrower ones (NotRexed/Hookshot#1636) broke the picture on
+RDNA1.
+
+Each held draw needs its own range of the records buffer:
+- by default a range is 64 MB, so n draws take about n x 70 MB of GPU memory, for each thread that records;
+- `RX_VK_FALLBACK_BATCH_MB=<mb>` packs smaller ranges into less memory, but a draw with more records than that loses the
+  rest. The floor grass needs up to ~17.5 MB.
+
+The tested setup uses 3 draws of 21 MB each: about 130 MB a recording thread (the Ally has two).
+
+**Result** (Kokiri Forest scripted walk, 4 x 113 s, plugged in, alternating runs, 2026-11-12; the reference is
+`Hookshot-Ally`, the same branch without the patch):
+
+| Run | Game fps | 1% low | GPU ms | Full barriers a frame | Passes a frame |
+|---|---|---|---|---|---|
+| reference 1 | 40.6 | 43.7 | 19.1 | 516 | 175 |
+| batches of 3, run 1 | 48.3 | 55.9 | 15.2 | 387 | 129 |
+| reference 2 | 46.5 | 50.1 | 15.5 | 462 | 160 |
+| batches of 3, run 2 | 47.3 | 52.9 | 14.7 | 380 | 130 |
+| reference 3 | 46.0 | 47.1 | 15.8 | 510 | 171 |
+| batches of 3, run 3 | 51.4 | 52.6 | 13.2 | 373 | 127 |
+
+- Each batched run beat each reference run on game fps, 1% low and GPU time.
+- Full barriers fell about 25% and passes about 20%.
+- Part of the raw gap is the scene: the walk is timed, and the batched runs happened to see fewer draws. At the same draw
+  count (fitted over all samples), GPU time was 15.2 ms against 15.6 ms, or 16.2 ms counting reference 1, which paged
+  heavily. That is 0.4 to 1.0 ms a frame.
+- Batches of 32 (one run, its records cut to 1 MB, so its picture doesn't count) did no better: 45.7 fps, GPU 15.5 ms,
+  14.9 ms at the same draw count. Most of the gain comes with the first few draws a batch.
+- Picture: still shots of both builds in Kokiri Forest and Hyrule Field (the same save, the camera turned the same way)
+  match. The only differences are moving things (leaves, Navi, the mist).
+- 10 loads with batching on, none lost the device.
 
 ## Tested setup
 
