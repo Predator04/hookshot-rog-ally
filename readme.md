@@ -1,3 +1,5 @@
+> **ROG Ally fork.** This branch (`rog-ally`) is Hookshot tuned for the ASUS ROG Ally (Z1 Extreme): start with [ally/README.md](ally/README.md). Upstream project: [NotRexed/Hookshot](https://github.com/NotRexed/Hookshot).
+
 <h1 align="center">
   <br>
   <a>
