@@ -187,6 +187,34 @@ The tested setup uses 3 draws of 21 MB each: about 130 MB a recording thread (th
 - So the gain is real but small, and it shows where fallback draws are many (the field's grass and far trees). The walk
   results above overstated it: their scenes differed.
 
+### Retired graphics memory given back (issue #6, from upstream)
+
+When the game moves its guest memory to a new place, the old import is retired. Until now, this base kept retired imports
+for good on Windows: upstream had seen GPU resets right after they went back. Those resets were most likely the stale
+texel views fixed later (a23587f). On the Ally that memory stays pinned in its 11.7 GB of RAM and grows over a session.
+After about an hour of play, in Castle Town, it reached 1.5 GB retired plus 2.5 GB live. The game was then left a 2.3 GB working
+set, and it paged from disk at 2-10 fps.
+
+The fork now carries upstream's fix (e8ab1e3, NotRexed/Hookshot#1906, and c2e9ed5, #2795). It is on by default:
+- a retired import goes back once the GPU is past it and it has been retired 30 s;
+- when the system heap is over 85%, the wait is 2 s, and imports keep going back until the heap is down to 75%;
+- `RX_VK_KEEP_RETIRED=1` keeps them (the old behaviour), and `=0` gives them back at once.
+
+**Result** (`route-bench.ps1`, one fresh start per spot, plugged in, 2026-11-12; the fix first, then
+`RX_VK_KEEP_RETIRED=1`):
+
+| Spot | Retired, given back (fix) | Retired, still pinned (old) | Game fps / 1% low (fix) | Game fps / 1% low (old) |
+|---|---|---|---|---|
+| Kokiri Forest | 464 MB | 400 MB | 40.7 / 23.4 (first start) | 44.8 / 52.4 |
+| Hyrule Field | 448 MB | 592 MB | 36.8 / 52.6 | 36.9 / 50.7 |
+| Castle Town | 656 MB | 992 MB | 41.1 / 53.8 | 41.1 / 45.9 |
+
+- No device lost and no crash in any run.
+- The fix's Kokiri run was the new exe's first start, which took 46 minutes of pipeline building, so its lows don't count.
+- After 3 minutes in a spot the old behaviour already pinned 0.4-1 GB, and that keeps growing. With the fix none of
+  it stays.
+- Still open: a long play session in town, to confirm it no longer slows down.
+
 ## Tested setup
 
 **Environment:** [`ally/hookshot_env.txt`](hookshot_env.txt), copied into the game folder.
