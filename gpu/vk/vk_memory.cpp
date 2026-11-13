@@ -41,6 +41,9 @@
 #endif
 #include "shaders/wb_diff_comp_spv.h"
 #include "vram_pressure.h"
+#ifndef HOOKSHOT_ENV_H   // (env_on, env_int: the switches' one rule; upstream's gpu/vk/compat/hookshot_env.h)
+#include "hookshot_env.h"
+#endif
 #include "vk_work.h"   // (after the others: counts the commands that do GPU work, for full_barrier)
 
 namespace mkwvk {
