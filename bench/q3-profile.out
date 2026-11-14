@@ -1,0 +1,2 @@
+﻿00:06 queue q3-profile start: 4 runs
+00:06 p_base env=env_pt.txt options+=[] spots=Kokiri,HyruleField,Town

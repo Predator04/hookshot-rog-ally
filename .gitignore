@@ -1,0 +1,15 @@
+# Nothing made from the game, no saves and no built binaries go into the repo (HANDOVER.md rules)
+*.dll
+*.exe
+*.bin
+*.png
+*.bmp
+*.jpg
+bench/vk-dll/
+bench/ls-backup-*/save/
+bench/hs/log_*.txt
+bench/hs/frames_*.csv
+bench/hs/route_input.txt
+bench/hs/shots/
+bench/hs/save*/
+__pycache__/
