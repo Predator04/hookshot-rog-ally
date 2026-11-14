@@ -129,8 +129,25 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   - Freeze rate with LOAD=create at 8 GB UMA: 1 of 24 loads (c_base Town), vs 7 of 8 Kokiri starts with the default
     start mode (q4). GPU shared max 3.0-3.84 GB of 3.94.
   - Thermals: APU max 92-95 C, passive limit 100%, throttle reasons 0 in every run: not thermally limited.
-- q6 (from 04:12): every run on env_ldc_rbl.txt (LOAD=create + readback-late): r_base, r_al (Anti-Lag 2), r_fsr (FSR 3.1
-  handheld at 67%), r_fsr1080 (FSR 3.1, docked profile, output 1920x1080 at 67% = 1280x720 3D), r_l40 (lock 40), repeats.
+- q6 (04:11-05:28): every run on env_ldc_rbl.txt (LOAD=create + readback-late) + one change. Shown-frame p99 (ms):
+
+  | run | Kokiri p99 | Hyrule p99 | Town p99 | game fps (route) | GPU ms | note |
+  |---|---|---|---|---|---|---|
+  | r_base (readback-late) | 22.7 | 41.3 | 22.2 | 37.2 | 18.2 | (q5 c_rbl/c_rbl2: 32.4/32.6, 52.3/36.2, 24.2/22.8) |
+  | r_al / r_al2 (+ Anti-Lag 2) | 32.8 / 33.2 | 56.1 / 37.2 | 27.0 / failed | 37.2 / 37.0 | 18.3 | neutral; r_al2 Town submit -2 |
+  | r_l40 (+ lock 40) | 26.7 | 38.1 | 27.4 | 37.2 | 18.2 | neutral (game rarely above 40) |
+  | r_fsr / r_fsr2 (FSR 3.1, handheld 67%) | 73.8 / 34.4 | 63.5 / 42.7 | 27.9 / 28.9 | 31.6 / 33.4 | 21.1 / 20.7 | -10 to -15% fps |
+  | r_fsr1080 / b (FSR 3.1, docked 1920x1080 out, 1280x720 3D) | 50.9 / 58.9 | 72.6 / 62.2 | 32.4 / 29.1 | 26.3 / 26.9 | 28.4 / 28.1 | -28% fps: too heavy |
+
+  - The "720p internal -> FSR 3.1 -> 1080p" target costs ~10 ms of GPU per game frame on the 780M-class iGPU (18 -> 28 ms)
+    and puts the game at ~26 fps with p99 51-73 ms. Not reachable smoothly here; the game's own upscaler (handheld
+    profile, 1536x864 frame) stays the faster and smoother choice. FSR 3.1 handheld is ~10% slower than the game's own.
+  - Freeze count with LOAD=create at 8 GB UMA: 2 of 48 loads (both Town). UMA 4 GB remains the fix.
+  - Run-to-run noise is large (same setup, Kokiri p99 22.7 vs 32.6): only differences bigger than ~10 ms in p99 or
+    ~2 game fps mean anything.
+- q7 (from 05:30): CPU-side switches on env_ldc_rbl.txt: s_poll0 (HOS_SHORT_SLEEP_POLLERS=0 + HOS_SPIN_OTHER_US=20,
+  pre-#2709), s_poll2 (POLLERS=2 + HOS_SPIN_US=5), s_nores (HOS_RESERVE_CORE=0), s_ranges (RX_VK_LOG_READBACK_RANGES=1,
+  which ranges still wait), s_base, repeats.
 - Bench tools added: `bench\frames_report.py <tag>` (p50/p95/p99/p99.9, jitter, hitches from the RX_VK_FRAME_LOG CSVs,
   over the window route-bench saves), sampler columns for APU temperature / passive limit / throttle reasons / GPU 3D %.
 - Longshot changes (patches in `patches\`, both built into Games\Longshot-Ally as cf605c85-dirty): `HOS_FPS_LOCK=<20-59>`
