@@ -1,0 +1,10 @@
+﻿11:57 ls4_c in C:\Users\Admin\Games\Longshot-Ally env=env_ldc_rbl.txt spots=Kokiri,HyruleField,Town (after ls4_nold's start mode built every noted pipeline into the driver cache)
+12:00 [ls4_c] Kokiri: start 57 s | game fps 39.5 | shown 75.8 (1% low 30.6) | GPU 16.98 ms | draws 1,456 | passes 175 | >=50ms 50 >=100ms 23 | views: 1_loaded 20.0 ms 34 fps; 2_left 15.7 ms 42 fps; 3_right 15.7 ms 40 fps; 4_half_left 17.5 ms 40 fps | alive=True   env=env_ldc_rbl.txt
+12:03 [ls4_c] HyruleField: start 54 s | game fps 34.2 | shown 65.9 (1% low 43.5) | GPU 21.08 ms | draws 1,950 | passes 183 | >=50ms 32 >=100ms 12 | views: 1_loaded 22.2 ms 33 fps; 2_left 20.8 ms 36 fps; 3_right 23.3 ms 29 fps; 4_half_left 18.4 ms 38 fps | alive=True   env=env_ldc_rbl.txt
+12:06 [ls4_c] Town: start 66 s | game fps 36.4 | shown 65.0 (1% low 40.9) | GPU 17.88 ms | draws 1,433 | passes 172 | >=50ms 28 >=100ms 10 | views: 1_loaded 13.2 ms 44 fps; 2_left 21.6 ms 33 fps; 3_right 23.8 ms 27 fps; 4_half_left 16.1 ms 37 fps | alive=True   env=env_ldc_rbl.txt
+12:06 [ls4_c] ROUTE (3 spots): game fps 36.7 | 1% low 38.3 | GPU 18.65 ms | draws 1,613  env=env_ldc_rbl.txt
+12:06 [ls4_c] Kokiri: private max 18,289 MB | working set max 5,476 MB | commit max 28.1 of 59.7 GB | available min 168 MB | GPU shared max 3,504 MB, dedicated max 3,624 MB | CPU perf mean 109% | disk page reads/s mean 1,169 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean 67% | 20 samples
+12:06 [ls4_c] HyruleField: private max 17,415 MB | working set max 5,840 MB | commit max 27.2 of 59.7 GB | available min 78 MB | GPU shared max 3,113 MB, dedicated max 3,524 MB | CPU perf mean 99% | disk page reads/s mean 778 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean 74% | 19 samples
+12:06 [ls4_c] Town: private max 17,997 MB | working set max 6,889 MB | commit max 27.7 of 59.7 GB | available min 384 MB | GPU shared max 3,355 MB, dedicated max 3,655 MB | CPU perf mean 113% | disk page reads/s mean 996 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean 63% | 21 samples
+route-bench exit: 
+12:06 ls4_c done; options put back

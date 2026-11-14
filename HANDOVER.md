@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-14, 08:15)
+# Longshot on the ROG Ally: hand-over (2026-11-14, 12:30; UMA back at 4 GB since 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -36,7 +36,11 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 - **Update + build Longshot:** `git -C "...\Zelda Ocrina\longshot" fetch origin; git merge --ff-only origin/main`, then
   `bench\build-longshot.ps1 -EnvFile bench\env_longshot_ally.txt` (builds into Longshot-Ally in place, keeps save/options;
   LONGSHOT_KEEP_BUILD_FILES=1 so a nearby commit compiles in ~9 min; stops itself if a game starts).
-- **Compare Longshot vs the old build:** `bench\ls-queue2.ps1` (Longshot warm-up start at Kokiri, then Longshot / old /
+- **Compare the old build vs Longshot (current way):** `bench\ls-queue3.ps1 -Name q9 -Uma 4 -WarmAll -NoLoadRun -StopAt HH:mm`
+  (warm-ups of both at all spots, then old / Longshot / old / Longshot on env_ally.txt / env_ldc_rbl.txt, optional start-mode
+  run; tags `ref<Uma>_*` / `ls<Uma>_*`). Then `python -I bench\uma_report.py <tags>`: game fps, p99 over the views and over
+  the whole run, hitches, failed submits / device lost, GPU shared max, paging, per spot, for both builds.
+- **Compare Longshot vs the old build (older way):** `bench\ls-queue2.ps1` (Longshot warm-up start at Kokiri, then Longshot / old /
   Longshot at Kokiri, HyruleField, Town; ~1 h, more if shaders must be rebuilt). Results: `bench\hs\route_results.txt`
   (Longshot) and `Zelda Ocrina\hs-merge\ally\tools\hs\route_results.txt` (old build); memory in `bench\mem\mem_results.txt`.
   It puts the bench options in both folders during runs and the user's own back after (`ls-play-options.ini`, `ref-options.ini`).
@@ -53,15 +57,25 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | **8 GB UMA (from 2026-11-14), q8:** | | | | | | | |
 | Old play build copy (ref8_a / ref8_b) | 45.5 / 39.7 | **froze** (submit -2) | **froze** (submit -2) | - | - | 16.4-19.0 | 139-149 |
 | Longshot + LOAD=create + READBACK_LATE (ls8_a / ls8_b) | 37.8 / 38.4 | 34.7 / 33.9 | 37.4 / 36.7 | **36.6 / 36.3** | 29.4 / 27.7 | 18.3-18.5 | 169-183 |
+| **4 GB UMA again (from 2026-11-14 09:44), q9:** | | | | | | | |
+| Old play build copy (ref4_a / ref4_b) | 44.2 / 43.2 | 35.4 / GPU reset | 40.8 / 40.3 | **40.1** / (41.8, 2 spots) | 48.9 / 53.6 | 17.2-21.7 | 137-164 |
+| Longshot env_ldc_rbl, driver cache cold (ls4_a / ls4_b) | 35.6 / 38.0 | 31.7 / 34.8 | 33.8 / 34.0 | 33.7 / 35.6 | 34.9 / 35.7 | 17.8-23.0 | 173-188 |
+| **Longshot env_ldc_rbl, driver cache warm (ls4_c)** | 39.5 | 34.2 | 36.4 | **36.7** | 38.3 | 17.0-21.1 | 172-183 |
+| Longshot start mode, no LOAD=create (ls4_nold) | 38.1 | 34.2 | 35.4 | 35.9 | 42.6 | 17.9-21.1 | 174-188 |
 
-Recommendation to the user (2026-11-14 08:15):
-1. **Set the BIOS / Armoury Crate UMA frame buffer back to 4 GB** (the user's setting; we never change it). At 8 GB both
-   builds run out of the 3.9 GB shared GPU heap: the old play build froze on **4 of 4** Hyrule Field / Town loads in q8;
-   Longshot with the new env on 3 of 78 loads overnight.
-2. Longshot (Games\Longshot-Ally, its longshot_env.txt now = bench\env_longshot_ally.txt with RX_VK_LOAD=create +
-   RX_VK_READBACK_LATE=newest; previous env in bench\ls-env-before-2026-11-14.txt) is now ~10% behind the old build in
-   game fps (was ~20%) and as smooth or smoother: Kokiri over the whole run (same window both) p99 71-81 ms vs 82-83 ms,
-   >100 ms hitches 73-88 vs 92-96. At 8 GB UMA it is the only one of the two that loads Hyrule Field / Town.
+Recommendation to the user (2026-11-14 12:30, at 4 GB UMA):
+1. **Keep UMA at 4 GB.** 0 failed submits in 24 loads (both builds, both Longshot start modes), GPU shared max 3.1-4.3 GB
+   of a 5,992 MB limit, page reads halved, frames over 100 ms per spot (whole run) down from 53-101 to 22-50 (Longshot's whole-run
+   p99 55-102 ms -> 23-46 ms; the old build's Kokiri 83 -> 23-28 ms). Details: "Daytime" below.
+2. **Play the old build (Games\Hookshot-Ally) for now.** It is ~8% faster than Longshot at 4 GB (route 40.1 vs 36.7; Kokiri
+   ~10%, Hyrule ~4%, Town ~10%) and a little smoother over the views (p99 17.5-21.9 ms vs 22.0-31.8). Its first start
+   after the UMA change rebuilds the driver's shaders (~28 min; the driver cache does not follow a folder): let it finish.
+   One GPU timeout (Windows LiveKernelEvent 141, device lost) in its 9 loads today; none in Longshot's 15.
+   (Its play folder's hookshot_env.txt has the same settings as bench\env_ally.txt; checked read-only.)
+3. **Longshot (Games\Longshot-Ally, longshot_env.txt as it is: RX_VK_LOAD=create + RX_VK_READBACK_LATE=newest)** is the one
+   to switch to once it catches up: ~8% behind now (~20% before the night). Its driver cache is warm again (ls4_nold did it).
+   After any UMA change or AMD driver update, give it **one start in start mode** (RX_VK_LOAD=start for one session, ~30 min
+   at the title's progress screen): create mode does not rebuild its noted pipelines into an emptied driver cache.
 
 ## What is known about the slowdown
 1. **CPU (main cause, shared by newer Hookshot and Longshot):** OoT's job workers poll for work far more often. HOS_SLEEP_LOG:
@@ -182,12 +196,61 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   holds the game's limiter (+0xfc) below 60 for an even cadence (30 + 2x FG = steady 60 shown); Anti-Lag 2 logs how long
   the driver holds each frame at its input stage (every 600 frames; RX_VK_ANTILAG_LOG=0 off).
 
+## Daytime 2026-11-14: back at 4 GB UMA (q9, 09:51-12:06, screen on, plugged in, the user's OK "Yes, start now")
+- The user set the UMA frame buffer to 4 GB and rebooted (09:44). Checked read-only: Windows RAM 11.70 GB
+  (`Win32_ComputerSystem.TotalPhysicalMemory`), dxdiag Dedicated 4,002 MB / **Shared 5,992 MB** / Display 9,995 MB, driver
+  32.0.32015.14001 (same). The AMD VkCache restarted at 09:49 (4 KB). Commit limit 59.7 GB.
+- Queue: `bench\ls-queue3.ps1 -Name q9 -Uma 4 -WarmAll -NoLoadRun -StopAt 14:00` (q9.out), then one extra Longshot run ls4_c
+  (q9c.out) after the start-mode run had rebuilt the driver cache. Per spot (`bench\uma_report.py`; "views" = the last
+  ~94 s of the frame log, the four views and three turns; "run" = HANDOVER q8's whole-run window, = frames_report.py on
+  copies without window files, cross-checked):
+
+  | run | Kokiri fps / p99 views / p99 run / >100 run | Hyrule | Town | route fps |
+  |---|---|---|---|---|
+  | ref8_a / ref8_b (8 GB) | 45.5, 39.7 / 20.7, 51.8 / 82.8, 82.5 / 96, 92 | froze (8 submits -2 each) | froze | - |
+  | ls8_a / ls8_b (8 GB) | 37.8, 38.4 / 44.0, 52.6 / 80.6, 71.1 / 88, 73 | 34.7, 33.9 / 41.2, 40.6 / 84.7, 101.8 / 82, 101 | 37.4, 36.7 / 25.8, 24.8 / 69.8, 55.3 / 84, 53 | 36.6, 36.3 |
+  | **ref4_a / ref4_b** | **44.2, 43.2** / 21.3, 21.4 / 23.4, 27.9 / 28, 30 | **35.4**, GPU reset / 19.9 / 22.7 / 24 | **40.8, 40.3** / 21.9, 17.5 / 23.9, 22.3 / 26, 27 | **40.1** |
+  | ls4_a / ls4_b (cache cold) | 35.6, 38.0 / 23.2, 29.1 / 27.6, 30.7 / 29, 36 | 31.7, 34.8 / 24.7, 22.8 / 33.6, 23.0 / 25, 24 | 33.8, 34.0 / 29.9, 33.6 / 27.7, 31.3 / 27, 30 | 33.7, 35.6 |
+  | **ls4_c (cache warm)** | **39.5** / 31.8 / 46.3 / 50 | **34.2** / 22.7 / 24.9 / 25 | **36.4** / 22.0 / 22.7 / 24 | **36.7** |
+  | ls4_nold (start mode) | 38.1 / 23.3 / (30-min first start) | 34.2 / 22.6 / 37.5 / 32 | 35.4 / 23.3 / 29.9 / 22 | 35.9 |
+
+- **No freeze at 4 GB:** 0 `vk: submit N failed (-2)` in 24 loads (old 9, Longshot create mode 12, start mode 3). GPU shared
+  max: old 3.71-3.88 GB, Longshot create 3.11-3.50 GB, start mode 4.10-4.32 GB, of 5.99 GB.
+- **Paging and hitches dropped:** disk page reads/s mean, 8 GB -> 4 GB: old 2,418-3,400 -> 974-1,385; Longshot 1,979-2,497 ->
+  561-1,406. Frames over 100 ms over the whole run: 53-101 -> 22-50. Available RAM min still low (14-507 MB): the game's
+  ~17-26 GB private memory still pages, less.
+- **Old build vs Longshot at 4 GB:** the old build is ahead: Kokiri 43.7 vs 39.5 (-10%), Hyrule 35.4-35.9 vs 34.2 (-4%), Town
+  40.6 vs 36.4 (-10%), route 40.1 vs 36.7 (-8.5%); views p99 17.5-21.9 vs 22.0-31.8 ms. Longshot gained ~13% at 4 GB from the
+  new env (32.4-32.7 before the night, same UMA). One Longshot warm run only (ls4_c): noise ±1 fps, ±5-10 ms p99.
+- **One GPU timeout in the old build** (ref4_b Hyrule load, 11:05): a 1,070 ms submit (draw 1,026 ms), 135 MB of uploads in a
+  frame, 2,445 ms sync wait, then `submit 9739 failed (-4)` (device lost); Windows WER LiveKernelEvent 141 (+ a1000001)
+  reports 11:06. The same kind as the merged build's six (all screen off, history-notes); not seen in the old build before
+  (history-notes' tally: 0 of 18 route starts).
+- **Longshot after a UMA change (or driver update) with RX_VK_LOAD=create + RX_VK_PCACHE_LOAD=0 stays cold:** the change
+  empties the AMD driver cache; `cache\longshot_pipelines.bin.built` (02:48, keyed only by the translator stamp,
+  precompile_covers_notes) still says the noted pipelines are built, and pcache_drop_stale is off with PCACHE_LOAD=0, so
+  precompile_warm never runs again. Each session then (ls4_a, ls4_b): "1,360-1,703 listed pipelines were in no cache"
+  (8 GB: none or 501), only 1,431-1,633 pipelines from the start's cache (8 GB: 6,824-7,172), 0-42 compiled in play, and
+  **442-119,769 draws left out per spot** (Kokiri 442-543, Hyrule 736-7,652, Town 64,062-119,769; 8 GB: 0-21). Game fps
+  5-10% lower (Town's right view 33-34 ms GPU vs 23.8). It did not heal over three sessions (ls4_w, a, b). One start in
+  start mode (ls4_nold: "noted pipelines: N of 27,874", 1,809 s) rebuilt the driver cache; the next create-mode run (ls4_c)
+  had 6,938-7,173 from the start's cache, 0-5 draws left out, 0 compiled, and the 8 GB speed back. Untested alternative: delete `longshot_pipelines.bin.built` (create mode then runs
+  precompile_warm). The longshot_load_start.txt marker (10:32) does not matter while RX_VK_LOAD=create is set (env wins).
+- **Is RX_VK_LOAD=create still needed at 4 GB?** Not against freezes (start mode: 0 failed submits, shared max 4.32 of 5.99 GB),
+  but keep it: same speed (route 36.7 vs 35.9, within noise; views p99 alike), ~7 GB less private memory (17.4-18.3 vs
+  24.5-26.1 GB), ~1 GB less GPU shared, more free RAM (min 78-384 vs 14-172 MB), starts 54-66 s vs 66-68 s, and it is the
+  insurance if UMA ever goes back to 8 GB. Cost: the one start-mode session after each UMA/driver change (above).
+- The camera-command write in route-bench-ls.ps1 now retries ("Stream was not readable" once in q8).
+- Thermals: APU max 91-95 C, passive limit 100%, throttle 0 (Longshot runs).
+- Options and saves: both bench folders' options equal ls-play-options.ini / ref-options.ini after the runs; no
+  save.routebak left. Keep-awake (scratchpad keep-awake.ps1, 09:51-12:07) stopped.
+
 ## Next steps (each needs the user)
-- After the user sets UMA back to 4 GB: the driver cache resets again (first start of each build ~30-40 min), then one
-  ls-queue3.ps1 run (old vs Longshot with the new env) to confirm the freezes are gone and get 4 GB numbers.
 - With the user watching the screen: `RX_VK_READBACK_LATE=newest,3980` (and maybe `,1b580`) for white exposure flashes;
-  they hold most of the remaining readback wait.
-- Post `issue-draft-uma8-submit-oom.md` upstream only with the user's OK.
+  they hold most of the remaining readback wait (s_ranges, 8 GB; not re-measured at 4 GB).
+- Post `issue-draft-uma8-submit-oom.md` upstream only with the user's OK. A second finding worth an upstream issue (draft
+  `issue-draft-create-cold-driver-cache.md`, same rule): create mode does not rebuild its notes into an emptied driver cache.
+- The bisect of the CPU regression (below) is what would close the remaining ~8% to the old build.
 
 ## Bisect (waiting on the user's yes: "Start hunting down the slowdown's cause?")
 Asked again 2026-11-13 ~23:50; the user said "Not now". Don't start until they say yes.
@@ -212,3 +275,10 @@ as fast.
   ls-play-options.ini) - done 02:30 on 2026-11-14, backup in bench\ls-backup-pre-lock.
 - Robocopy exit 1 = files copied (success). `gh` isn't installed.
 - The user's options keep output_res=2048x1152 (Longshot's new-install default is now 2560x1440).
+- The frame log (RX_VK_FRAME_LOG) counts from the first shown frame, ~7 s after the process start that window_*.txt and
+  route-bench's Stats count from: frames_report.py's saved windows start ~7 s late and run through the close (same shift in
+  every run, so Longshot-vs-Longshot comparisons stand). uma_report.py anchors the views window to the log's end instead.
+- `powershell -File script.ps1 -Spots A,B,C` passes one string "A,B,C" to a [string[]] parameter: call such scripts with `&`
+  in-process (as the queues do), or `-Command`.
+- A BIOS UMA change resets the AMD driver cache (the driver treats it as a new device); it also invalidates Longshot's
+  create-mode warm state without telling it (see Daytime above): one start-mode session fixes it.

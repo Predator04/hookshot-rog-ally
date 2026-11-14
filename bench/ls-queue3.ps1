@@ -3,7 +3,12 @@
 # change threw the AMD driver cache away, so the old build's first start re-prepares its pipelines (warm-up, up to 75 min).
 # Also answers: does the old build (what the user plays) freeze on area loads at 8 GB UMA too?
 # No run starts after $StopAt (the user is back in the morning; daytime benchmarks need their OK).
-param([string]$StopAt = '08:40')
+# 2026-11-14 (q9, back at 4 GB UMA): -Uma 4 names the runs ref4_* / ls4_* (the 8 GB ones are ref8_* / ls8_*: never overwrite
+# them); -WarmAll warms both builds at all three spots (the UMA change emptied the AMD driver cache again, and Longshot with
+# RX_VK_LOAD=create builds its noted pipelines into it on its first start); -NoLoadRun adds one Longshot run on env_rbl.txt
+# (readback-late only, no RX_VK_LOAD=create: start mode, as the Ally's compute mesh fallback picks without it).
+#   powershell -File bench\ls-queue3.ps1 -Name q9 -Uma 4 -WarmAll -NoLoadRun -StopAt 14:00
+param([string]$StopAt = '08:40', [string]$Name = 'q8', [string]$Uma = '8', [switch]$WarmAll, [switch]$NoLoadRun)
 $ErrorActionPreference = 'Continue'
 $S = Split-Path $MyInvocation.MyCommand.Path -Parent
 $LS = 'C:\Users\Admin\Games\Longshot-Ally'
@@ -36,11 +41,13 @@ function Run($tag, $g, $envf, [string[]]$spots, [int]$maxmin = 15) {
     if ($LASTEXITCODE -eq 2 -or $LASTEXITCODE -eq 3) { "stopped at ${tag}: $LASTEXITCODE"; Restore; exit $LASTEXITCODE }
 }
 $all = @('Kokiri', 'HyruleField', 'Town')
-"$(Get-Date -Format HH:mm) queue q8 (old build vs Longshot at 8 GB UMA) start"
-Run 'ref8_w' $REF 'env_ally.txt'     @('Kokiri') 75
-Run 'ref8_a' $REF 'env_ally.txt'     $all
-Run 'ls8_a'  $LS  'env_ldc_rbl.txt'  $all
-Run 'ref8_b' $REF 'env_ally.txt'     $all
-Run 'ls8_b'  $LS  'env_ldc_rbl.txt'  $all
+"$(Get-Date -Format HH:mm) queue $Name (old build vs Longshot at $Uma GB UMA) start"
+Run "ref${Uma}_w" $REF 'env_ally.txt'     $(if ($WarmAll) { $all } else { @('Kokiri') }) 75
+if ($WarmAll) { Run "ls${Uma}_w" $LS 'env_ldc_rbl.txt' $all 75 }
+Run "ref${Uma}_a" $REF 'env_ally.txt'     $all
+Run "ls${Uma}_a"  $LS  'env_ldc_rbl.txt'  $all
+Run "ref${Uma}_b" $REF 'env_ally.txt'     $all
+Run "ls${Uma}_b"  $LS  'env_ldc_rbl.txt'  $all
+if ($NoLoadRun) { Run "ls${Uma}_nold" $LS 'env_rbl.txt' $all 45 }
 Restore
-"$(Get-Date -Format HH:mm) queue q8 done"
+"$(Get-Date -Format HH:mm) queue $Name done"

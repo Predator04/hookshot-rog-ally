@@ -129,7 +129,12 @@ foreach ($spot in $Spots) {
         Start-Sleep 10   # (the place streams in, the camera settles)
         $marks = @(); $battery = $false
         foreach ($v in $views) {
-            if ($v[1]) { Add-Content $in $v[1] -Encoding ascii; Start-Sleep -Milliseconds 4500 }   # (the camera moves, then stops)
+            # (the camera moves, then stops. The game reads the file as it is written: one write in q8 failed with "Stream was
+            # not readable", so try again for up to a second)
+            if ($v[1]) {
+                for ($try = 0; $try -lt 20; $try++) { try { Add-Content $in $v[1] -Encoding ascii -ErrorAction Stop; break } catch { Start-Sleep -Milliseconds 50 } }
+                Start-Sleep -Milliseconds 4500
+            }
             $n = LogLines; $from = ((Get-Date) - $t0).TotalSeconds
             if ($Shots) { Shot "${spot}_$($v[0])" }
             Start-Sleep $HoldS
