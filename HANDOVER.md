@@ -76,8 +76,10 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   options back after). A background keep-awake (ES_DISPLAY_REQUIRED, 11 h from 00:07) keeps the screen on all night.
 - Already in Longshot: FSR 3.1 (dlss=3), its own 2x frame interpolation, Anti-Lag 2 (VK_AMD_anti_lag: "available" on the
   Ally), pipeline caches + precompile. The user's options: game's own upscaler at 67%, FG 2x, Anti-Lag 2 OFF.
-- Found: Windows desktop is 1280x720 @120 Hz; with handheld_profile=1 Longshot ignores output_res and the game presents
-  2560x1440 (4x the screen's pixels), then Lanczos-scales it to 720p.
+- Found: Windows desktop is 1280x720 @120 Hz; with handheld_profile=1 Longshot ignores output_res: the game's frame is
+  1536x864 (`nvn: window crop 0,0 1536x864` inside a 2560x1440 texture), 3D at 67% = ~1024x576, scaled to the 720p
+  swapchain. For "720p internal -> 1080p" the docked profile is needed (handheld_profile=0, output_res=1920x1080,
+  resolution=3, dlss=3 = FSR 3.1 Quality); q6 measures its cost.
 - Phase 2 paste (user, overnight): smoothness first (steady frame time, no hitches; a locked 40-60 with good pacing beats
   a stuttering 60), 720p internal + FSR 3.1 to 1080p with sharpening preferred; research online first; report p99 frame
   time before/after each change. Research notes: `research-2026-11-14.md` (top lead: readback waits,
@@ -107,14 +109,33 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   3.83-3.92 GB of 3.94; imports only 1.1-1.5 GB of it, the rest driver/staging/capture/pipelines). So at 8 GB UMA the
   default setup barely starts at all. The one start that loaded, k_lock30 (HOS_FPS_LOCK=30, FG 2x): lock held (game
   ~32 fps, speed 0.94-1.00), FG output 316 of 320 frames 12-17 ms apart, p99 46.7 ms, jitter 1.8 ms, 26 frames >=100 ms.
-- q5 (from 02:55): every run on env_ldc.txt (LOAD=create) + one change each, all three spots: c_base, c_lock30, c_rbl,
-  c_al (Anti-Lag 2 on, with the new wait log), repeats, c_lock40.
+- q5 (02:50-04:09, 8 GB UMA): every run on env_ldc.txt (LOAD=create) + one change each, all three spots. Shown-frame p99
+  (ms, from frames_report.py; FG 2x on, so ~2 shown frames per game frame) and game fps (route line):
+
+  | run | Kokiri p99 | Hyrule p99 | Town p99 | game fps (route) | 1% low | note |
+  |---|---|---|---|---|---|---|
+  | c_base / c_base2 (LOAD=create) | 36.1 / 33.7 | 57.4 / 52.1 | failed / 31.5 | 30.2 (2 spots) / 32.4 | 22.6 / 26.9 | c_base Town: submit -2 |
+  | c_lock30 / c_lock30b (HOS_FPS_LOCK=30) | 47.2 / 49.3 | 62.4 / 53.2 | 35.2 / 31.4 | 31.5 / 31.8 | 21.9 / 23.6 | worse p99 in Kokiri |
+  | c_lock40 (HOS_FPS_LOCK=40) | 31.7 | 67.4 | 23.6 | 32.3 | 29.6 | mixed (one run) |
+  | c_al (Anti-Lag 2 on) | 35.7 | 51.3 | 36.9 | 32.1 | 24.9 | ~neutral |
+  | **c_rbl / c_rbl2 (RX_VK_READBACK_LATE=newest)** | **32.4 / 32.6** | **52.3 / 36.2** | **24.2 / 22.8** | **36.5 / 36.5** | **30.4 / 34.1** | best everywhere |
+
+  - **Readback-late wins**: +13% game fps (32.4 -> 36.5, Kokiri 35 -> 39), p99 down at every spot, 1% low +7 fps,
+    GPU 3D 57-65%. Upstream PR #238 (merged 11-14): reads the named ranges without waiting, so they hold last frame's
+    values; risk = the exposure meter can read stale values (no flashes seen upstream). Now in env_ldc_rbl.txt.
+  - 30 fps lock: the game only runs 28-39 fps here, so the lock mostly adds waits; p99 worse. Not recommended now.
+  - Anti-Lag 2 works on the Ally: the driver holds 1-48 of each 600 frames at the input stage, 0.1-0.6 ms a frame on
+    average (longest holds = the load hitches). p99 within noise of the base: safe to turn on for latency with FG.
+  - Freeze rate with LOAD=create at 8 GB UMA: 1 of 24 loads (c_base Town), vs 7 of 8 Kokiri starts with the default
+    start mode (q4). GPU shared max 3.0-3.84 GB of 3.94.
+  - Thermals: APU max 92-95 C, passive limit 100%, throttle reasons 0 in every run: not thermally limited.
+- q6 (from 04:12): every run on env_ldc_rbl.txt (LOAD=create + readback-late): r_base, r_al (Anti-Lag 2), r_fsr (FSR 3.1
+  handheld at 67%), r_fsr1080 (FSR 3.1, docked profile, output 1920x1080 at 67% = 1280x720 3D), r_l40 (lock 40), repeats.
 - Bench tools added: `bench\frames_report.py <tag>` (p50/p95/p99/p99.9, jitter, hitches from the RX_VK_FRAME_LOG CSVs,
   over the window route-bench saves), sampler columns for APU temperature / passive limit / throttle reasons / GPU 3D %.
-- Longshot changes (not built yet; patches in `patches\`): `HOS_FPS_LOCK=<20-59>` holds the game's limiter (+0xfc) below
-  60 for an even cadence (30 + 2x FG = steady 60 shown); Anti-Lag 2 logs how long the driver holds each frame at its input
-  stage (every 600 frames; RX_VK_ANTILAG_LOG=0 off). Both need builds: host (build-longshot.ps1, ~9 min) and engine
-  (build-vk.ps1).
+- Longshot changes (patches in `patches\`, both built into Games\Longshot-Ally as cf605c85-dirty): `HOS_FPS_LOCK=<20-59>`
+  holds the game's limiter (+0xfc) below 60 for an even cadence (30 + 2x FG = steady 60 shown); Anti-Lag 2 logs how long
+  the driver holds each frame at its input stage (every 600 frames; RX_VK_ANTILAG_LOG=0 off).
 
 ## Next step (waiting on the user's yes: "Start hunting down the slowdown's cause?")
 Asked again 2026-11-13 ~23:50; the user said "Not now". Don't start until they say yes.
