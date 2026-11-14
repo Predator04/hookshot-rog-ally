@@ -145,9 +145,17 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   - Freeze count with LOAD=create at 8 GB UMA: 2 of 48 loads (both Town). UMA 4 GB remains the fix.
   - Run-to-run noise is large (same setup, Kokiri p99 22.7 vs 32.6): only differences bigger than ~10 ms in p99 or
     ~2 game fps mean anything.
-- q7 (from 05:30): CPU-side switches on env_ldc_rbl.txt: s_poll0 (HOS_SHORT_SLEEP_POLLERS=0 + HOS_SPIN_OTHER_US=20,
-  pre-#2709), s_poll2 (POLLERS=2 + HOS_SPIN_US=5), s_nores (HOS_RESERVE_CORE=0), s_ranges (RX_VK_LOG_READBACK_RANGES=1,
-  which ranges still wait), s_base, repeats.
+- q7 (05:29-06:46): CPU-side switches on env_ldc_rbl.txt. Route game fps / p99 Kokiri, Hyrule, Town (ms):
+  s_base 37.3 / 28.1, 39.7, 21.6; s_poll0 + s_poll0b (HOS_SHORT_SLEEP_POLLERS=0 + HOS_SPIN_OTHER_US=20, pre-#2709)
+  37.1, 37.8 / 24.3-32.5, 33.6-35.1, 20.9-24.6; s_poll2 + b (POLLERS=2 + HOS_SPIN_US=5) 36.2, 37.2 / 31.9-36.4,
+  37.6-37.9, 27.4 (b Town: submit -2); s_nores + b (HOS_RESERVE_CORE=0) 37.2, 37.8 / 29.7-31.2, 32.2-35.9, 22.9-23.1.
+  **All within noise**: the sleep/spin/reserved-core switches don't move the Ally (matches the 4 GB-UMA finding).
+  Freezes: 1 more Town submit -2 (3 of 72 loads with LOAD=create over q5-q7).
+- Readback ranges still waiting with `newest` (s_ranges, RX_VK_LOG_READBACK_RANGES=1, whole run incl. load; total ms
+  waited): Kokiri 0x3980 6.2 s, 0x9b040 3.7 s, 0x1b580 1.2 s; Hyrule **0x1b580 7.6 s**, 0x3980 0.7 s, 0x9b040 0.7 s;
+  Town 0x3980 9.3 s, 0x9b040 2.6 s, 0x1b580 2.6 s. Next candidate: `RX_VK_READBACK_LATE=newest,3980` (upstream PR #238's
+  tested combo, no flashes seen on Deck); `1b580` / `9b040` untested anywhere. Each needs eyes on the screen for white
+  (exposure) flashes, so only with the user watching.
 - Bench tools added: `bench\frames_report.py <tag>` (p50/p95/p99/p99.9, jitter, hitches from the RX_VK_FRAME_LOG CSVs,
   over the window route-bench saves), sampler columns for APU temperature / passive limit / throttle reasons / GPU 3D %.
 - Longshot changes (patches in `patches\`, both built into Games\Longshot-Ally as cf605c85-dirty): `HOS_FPS_LOCK=<20-59>`

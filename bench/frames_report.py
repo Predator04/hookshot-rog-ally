@@ -12,7 +12,7 @@ import statistics
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-HS = os.path.join(HERE, "hs")
+HS = os.environ.get("FRAMES_HS") or os.path.join(HERE, "hs")   # (FRAMES_HS: another route-bench hs folder, e.g. the old build's)
 SPOTS = ("Kokiri", "HyruleField", "Town")
 
 
