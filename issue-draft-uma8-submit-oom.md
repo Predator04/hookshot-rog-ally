@@ -17,6 +17,11 @@ is 3.9 GB, and Longshot's imported guest pools (~2.1 GB live + retired-still-imp
 "GPU Process Memory ... Shared Usage" max 3,843 MB). With the same build at 4 GB UMA (12 GB visible, ~6 GB shared limit) the
 peak was 4.3 GB shared and nothing failed in 8 Hyrule/Town loads.
 
+**What helps (8 GB UMA, same box):** `RX_VK_LOAD=create` (programs loaded when the game makes them) cut private memory from
+~24 GB to ~17.5 GB and GPU shared peak to 2.9-3.84 GB; with it 3 of 78 area loads still failed with -2 (all Market Town /
+Hyrule entries) over one night of benchmarks. An older Hookshot-based build on the same box failed 4 of 4 Hyrule Field /
+Town loads the same way, so this is not new in Longshot; it's the shared-heap size.
+
 **Suggestions:**
 - A submit that fails with -2 could be retried after giving back retired/idle imports (or at least logged as fatal with a
   hint), instead of leaving the game waiting for work that never ran.

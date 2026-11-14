@@ -1,0 +1,51 @@
+﻿06:47 queue q8 (old build vs Longshot at 8 GB UMA) start
+06:47 ref8_w in C:\Users\Admin\Games\Hookshot-Ally-ref env=env_ally.txt spots=Kokiri
+07:22 [ref8_w] Kokiri: start 1991 s | game fps 41.8 | shown 69.3 (1% low 13.8) | GPU 17.94 ms | draws 1,413 | passes 138 | >=50ms 110 >=100ms 49 | views: 1_loaded 32.9 ms 14 fps; 2_left 16.9 ms 43 fps; 3_right 15.5 ms 46 fps; 4_half_left 15.8 ms 47 fps | alive=True   env=env_ally.txt
+07:22 [ref8_w] ROUTE (1 spots): game fps 41.8 | 1% low 13.8 | GPU 17.94 ms | draws 1,413  env=env_ally.txt
+07:22 [ref8_w] Kokiri: private max 27,009 MB | working set max 2,769 MB | commit max 37.0 of 55.7 GB | available min 1 MB | GPU shared max 3,729 MB, dedicated max 4,207 MB | CPU perf mean 122% | disk page reads/s mean 1,522 | 264 samples
+route-bench exit: 
+07:22 ref8_a in C:\Users\Admin\Games\Hookshot-Ally-ref env=env_ally.txt spots=Kokiri,HyruleField,Town
+07:26 [ref8_a] Kokiri: start 108 s | game fps 45.5 | shown 86.7 (1% low 48.3) | GPU 16.44 ms | draws 1,427 | passes 139 | >=50ms 39 >=100ms 16 | views: 1_loaded 22.7 ms 31 fps; 2_left 14.8 ms 50 fps; 3_right 15.3 ms 48 fps; 4_half_left 15.3 ms 48 fps | alive=True   env=env_ally.txt
+07:30 [ref8_a] HyruleField: start 110 s | game fps 57.9 | shown NaN (1% low NaN) | GPU 17.34 ms | draws 2,021 | passes 145 | >=50ms 0 >=100ms 0 | views: 1_loaded 18.4 ms 52 fps; 2_left 16.0 ms 60 fps; 3_right 19.1 ms 60 fps; 4_half_left 15.8 ms 60 fps | alive=True   env=env_ally.txt
+07:33 [ref8_a] Town: start 98 s | game fps 55.6 | shown NaN (1% low NaN) | GPU 32.32 ms | draws 1,593 | passes 174 | >=50ms 0 >=100ms 0 | views: 1_loaded 19.5 ms 60 fps; 2_left 28.4 ms 58 fps; 3_right 57.5 ms 39 fps; 4_half_left 32.8 ms 60 fps | alive=True   env=env_ally.txt
+07:34 [ref8_a] ROUTE (3 spots): game fps 53.0 | 1% low NaN | GPU 22.03 ms | draws 1,681  env=env_ally.txt
+07:34 [ref8_a] Kokiri: private max 26,174 MB | working set max 2,681 MB | commit max 36.2 of 55.7 GB | available min 14 MB | GPU shared max 3,730 MB, dedicated max 4,176 MB | CPU perf mean 113% | disk page reads/s mean 2,883 | 32 samples
+07:34 [ref8_a] HyruleField: private max 25,937 MB | working set max 1,823 MB | commit max 35.9 of 55.7 GB | available min 16 MB | GPU shared max 3,765 MB, dedicated max 2,883 MB | CPU perf mean 124% | disk page reads/s mean 3,075 | 32 samples
+07:34 [ref8_a] Town: private max 26,514 MB | working set max 2,238 MB | commit max 36.4 of 55.7 GB | available min 93 MB | GPU shared max 3,918 MB, dedicated max 3,229 MB | CPU perf mean 120% | disk page reads/s mean 2,418 | 33 samples
+route-bench exit: 
+07:34 ls8_a in C:\Users\Admin\Games\Longshot-Ally env=env_ldc_rbl.txt spots=Kokiri,HyruleField,Town
+Add-Content : Stream was not readable.
+At C:\Users\Admin\Desktop\LongShot Rog Ally\bench\route-bench-ls.ps1:132 char:26
++ ...            if ($v[1]) { Add-Content $in $v[1] -Encoding ascii; Start- ...
++                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (C:\Users\Admin\...route_input.txt:String) [Add-Content], ArgumentExcep 
+   tion
+    + FullyQualifiedErrorId : GetContentWriterArgumentError,Microsoft.PowerShell.Commands.AddContentCommand
+ 
+07:37 [ls8_a] Kokiri: start 80 s | game fps 37.8 | shown 75.6 (1% low 27.7) | GPU 17.30 ms | draws 1,208 | passes 169 | >=50ms 57 >=100ms 32 | views: 1_loaded 24.8 ms 27 fps; 2_left 15.9 ms 40 fps; 3_right 16.3 ms 38 fps; 4_half_left 15.5 ms 41 fps | alive=True   env=env_ldc_rbl.txt
+07:40 [ls8_a] HyruleField: start 87 s | game fps 34.7 | shown 65.8 (1% low 23.8) | GPU 20.58 ms | draws 1,855 | passes 181 | >=50ms 51 >=100ms 29 | views: 1_loaded 21.7 ms 33 fps; 2_left 20.2 ms 37 fps; 3_right 23.3 ms 29 fps; 4_half_left 18.1 ms 38 fps | alive=True   env=env_ldc_rbl.txt
+07:44 [ls8_a] Town: start 92 s | game fps 37.4 | shown 69.3 (1% low 36.7) | GPU 16.86 ms | draws 1,277 | passes 177 | >=50ms 35 >=100ms 16 | views: 1_loaded 13.4 ms 43 fps; 2_left 17.2 ms 37 fps; 3_right 25.1 ms 26 fps; 4_half_left 15.6 ms 38 fps | alive=True   env=env_ldc_rbl.txt
+07:44 [ls8_a] ROUTE (3 spots): game fps 36.6 | 1% low 29.4 | GPU 18.25 ms | draws 1,447  env=env_ldc_rbl.txt
+07:44 [ls8_a] Kokiri: private max 17,537 MB | working set max 2,604 MB | commit max 27.7 of 55.7 GB | available min 474 MB | GPU shared max 2,940 MB, dedicated max 4,230 MB | CPU perf mean 111% | disk page reads/s mean 2,126 | APU max 93 C, passive limit min 100%, throttle 0 | GPU 3D mean 58% | 23 samples
+07:44 [ls8_a] HyruleField: private max 17,716 MB | working set max 1,852 MB | commit max 27.9 of 55.7 GB | available min 165 MB | GPU shared max 3,744 MB, dedicated max 3,179 MB | CPU perf mean 108% | disk page reads/s mean 1,979 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean 54% | 23 samples
+07:44 [ls8_a] Town: private max 18,184 MB | working set max 2,438 MB | commit max 28.3 of 55.7 GB | available min 387 MB | GPU shared max 3,839 MB, dedicated max 3,915 MB | CPU perf mean 116% | disk page reads/s mean 2,091 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean 52% | 24 samples
+route-bench exit: 
+07:44 ref8_b in C:\Users\Admin\Games\Hookshot-Ally-ref env=env_ally.txt spots=Kokiri,HyruleField,Town
+07:48 [ref8_b] Kokiri: start 101 s | game fps 39.7 | shown 74.0 (1% low 35.6) | GPU 19.04 ms | draws 2,173 | passes 149 | >=50ms 43 >=100ms 20 | views: 1_loaded 27.0 ms 25 fps; 2_left 17.4 ms 42 fps; 3_right 14.6 ms 50 fps; 4_half_left 22.1 ms 31 fps | alive=True   env=env_ally.txt
+07:51 [ref8_b] HyruleField: start 96 s | game fps 58.3 | shown NaN (1% low NaN) | GPU 128.79 ms | draws 2,437 | passes 152 | >=50ms 0 >=100ms 0 | views: 1_loaded 121.3 ms 55 fps; 2_left 132.8 ms 60 fps; 3_right 130.5 ms 57 fps; 4_half_left 129.4 ms 60 fps | alive=True   env=env_ally.txt
+07:55 [ref8_b] Town: start 115 s | game fps 57.2 | shown NaN (1% low NaN) | GPU 48.90 ms | draws 1,746 | passes 174 | >=50ms 0 >=100ms 0 | views: 1_loaded 27.6 ms 58 fps; 2_left 53.1 ms 58 fps; 3_right 54.1 ms 55 fps; 4_half_left 60.9 ms 57 fps | alive=True   env=env_ally.txt
+07:56 [ref8_b] ROUTE (3 spots): game fps 51.7 | 1% low NaN | GPU 65.58 ms | draws 2,119  env=env_ally.txt
+07:56 [ref8_b] Kokiri: private max 25,879 MB | working set max 1,885 MB | commit max 35.9 of 55.7 GB | available min 51 MB | GPU shared max 3,475 MB, dedicated max 4,207 MB | CPU perf mean 115% | disk page reads/s mean 3,261 | 31 samples
+07:56 [ref8_b] HyruleField: private max 25,659 MB | working set max 2,304 MB | commit max 35.6 of 55.7 GB | available min 15 MB | GPU shared max 3,892 MB, dedicated max 1,403 MB | CPU perf mean 122% | disk page reads/s mean 2,844 | 31 samples
+07:56 [ref8_b] Town: private max 26,065 MB | working set max 1,815 MB | commit max 36.1 of 55.7 GB | available min 6 MB | GPU shared max 3,927 MB, dedicated max 2,494 MB | CPU perf mean 124% | disk page reads/s mean 3,400 | 33 samples
+route-bench exit: 
+07:56 ls8_b in C:\Users\Admin\Games\Longshot-Ally env=env_ldc_rbl.txt spots=Kokiri,HyruleField,Town
+07:59 [ls8_b] Kokiri: start 73 s | game fps 38.4 | shown 74.8 (1% low 24.2) | GPU 17.76 ms | draws 1,414 | passes 176 | >=50ms 58 >=100ms 22 | views: 1_loaded 25.3 ms 24 fps; 2_left 15.4 ms 42 fps; 3_right 15.7 ms 42 fps; 4_half_left 16.8 ms 41 fps | alive=True   env=env_ldc_rbl.txt
+08:02 [ls8_b] HyruleField: start 87 s | game fps 33.9 | shown 65.5 (1% low 24.6) | GPU 20.68 ms | draws 1,885 | passes 183 | >=50ms 51 >=100ms 32 | views: 1_loaded 21.8 ms 32 fps; 2_left 19.8 ms 36 fps; 3_right 22.7 ms 29 fps; 4_half_left 18.8 ms 37 fps | alive=True   env=env_ldc_rbl.txt
+08:06 [ls8_b] Town: start 70 s | game fps 36.7 | shown 68.8 (1% low 34.2) | GPU 16.94 ms | draws 1,301 | passes 181 | >=50ms 41 >=100ms 17 | views: 1_loaded 14.0 ms 42 fps; 2_left 17.4 ms 36 fps; 3_right 22.4 ms 27 fps; 4_half_left 15.5 ms 39 fps | alive=True   env=env_ldc_rbl.txt
+08:06 [ls8_b] ROUTE (3 spots): game fps 36.3 | 1% low 27.7 | GPU 18.46 ms | draws 1,534  env=env_ldc_rbl.txt
+08:06 [ls8_b] Kokiri: private max 17,612 MB | working set max 2,674 MB | commit max 27.8 of 55.7 GB | available min 526 MB | GPU shared max 3,044 MB, dedicated max 4,262 MB | CPU perf mean 113% | disk page reads/s mean 2,497 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean 59% | 22 samples
+08:06 [ls8_b] HyruleField: private max 17,524 MB | working set max 2,314 MB | commit max 27.7 of 55.7 GB | available min 406 MB | GPU shared max 3,616 MB, dedicated max 3,531 MB | CPU perf mean 109% | disk page reads/s mean 2,138 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean 61% | 22 samples
+08:06 [ls8_b] Town: private max 17,914 MB | working set max 2,865 MB | commit max 28.1 of 55.7 GB | available min 591 MB | GPU shared max 3,807 MB, dedicated max 3,980 MB | CPU perf mean 116% | disk page reads/s mean 2,070 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean 63% | 21 samples
+route-bench exit: 
+08:06 queue q8 done

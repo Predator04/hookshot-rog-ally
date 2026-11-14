@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-13, 23:45)
+# Longshot on the ROG Ally: hand-over (2026-11-14, 08:15)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -50,8 +50,18 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (latest, 2 runs) | 34-35 | 29-29.5 | 33.6-33.8 | **32.4-32.7** | 26-28 | ~20 | 177-188 |
 | Longshot 514591a3 (this morning) | 32.7-34.6 | 27.3-29.3 | 32.8-32.9 | 31.0-32.2 | 22-24.5 | ~21 | 174-193 |
 | Hookshot merged e9975d6 | 32-37 | 30-32 | 32-34 | ~33 | | ~18.5 | 139-167 |
+| **8 GB UMA (from 2026-11-14), q8:** | | | | | | | |
+| Old play build copy (ref8_a / ref8_b) | 45.5 / 39.7 | **froze** (submit -2) | **froze** (submit -2) | - | - | 16.4-19.0 | 139-149 |
+| Longshot + LOAD=create + READBACK_LATE (ls8_a / ls8_b) | 37.8 / 38.4 | 34.7 / 33.9 | 37.4 / 36.7 | **36.6 / 36.3** | 29.4 / 27.7 | 18.3-18.5 | 169-183 |
 
-Recommendation to the user right now: keep playing the old build (Hookshot-Ally); Longshot is ~20 % slower on the Ally.
+Recommendation to the user (2026-11-14 08:15):
+1. **Set the BIOS / Armoury Crate UMA frame buffer back to 4 GB** (the user's setting; we never change it). At 8 GB both
+   builds run out of the 3.9 GB shared GPU heap: the old play build froze on **4 of 4** Hyrule Field / Town loads in q8;
+   Longshot with the new env on 3 of 78 loads overnight.
+2. Longshot (Games\Longshot-Ally, its longshot_env.txt now = bench\env_longshot_ally.txt with RX_VK_LOAD=create +
+   RX_VK_READBACK_LATE=newest; previous env in bench\ls-env-before-2026-11-14.txt) is now ~10% behind the old build in
+   game fps (was ~20%) and as smooth or smoother: Kokiri over the whole run (same window both) p99 71-81 ms vs 82-83 ms,
+   >100 ms hitches 73-88 vs 92-96. At 8 GB UMA it is the only one of the two that loads Hyrule Field / Town.
 
 ## What is known about the slowdown
 1. **CPU (main cause, shared by newer Hookshot and Longshot):** OoT's job workers poll for work far more often. HOS_SLEEP_LOG:
@@ -156,13 +166,30 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   Town 0x3980 9.3 s, 0x9b040 2.6 s, 0x1b580 2.6 s. Next candidate: `RX_VK_READBACK_LATE=newest,3980` (upstream PR #238's
   tested combo, no flashes seen on Deck); `1b580` / `9b040` untested anywhere. Each needs eyes on the screen for white
   (exposure) flashes, so only with the user watching.
+- q8 (06:47-08:06, `bench\ls-queue3.ps1`): the old play build's copy (Hookshot-Ally-ref, env_ally.txt) vs Longshot
+  (env_ldc_rbl.txt), both at 8 GB UMA. Old build warm-up: 1,991 s start (the driver cache re-prepared after the UMA change).
+  **Old build: every Hyrule Field and Town load failed with `vk: submit N failed (-2)` (8 each, 4 of 4 loads)**: the frame
+  log stops ("shown NaN"), the game's own counter keeps ticking; GPU shared max 3.89-3.93 GB, private max ~26 GB vs 17.5 GB
+  for Longshot. Kokiri: old 45.5 / 39.7 game fps vs Longshot 37.8 / 38.4. Same-window smoothness (whole run after 20 s,
+  incl. view-change loads; FRAMES_HS + copies without window files): old p99 82.8 / 82.5 ms, >100 ms 96 / 92; Longshot
+  p99 80.6 / 71.1 ms, >100 ms 88 / 73. Longshot routes 36.6 / 36.3, all 6 loads fine.
+- 08:10: Games\Longshot-Ally\longshot_env.txt updated to the new bench\env_longshot_ally.txt (+ RX_VK_LOAD=create,
+  RX_VK_READBACK_LATE=newest, each with an "undo" comment); old one in bench\ls-env-before-2026-11-14.txt. The user's
+  options and saves in both bench folders checked back in place after q8.
 - Bench tools added: `bench\frames_report.py <tag>` (p50/p95/p99/p99.9, jitter, hitches from the RX_VK_FRAME_LOG CSVs,
   over the window route-bench saves), sampler columns for APU temperature / passive limit / throttle reasons / GPU 3D %.
 - Longshot changes (patches in `patches\`, both built into Games\Longshot-Ally as cf605c85-dirty): `HOS_FPS_LOCK=<20-59>`
   holds the game's limiter (+0xfc) below 60 for an even cadence (30 + 2x FG = steady 60 shown); Anti-Lag 2 logs how long
   the driver holds each frame at its input stage (every 600 frames; RX_VK_ANTILAG_LOG=0 off).
 
-## Next step (waiting on the user's yes: "Start hunting down the slowdown's cause?")
+## Next steps (each needs the user)
+- After the user sets UMA back to 4 GB: the driver cache resets again (first start of each build ~30-40 min), then one
+  ls-queue3.ps1 run (old vs Longshot with the new env) to confirm the freezes are gone and get 4 GB numbers.
+- With the user watching the screen: `RX_VK_READBACK_LATE=newest,3980` (and maybe `,1b580`) for white exposure flashes;
+  they hold most of the remaining readback wait.
+- Post `issue-draft-uma8-submit-oom.md` upstream only with the user's OK.
+
+## Bisect (waiting on the user's yes: "Start hunting down the slowdown's cause?")
 Asked again 2026-11-13 ~23:50; the user said "Not now". Don't start until they say yes.
 Bisect the CPU regression in the Longshot clone between the old build's base and Longshot's split: d7a7306..4dd972a (about
 362 commits; Longshot's history has them all). Signal: HOS_SLEEP_LOG count at lr 0x8009a478 or the vcores takes per 5 s in
