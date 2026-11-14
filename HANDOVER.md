@@ -99,6 +99,16 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   peak shared 4.35 GB: no freeze in any earlier run. **Recommendation: UMA back to 4 GB** (BIOS / Armoury Crate: the
   user's setting, never change it ourselves). `RX_VK_MIRROR=1` would not help (mirrors add a device-local copy; the
   imports stay). route-bench-ls.ps1 now gives up a start at the first failed submit and flags them in the result line.
+- Freeze tests at 8 GB UMA (q4, Hyrule only): **`RX_VK_LOAD=create` loaded Hyrule** (ldc_h: no failed submit; private max
+  17.3 GB vs 23.8, GPU shared max 3,549 MB vs 3,782, available min 321 MB vs 6, page reads 1,765/s vs 3,940; game 27.8 fps,
+  p99 62.8 ms, 30 frames >=100 ms). Only ~400 MB under the shared limit: one run, not proof. `RX_VK_IMPORT_HIGH=85` froze
+  (submit -2). LOAD=create = programs and their pipelines loaded when the game makes them, not all ~4-5 GB before the title.
+- q4 Kokiri A/B (02:31-02:49, default start mode): **7 of 8 Kokiri starts failed with submit -2 too** (GPU shared max
+  3.83-3.92 GB of 3.94; imports only 1.1-1.5 GB of it, the rest driver/staging/capture/pipelines). So at 8 GB UMA the
+  default setup barely starts at all. The one start that loaded, k_lock30 (HOS_FPS_LOCK=30, FG 2x): lock held (game
+  ~32 fps, speed 0.94-1.00), FG output 316 of 320 frames 12-17 ms apart, p99 46.7 ms, jitter 1.8 ms, 26 frames >=100 ms.
+- q5 (from 02:55): every run on env_ldc.txt (LOAD=create) + one change each, all three spots: c_base, c_lock30, c_rbl,
+  c_al (Anti-Lag 2 on, with the new wait log), repeats, c_lock40.
 - Bench tools added: `bench\frames_report.py <tag>` (p50/p95/p99/p99.9, jitter, hitches from the RX_VK_FRAME_LOG CSVs,
   over the window route-bench saves), sampler columns for APU temperature / passive limit / throttle reasons / GPU 3D %.
 - Longshot changes (not built yet; patches in `patches\`): `HOS_FPS_LOCK=<20-59>` holds the game's limiter (+0xfc) below

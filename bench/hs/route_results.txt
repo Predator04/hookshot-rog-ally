@@ -21,3 +21,15 @@
 01:26 [p_base] HyruleField START TIMEOUT after 40 min  env=env_pt.txt
 02:06 [p_base] Town START TIMEOUT after 40 min  env=env_pt.txt
 02:11 [p_r50] Kokiri: start 161 s | game fps 30.4 | shown 58.5 (1% low 17.3) | GPU 18.74 ms | draws 2,033 | passes 193 | >=50ms 57 >=100ms 34 | views: 1_loaded 23.3 ms 24 fps; 2_left 16.8 ms 34 fps; 3_right 17.0 ms 32 fps; 4_half_left 19.7 ms 29 fps | alive=True   env=env_pt.txt
+02:29 [ldc_h] HyruleField: start 91 s | game fps 27.8 | shown 53.7 (1% low 15.9) | GPU 23.59 ms | draws 2,110 | passes 192 | >=50ms 54 >=100ms 30 | views: 1_loaded 26.2 ms 25 fps; 2_left 20.8 ms 32 fps; 3_right 23.4 ms 26 fps; 4_half_left 24.0 ms 29 fps | alive=True   env=env_ldc.txt
+02:29 [ldc_h] ROUTE (1 spots): game fps 27.8 | 1% low 15.9 | GPU 23.59 ms | draws 2,110  env=env_ldc.txt
+02:31 [imp_h] HyruleField SUBMIT FAILED (-2: out of device memory) during start-up  env=env_imp85.txt
+02:33 [k_base] Kokiri SUBMIT FAILED (-2: out of device memory) during start-up  env=env_longshot_ally.txt
+02:35 [k_rbl] Kokiri SUBMIT FAILED (-2: out of device memory) during start-up  env=env_rbl.txt
+02:39 [k_lock30] Kokiri: start 99 s | game fps 31.5 | shown 61.6 (1% low 21.4) | GPU 20.26 ms | draws 1,537 | passes 179 | >=50ms 51 >=100ms 26 | views: 1_loaded 23.0 ms 27 fps; 2_left 18.7 ms 35 fps; 3_right 18.9 ms 31 fps; 4_half_left 21.1 ms 32 fps | alive=True   env=env_lock30.txt
+02:39 [k_lock30] ROUTE (1 spots): game fps 31.5 | 1% low 21.4 | GPU 20.26 ms | draws 1,537  env=env_lock30.txt
+02:41 [k_lock40] Kokiri SUBMIT FAILED (-2: out of device memory) during start-up  env=env_lock40.txt
+02:43 [k_al] Kokiri SUBMIT FAILED (-2: out of device memory) during start-up  env=env_longshot_ally.txt
+02:45 [k_base2] Kokiri SUBMIT FAILED (-2: out of device memory) during start-up  env=env_longshot_ally.txt
+02:47 [k_rbl2] Kokiri SUBMIT FAILED (-2: out of device memory) during start-up  env=env_rbl.txt
+02:49 [k_lock30b] Kokiri SUBMIT FAILED (-2: out of device memory) during start-up  env=env_lock30.txt

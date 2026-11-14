@@ -60,10 +60,10 @@ foreach ($g in ($rows | Group-Object pid)) {
         (Get-Date -Format HH:mm), $Tag, $spot, ($r | Measure-Object private_mb -Maximum).Maximum, ($r | Measure-Object ws_mb -Maximum).Maximum,
         ($r | Measure-Object commit_gb -Maximum).Maximum, [double]$r[0].limit_gb, ($r | Measure-Object avail_mb -Minimum).Minimum,
         ($r | Measure-Object gpu_shared_mb -Maximum).Maximum, ($r | Measure-Object gpu_ded_mb -Maximum).Maximum, $r.Count, $(if ($r[0].PSObject.Properties['cpu_perf_pct']) { ($r | Measure-Object cpu_perf_pct -Average).Average } else { 0 }), $(if ($r[0].PSObject.Properties['page_reads_s']) { ($r | Measure-Object page_reads_s -Average).Average } else { 0 }),
-        $(if ($r[0].PSObject.Properties['apu_c']) { ($r | Measure-Object { [double]$_.apu_c } -Maximum).Maximum } else { 0 }),
-        $(if ($r[0].PSObject.Properties['passive_pct']) { ($r | Measure-Object { [double]$_.passive_pct } -Minimum).Minimum } else { 0 }),
-        $(if ($r[0].PSObject.Properties['throttle']) { ($r | Measure-Object { [double]$_.throttle } -Maximum).Maximum } else { 0 }),
-        $(if ($r[0].PSObject.Properties['gpu3d_pct']) { ($r | Measure-Object { [double]$_.gpu3d_pct } -Average).Average } else { 0 })
+        $(if ($r[0].PSObject.Properties['apu_c']) { ($r | Where-Object { $_.apu_c -ne '' } | Measure-Object apu_c -Maximum).Maximum } else { 0 }),
+        $(if ($r[0].PSObject.Properties['passive_pct']) { ($r | Where-Object { $_.passive_pct -ne '' } | Measure-Object passive_pct -Minimum).Minimum } else { 0 }),
+        $(if ($r[0].PSObject.Properties['throttle']) { ($r | Where-Object { $_.throttle -ne '' } | Measure-Object throttle -Maximum).Maximum } else { 0 }),
+        $(if ($r[0].PSObject.Properties['gpu3d_pct']) { ($r | Where-Object { $_.gpu3d_pct -ne '' } | Measure-Object gpu3d_pct -Average).Average } else { 0 })
     Add-Content "$md\mem_results.txt" $line; $line
 }
 "route-bench exit: $code"
