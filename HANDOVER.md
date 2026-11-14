@@ -78,6 +78,23 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   Ally), pipeline caches + precompile. The user's options: game's own upscaler at 67%, FG 2x, Anti-Lag 2 OFF.
 - Found: Windows desktop is 1280x720 @120 Hz; with handheld_profile=1 Longshot ignores output_res and the game presents
   2560x1440 (4x the screen's pixels), then Lanczos-scales it to 720p.
+- Phase 2 paste (user, overnight): smoothness first (steady frame time, no hitches; a locked 40-60 with good pacing beats
+  a stuttering 60), 720p internal + FSR 3.1 to 1080p with sharpening preferred; research online first; report p99 frame
+  time before/after each change. Research notes: `research-2026-11-14.md` (top lead: readback waits,
+  RX_VK_READBACK_LATE=newest; Reddit blocks automated reading).
+- **The box changed under the benchmarks.** A reboot at 23:34 (2026-11-13) came back with the UMA frame buffer at 8 GB
+  (the user's Phase 1 paste: "UMA 8 GB"): game logs say 6,555 MB of video memory / 11,985 MB Windows RAM before, 7,936 MB /
+  7,889 MB after (commit limit 59.7 -> 55.7 GB). Every result before 2026-11-14 is at 4 GB UMA; don't compare across.
+  The change also invalidated the AMD driver's Vulkan cache (AMD\VkCache restarted at 00:06, now one 1,280 MB .parc), so
+  the q3-profile queue's p_base (00:06-02:06) spent all three 40-min start limits re-preparing pipelines: each start
+  reached the title at 60 fps and froze on loading the level (presentation thread silent, other threads alive). The
+  precompile finished at 02:07 (`cache\longshot_pipelines.bin.built`); p_r50 then loaded normally.
+- Bench tools added: `bench\frames_report.py <tag>` (p50/p95/p99/p99.9, jitter, hitches from the RX_VK_FRAME_LOG CSVs,
+  over the window route-bench saves), sampler columns for APU temperature / passive limit / throttle reasons / GPU 3D %.
+- Longshot changes (not built yet; patches in `patches\`): `HOS_FPS_LOCK=<20-59>` holds the game's limiter (+0xfc) below
+  60 for an even cadence (30 + 2x FG = steady 60 shown); Anti-Lag 2 logs how long the driver holds each frame at its input
+  stage (every 600 frames; RX_VK_ANTILAG_LOG=0 off). Both need builds: host (build-longshot.ps1, ~9 min) and engine
+  (build-vk.ps1).
 
 ## Next step (waiting on the user's yes: "Start hunting down the slowdown's cause?")
 Asked again 2026-11-13 ~23:50; the user said "Not now". Don't start until they say yes.
@@ -94,6 +111,8 @@ as fast.
 - In Windows PowerShell `lp` is an alias for Out-Printer (aliases win over functions): don't name a function LP.
 - Longshot 76699aad moved logs to `<game>\logs\` and caches to `<game>\cache\`; route-bench-ls.ps1 reads the newer log.
 - The AMD driver's shader cache is shared and evicts: a folder not run for hours can re-prepare pipelines for 25+ min.
+  A BIOS UMA change (or driver update) throws it away entirely: the next Longshot starts take 2 h+ in all (40-min limit
+  per start was not enough; three starts in a row got there).
 - Write scripts with a file tool, not bash heredocs (backslashes get eaten).
 - Robocopy exit 1 = files copied (success). `gh` isn't installed.
 - The user's options keep output_res=2048x1152 (Longshot's new-install default is now 2560x1440).

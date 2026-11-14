@@ -1,0 +1,22 @@
+diff --git a/host/nn_vi.c b/host/nn_vi.c
+index 6534797f..92bc9789 100644
+--- a/host/nn_vi.c
++++ b/host/nn_vi.c
+@@ -403,6 +403,17 @@ static void realtime_step(int64_t now) {
+             clock_before = game_clock, at_before = now;
+         }
+         if (target && *limit > 0 && *limit < target) *limit = target;
++        /* (Ally) HOS_FPS_LOCK=<20-59>: the limiter held at that rate, below the console's 60: an even cadence (30 with 2x frame
++           generation is a steady 60 shown) instead of a rate that swings with the scene. The game's own path for frames slower
++           than 60: its limiter sleeps to 1 / +0xfc, and the real-time step below follows the frames' time. Only with the cap at
++           60 (a cap above 60 raises the limiter itself) */
++        static int lock = -1;
++        if (lock < 0) {
++            lock = getenv("HOS_FPS_LOCK") ? atoi(getenv("HOS_FPS_LOCK")) : 0;
++            if (lock < 20 || lock > 59) lock = 0;
++            if (lock) hos_log("vi: frame rate locked at %d (HOS_FPS_LOCK): the game's limiter held there", lock);
++        }
++        if (lock && fps_max() <= 60 && *limit > 0) *limit = lock;
+         /* (the cap raises the limiter; it comes down in play: the game's own value back, the one it had when the cap raised it,
+            unless the game has written its own since) */
+         static int raised, game_limit;

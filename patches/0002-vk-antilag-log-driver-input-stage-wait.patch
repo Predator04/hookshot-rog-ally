@@ -1,0 +1,36 @@
+diff --git a/gpu/vk/vk_antilag.cpp b/gpu/vk/vk_antilag.cpp
+index 69dda25a..a1b5ad3e 100644
+--- a/gpu/vk/vk_antilag.cpp
++++ b/gpu/vk/vk_antilag.cpp
+@@ -15,6 +15,7 @@
+ // renders on its presentation thread, and the wait holds the presentation thread, which the main thread waits for.
+ #include "vk_antilag.h"
+ 
++#include <chrono>
+ #include <cstdlib>
+ #include <cstring>
+ #include <mutex>
+@@ -131,7 +132,23 @@ void antilag_input() {
+     std::lock_guard lk(a.mu);
+     if (!on()) return;
+     a.frame++;
++    // (Ally) how long the driver holds the frame at its input stage, in the log every 600 frames: Anti-Lag 2 at work is a wait
++    // here whenever the GPU is the frame's limit (none when the CPU is: nothing queues up for it to take out), and a driver
++    // that ignores the stage never waits. RX_VK_ANTILAG_LOG=0: not counted
++    static const bool counted = !getenv("RX_VK_ANTILAG_LOG") || atoi(getenv("RX_VK_ANTILAG_LOG")) != 0;
++    const auto t0 = std::chrono::steady_clock::now();
+     stage(VK_ANTI_LAG_STAGE_INPUT_AMD, a.frame);   // (the driver's wait, when it wants one)
++    if (counted) {
++        static double sum_ms = 0, max_ms = 0;
++        static int n = 0, held = 0;
++        const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
++        sum_ms += ms, max_ms = ms > max_ms ? ms : max_ms, held += ms > 0.2, n++;
++        if (n == 600) {
++            logf("vk: AMD Anti-Lag 2: the driver held %d of the last 600 frames at their input stage (over 0.2 ms), %.2f ms a frame "
++                 "on average, longest %.2f ms", held, sum_ms / n, max_ms);
++            sum_ms = max_ms = 0, n = held = 0;
++        }
++    }
+     a.frame_marked = true;
+ }
+ 

@@ -145,6 +145,8 @@ foreach ($spot in $Spots) {
             $whole += , $all[$m[1]..([Math]::Max($m[1], $m[2] - 1))]
         }
         $st = Stats ($whole | ForEach-Object { $_ }) $marks[0][3] $marks[-1][4] $csv
+        # (the measured window, for frames_report.py: p99 / p99.9 frame time and hitches over the same frames)
+        Set-Content "$s\window_${Tag}_$spot.txt" ("{0:F3} {1:F3}" -f $marks[0][3], $marks[-1][4]) -Encoding ascii
         # (the whole spot from the first view's start to the last's end includes the camera moves: hitches and 1% low over that)
         $line = "{0} [{1}] {2}: start {3:F0} s | game fps {4:N1} | shown {5:N1} (1% low {6:N1}) | GPU {7:N2} ms | draws {8:N0} | passes {9:N0} | >=50ms {10} >=100ms {11} | views: {12} | alive={13} {14}{15}  env={16}" -f (Get-Date -Format HH:mm), $Tag, $spot, $startS, $st.fps, $st.shown, $st.low, $st.gpu, $st.draws, $st.passes, $st.h50, $st.h100, ($per -join '; '), $alive, $(if ($battery) { 'ON BATTERY: not comparable ' } else { '' }), $lost, (Split-Path $EnvFile -Leaf)
         Add-Content "$s\route_results.txt" $line; $line

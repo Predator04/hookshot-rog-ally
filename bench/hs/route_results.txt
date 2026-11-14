@@ -17,3 +17,7 @@
 21:47 [ls2_on2] HyruleField: start 72 s | game fps 29.5 | shown 56.7 (1% low 25.1) | GPU 22.55 ms | draws 2,043 | passes 188 | >=50ms 39 >=100ms 18 | views: 1_loaded 24.3 ms 28 fps; 2_left 21.9 ms 31 fps; 3_right 23.6 ms 26 fps; 4_half_left 20.9 ms 32 fps | alive=True   env=env_longshot_ally.txt
 21:50 [ls2_on2] Town: start 76 s | game fps 33.6 | shown 58.7 (1% low 28.6) | GPU 19.13 ms | draws 1,407 | passes 183 | >=50ms 25 >=100ms 10 | views: 1_loaded 13.8 ms 42 fps; 2_left 21.9 ms 27 fps; 3_right 31.3 ms 21 fps; 4_half_left 16.9 ms 35 fps | alive=True   env=env_longshot_ally.txt
 21:51 [ls2_on2] ROUTE (3 spots): game fps 32.4 | 1% low 26.1 | GPU 20.25 ms | draws 1,669  env=env_longshot_ally.txt
+00:46 [p_base] Kokiri START TIMEOUT after 40 min  env=env_pt.txt
+01:26 [p_base] HyruleField START TIMEOUT after 40 min  env=env_pt.txt
+02:06 [p_base] Town START TIMEOUT after 40 min  env=env_pt.txt
+02:11 [p_r50] Kokiri: start 161 s | game fps 30.4 | shown 58.5 (1% low 17.3) | GPU 18.74 ms | draws 2,033 | passes 193 | >=50ms 57 >=100ms 34 | views: 1_loaded 23.3 ms 24 fps; 2_left 16.8 ms 34 fps; 3_right 17.0 ms 32 fps; 4_half_left 19.7 ms 29 fps | alive=True   env=env_pt.txt
