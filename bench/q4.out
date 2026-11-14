@@ -1,0 +1,2 @@
+﻿02:25 queue q4 start: 10 runs
+02:25 ldc_h env=env_ldc.txt options+=[] spots=HyruleField

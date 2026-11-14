@@ -112,6 +112,9 @@ foreach ($spot in $Spots) {
             if ((Get-Date) -gt $deadline) { $failed = "START TIMEOUT after $StartMaxMin min"; break }
             if (-not (Get-Process -Id $p.Id -ErrorAction SilentlyContinue)) { $failed = 'GAME EXITED during start-up'; break }
             $at = Last
+            # (a submit the driver refused, VK_ERROR_OUT_OF_DEVICE_MEMORY: its work never runs and the game's render thread waits
+            # for it for good, seen at 8 GB UMA where the GPU's shared memory is 3.9 GB. Give up at once, not after the start limit)
+            if (Select-String -Path (GameLog) -Pattern 'vk: submit \d+ failed \(-2\)' -Quiet -ErrorAction SilentlyContinue) { Start-Sleep 20; $failed = 'SUBMIT FAILED (-2: out of device memory) during start-up'; break }
             if ($at[1] -gt 400) { $loaded = $true; break }
             if ($at[0] -gt 0) { Add-Content $in '0:A' -Encoding ascii }   # (presenting: the intro, the title or the file select)
             if ($at[0] -gt 12000) { $failed = 'LOAD FAILED'; break }      # (well past the intro and still no play)
@@ -138,6 +141,8 @@ foreach ($spot in $Spots) {
         Copy-Item (GameLog) "$s\log_route_${Tag}_$spot.txt" -Force
         $all = @(Get-Content "$s\log_route_${Tag}_$spot.txt")
         $lost = ($all | Select-String 'device lost|DEVICE_LOST|FATAL' | Select-Object -First 1).Line
+        $oom = @($all | Select-String 'vk: submit \d+ failed \(-').Count
+        if ($oom) { $lost = "SUBMITS FAILED: $oom $lost" }
         $per = @(); $whole = @()
         foreach ($m in $marks) {
             $st = Stats ($all[$m[1]..([Math]::Max($m[1], $m[2] - 1))]) $m[3] $m[4] $csv

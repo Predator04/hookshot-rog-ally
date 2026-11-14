@@ -1,0 +1,3 @@
+time,pid,private_mb,ws_mb,commit_gb,limit_gb,avail_mb,gpu_shared_mb,gpu_ded_mb,cpu_perf_pct,page_reads_s,apu_c,passive_pct,throttle,gpu3d_pct
+2026-11-14T02:25:58.7367935-08:00,0,0,0,10.59,55.70,2555,0,0,127,3862,79.0,100,0,0
+2026-11-14T02:26:06.9148017-08:00,4764,1505,1505,11.91,55.70,1654,88,147,114,4105,80.0,100,0,6

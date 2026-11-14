@@ -1,0 +1,52 @@
+﻿Source:  C:\Users\Admin\Desktop\Zelda Ocrina\longshot (longshot-ally-cf605c85-dirty)
+Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+Game:    C:\Users\Admin\Games\Hookshot
+Out:     C:\Users\Admin\Games\Longshot-Ally
+
+== 02:21 Preparing the working tools folder
+
+== 02:21 Building
+  zstd.c              2 MB       0s  (0s)
+@@progress 0.999
+@@file zstd.c 0.0 cached
+  nn_vi.c             0 MB       1s  (1s)
+@@progress 0.999
+@@file nn_vi.c 0.9 new
+@@eta 5
+  hos_main.c          0 MB       1s  (1s)
+@@progress 1.000
+@@file hos_main.c 1.0 new
+@@eta 5
+  vk_antilag.cpp      0 MB       9s  (9s)
+@@progress 1.000
+@@file vk_antilag.cpp 8.8 new
+@@eta 5
+  vk_menu.cpp         0 MB      13s  (14s)
+@@progress 1.000
+@@file vk_menu.cpp 13.4 new
+@@eta 0
+compiled in 14s, 0 failed
+linked C:\Users\Admin\AppData\Local\LongshotBuilder-ally\work\sa\build\longshot.exe: 448 MB (7s)
+linked C:\Users\Admin\AppData\Local\LongshotBuilder-ally\work\sa\build\longshot_vk.dll: 12 MB (1s)
+@@stage finish Putting the game folder together
+the shader list is the one the last build made from the same files: not made again
+prompts: unchanged, kept
+the shipped pipeline state list: 42072 pipelines
+where the time went:
+  checks                                  4 s
+  read                                  175 s
+  lift                                    2 s
+  compile                                33 s
+    planning                             12 s
+    compiling                            14 s
+    linking longshot.exe                  7 s
+    linking longshot_vk.dll               1 s
+  finish                                  4 s
+the build took 0:03:38, compiled in 0:00:33 (the last one 0:09:04)
+@@times 218 33 544
+the shaders were not prepared now ("Prepare shaders now" is unticked): the game prepares them at its first start
+@@done C:\Users\Admin\Games\Longshot-Ally
+built in 4 min
+
+== 02:25 Ally settings
+Done: C:\Users\Admin\Games\Longshot-Ally (longshot-ally-cf605c85-dirty)

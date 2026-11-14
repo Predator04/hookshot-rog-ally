@@ -89,6 +89,16 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   the q3-profile queue's p_base (00:06-02:06) spent all three 40-min start limits re-preparing pipelines: each start
   reached the title at 60 fps and froze on loading the level (presentation thread silent, other threads alive). The
   precompile finished at 02:07 (`cache\longshot_pipelines.bin.built`); p_r50 then loaded normally.
+- **Root cause of the level-load freezes at 8 GB UMA (02:20):** `vk: submit N failed (-2)` = VK_ERROR_OUT_OF_DEVICE_MEMORY.
+  dxdiag: Dedicated 8,102 MB, **Shared 3,944 MB** (half of Windows' 7.9 GB). Longshot imports the game's memory pools as host
+  memory (shared segment: imports ~2.1 GB at the freeze + staging arenas + capture buffers + driver) and peaks at ~3.8 GB
+  shared ("GPU shared max" in mem_results), so the Hyrule Field / Town loads hit the limit: every one tonight (p_base
+  Hyrule 8 failed submits, Town 6, p_r50 Hyrule 3+), no Kokiri load. The refused submit's work never runs; the game's
+  render thread "OptimizeChangeBanc" (priority 27) then loops in guest f_805aeea0 at 100% CPU waiting for it, holding a
+  virtual core (thread sampled with scratchpad threadpeek.ps1 + longshot.map). At 4 GB UMA the shared limit was ~6 GB and
+  peak shared 4.35 GB: no freeze in any earlier run. **Recommendation: UMA back to 4 GB** (BIOS / Armoury Crate: the
+  user's setting, never change it ourselves). `RX_VK_MIRROR=1` would not help (mirrors add a device-local copy; the
+  imports stay). route-bench-ls.ps1 now gives up a start at the first failed submit and flags them in the result line.
 - Bench tools added: `bench\frames_report.py <tag>` (p50/p95/p99/p99.9, jitter, hitches from the RX_VK_FRAME_LOG CSVs,
   over the window route-bench saves), sampler columns for APU temperature / passive limit / throttle reasons / GPU 3D %.
 - Longshot changes (not built yet; patches in `patches\`): `HOS_FPS_LOCK=<20-59>` holds the game's limiter (+0xfc) below
@@ -114,5 +124,8 @@ as fast.
   A BIOS UMA change (or driver update) throws it away entirely: the next Longshot starts take 2 h+ in all (40-min limit
   per start was not enough; three starts in a row got there).
 - Write scripts with a file tool, not bash heredocs (backslashes get eaten).
+- Stopping a bench queue with TaskStop skips the scripts' finally blocks: the spot's save stays in `user\save` with the
+  game's own in `user\save.routebak`, and the bench options stay. Put both back by hand (Restore in route-bench-ls.ps1;
+  ls-play-options.ini) - done 02:30 on 2026-11-14, backup in bench\ls-backup-pre-lock.
 - Robocopy exit 1 = files copied (success). `gh` isn't installed.
 - The user's options keep output_res=2048x1152 (Longshot's new-install default is now 2560x1440).
