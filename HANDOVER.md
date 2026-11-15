@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-14, 17:30; UMA back at 4 GB since 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-14, 20:15; UMA back at 4 GB since 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -63,6 +63,18 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot env_ldc_rbl, driver cache cold (ls4_a / ls4_b) | 35.6 / 38.0 | 31.7 / 34.8 | 33.8 / 34.0 | 33.7 / 35.6 | 34.9 / 35.7 | 17.8-23.0 | 173-188 |
 | **Longshot env_ldc_rbl, driver cache warm (ls4_c)** | 39.5 | 34.2 | 36.4 | **36.7** | 38.3 | 17.0-21.1 | 172-183 |
 | Longshot start mode, no LOAD=create (ls4_nold) | 38.1 | 34.2 | 35.4 | 35.9 | 42.6 | 17.9-21.1 | 174-188 |
+| **Evening q12 (same session, interleaved):** | | | | | | | |
+| **Longshot 6c9edffe (Longshot-Ally-next), env as is (n5_a / n5_b)** | 41.1 / 40.7 | 34.3 / 36.4 | 35.3 / 36.7 | **36.9 / 37.9** | **47.1 / 48.1** | 16.3-20.4 | 175-186 |
+| Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
+| 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
+| 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+Update 2026-11-14 20:15 (q12, details: "Evening" below): **Longshot 6c9edffe in `Games\Longshot-Ally-next` is the Longshot
+to play**: same game fps as cf605c85 (route 37.4 vs 37.3), but Kokiri 0-1 frames over 100 ms per run against 17-20, Hyrule
+7-9 against 14, route 1% low 47.6 against 41.0; that is as smooth as the old build was this morning (views p99 17-24 ms vs
+17.5-21.9, Kokiri long hitches 0-1 vs 10-12) at ~7% lower game fps (different sessions). Keep Threaded rendering on Auto
+(off on the Ally): the render thread needs RX_VK_MIRROR=1, and the mirrors cost what it gains. Its save is a copy of
+Longshot-Ally's (13:12); its first start (shaders) is done.
 
 Recommendation to the user (2026-11-14 12:30, at 4 GB UMA):
 1. **Keep UMA at 4 GB.** 0 failed submits in 24 loads (both builds, both Longshot start modes), GPU shared max 3.1-4.3 GB
@@ -271,7 +283,7 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
 - `Games\Longshot-Ally-next` is kept (same speed; newer fixes, e.g. Gossip Stones whole under frame generation #59): the
   user decides whether to play from it or delete it (it was made this session; delete only with their OK).
 
-## Evening 2026-11-14: Longshot 6c9edffe and the render thread (q12, stopped: the Ally was unplugged at 18:19)
+## Evening 2026-11-14: Longshot 6c9edffe and the render thread (q12; stopped 18:19 when unplugged, resumed 19:03-20:08)
 - User: "Is there a new update that maybe we could test out?" then "Yes, start now". Upstream had 20 more commits: **#588 a
   render thread** for the replay (Threaded rendering row, Auto: on from 12 logical processors; upstream -4 to -6 % frame time
   on a 3090/7900X; merged untested as pushed), **#599 the play profile over the compute fallback** (the Ally's path; upstream
@@ -290,6 +302,18 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
 - 18:19: "rt5_a Kokiri NOT STARTED: on battery" (Kernel-Power 105 power source change; 98%, discharging); route-bench stopped
   before the spot (exit 3): nothing ran on battery; options and saves back in both folders (checked); keep-awake stopped.
   Remaining: rt5_a, mir5_a, cur5_a, rt5_b, cur5_b, mir5_b, n5_b (~70 min, the Ally plugged in; edit ls-queue5.ps1's list).
+- User 19:0x: "Yes, it's plugged in" (AC on, charging 98%, screen back on 19:01). Resumed with `ls-queue5.ps1 -Resume`
+  (n5_b first, then rt5_a, mir5_a, cur5_a, rt5_b, cur5_b, mir5_b; 19:03-20:08, q12.out). 0 failed submits, no device lost.
+- **Results (route game fps / 1% low, two runs each):** new as is 36.9, 37.9 / 47.1, 48.1; current 37.3, 37.3 / 40.2, 41.9;
+  render thread (mirrors on) 37.5, 37.6 / 40.6, 44.5; mirrors only 36.7, 37.2 / 45.2, 45.9. Per spot, views window
+  (uma_report.py): Kokiri frames over 100 ms new 0 / 1, rt 0 / 0, mir 0 / 0, **current 17 / 20**; p99 17.2-21.6 vs 26.9-27.1 ms;
+  Hyrule new 34.3 / 36.4 fps (9 / 7 long frames), current 35.2 / 35.1 (14 / 14), rt 34.0 / 33.9 (19 / 16), mir 32.9 / 32.3
+  (17 / 16); Town all 35.3-39.7, 11-17 long frames.
+- **Reading:** 6c9edffe is smoother than cf605c85 at the same speed, mostly in Kokiri (all 7 of its Kokiri runs: 0-1 frames
+  over 100 ms). Likely the +22,987 shipped pipelines (#563: 32,841 noted pipelines warmed vs ~24,500) and/or the profile over
+  the compute fallback (#599); not separated. **Render thread:** with it, Kokiri and Town equal or a little faster, Hyrule
+  slower with more long frames, 1% low lower; the mirrors it needs cost ~2-3 ms of GPU a frame (Kokiri 16.3-16.4 -> 18.5-18.7 ms, Hyrule 19.3-20.4 -> 22.7-22.9) and
+  ~0.5-3 fps in Hyrule. Net: nothing to gain on the Ally; Auto's off is right here.
 
 ## Next steps (each needs the user)
 - With the user watching the screen: `RX_VK_READBACK_LATE=newest,3980` (and maybe `,1b580`) for white exposure flashes;

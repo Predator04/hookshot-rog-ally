@@ -6,7 +6,7 @@
 #   mir5 new build, + RX_VK_MIRROR=1, RX_VK_ASYNC=0, RX_VK_RECORDER=off: the mirrors' own cost
 #   cur5 the current build (Games\Longshot-Ally, cf605c85), env_ldc_rbl.txt
 #   powershell -File bench\ls-queue5.ps1 -StopAt 21:30
-param([string]$StopAt = '21:30')
+param([string]$StopAt = '21:30', [switch]$Resume)
 $ErrorActionPreference = 'Continue'
 $S = Split-Path $MyInvocation.MyCommand.Path -Parent
 $CUR = 'C:\Users\Admin\Games\Longshot-Ally'
@@ -30,15 +30,20 @@ function Run($tag, $g, $envf, [int]$maxmin = 15) {
     & "$S\bench-route-ls.ps1" -Tag $tag -Game $g -EnvFile "$S\$envf" -Spots @('Kokiri', 'HyruleField', 'Town') -StartMaxMin $maxmin
     if ($LASTEXITCODE -eq 2 -or $LASTEXITCODE -eq 3) { "stopped at ${tag}: $LASTEXITCODE"; Restore; exit $LASTEXITCODE }
 }
-"$(Get-Date -Format HH:mm) queue q12 (render thread / mirrors / new vs current, 4 GB UMA) start"
+"$(Get-Date -Format HH:mm) queue q12 (render thread / mirrors / new vs current, 4 GB UMA) start$(if ($Resume) { ': resumed after the unplug at 18:19' })"
+# (-Resume, 19:0x: the first run stopped at rt5_a, the Ally unplugged; next5_w and n5_a were done, n5_b goes first instead)
+if (-not $Resume) {
 Run 'next5_w' $NEXT 'env_ldc_rbl.txt' 90
 Run 'n5_a'    $NEXT 'env_ldc_rbl.txt'
+} else {
+Run 'n5_b'    $NEXT 'env_ldc_rbl.txt'
+}
 Run 'rt5_a'   $NEXT 'env_ldc_rbl_mirror_rt.txt'
 Run 'mir5_a'  $NEXT 'env_ldc_rbl_mirror.txt'
 Run 'cur5_a'  $CUR  'env_ldc_rbl.txt'
 Run 'rt5_b'   $NEXT 'env_ldc_rbl_mirror_rt.txt'
 Run 'cur5_b'  $CUR  'env_ldc_rbl.txt'
 Run 'mir5_b'  $NEXT 'env_ldc_rbl_mirror.txt'
-Run 'n5_b'    $NEXT 'env_ldc_rbl.txt'
+if (-not $Resume) { Run 'n5_b' $NEXT 'env_ldc_rbl.txt' }
 Restore
 "$(Get-Date -Format HH:mm) queue q12 done"
