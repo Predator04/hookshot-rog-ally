@@ -8,10 +8,13 @@
 #   powershell -File bench\ls-queue6.ps1 -StopAt 23:30
 param([string]$StopAt = '23:30', [string]$Name = 'q13', [int]$WalkS = 0, [string[]]$Runs = @(
     's6_a|next|env_ldc_rbl.txt', 'l6_a|next|env_ldc_rbl_lock30.txt', 'f6_a|next|env_ldc_rbl_lock30_fifo.txt',
-    'l6_b|next|env_ldc_rbl_lock30.txt', 'f6_b|next|env_ldc_rbl_lock30_fifo.txt', 's6_b|next|env_ldc_rbl.txt'))
+    'l6_b|next|env_ldc_rbl_lock30.txt', 'f6_b|next|env_ldc_rbl_lock30_fifo.txt', 's6_b|next|env_ldc_rbl.txt'),
+    # (the game folders a run's second field names: the Ally's by default; another machine passes its own, e.g.
+    # -Dirs @{ g = 'C:\Users\Admin\Games\Longshot-4090' } with runs 'tag|g|env|spots', called with & in-process)
+    [hashtable]$Dirs = @{ cur = 'C:\Users\Admin\Games\Longshot-Ally'; next = 'C:\Users\Admin\Games\Longshot-Ally-next' })
 $ErrorActionPreference = 'Continue'
 $S = Split-Path $MyInvocation.MyCommand.Path -Parent
-$dirs = @{ cur = 'C:\Users\Admin\Games\Longshot-Ally'; next = 'C:\Users\Admin\Games\Longshot-Ally-next' }
+$dirs = $Dirs
 $ini0 = "$S\b4-before\hookshot_options.ini"
 $benches = @($dirs.Values)
 $stop = [datetime]::ParseExact($StopAt, 'HH:mm', $null)

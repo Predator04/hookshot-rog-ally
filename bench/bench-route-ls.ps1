@@ -1,11 +1,14 @@
-param([string]$Tag, [string]$Game, [string]$EnvFile, [string[]]$Spots = @('Kokiri', 'HyruleField', 'Town'), [int]$StartMaxMin = 75, [int]$WalkS = 0)
+param([string]$Tag, [string]$Game, [string]$EnvFile, [string[]]$Spots = @('Kokiri', 'HyruleField', 'Town'), [int]$StartMaxMin = 75, [int]$WalkS = 0,
+      [string]$Saves = '')
 # One route-bench run (called in-process, as the task asks) with a memory sampler beside it:
 # hookshot's private bytes and working set, system commit / limit, available RAM, the game's GPU shared + dedicated memory.
 # Output: scratchpad\mem\mem_<Tag>.csv, and a summary line per spot appended to scratchpad\mem\mem_results.txt.
 $ErrorActionPreference = 'Continue'
 $sp = Split-Path $MyInvocation.MyCommand.Path -Parent
 $rb = "$sp\route-bench-ls.ps1"
-$saves = 'C:\Users\Admin\Desktop\Zelda Ocrina\hookshot-rog-ally\ally\tools\hs\route-saves'
+# (the spot saves: -Saves, else bench\hs\route-saves where a machine keeps them (gitignored: saves never go in the repo), else
+# the Ally's shared checkout)
+$saves = if ($Saves) { $Saves } elseif (Test-Path "$sp\hs\route-saves") { "$sp\hs\route-saves" } else { 'C:\Users\Admin\Desktop\Zelda Ocrina\hookshot-rog-ally\ally\tools\hs\route-saves' }
 $md = "$sp\mem"; New-Item -ItemType Directory -Force $md | Out-Null
 $csv = "$md\mem_$Tag.csv"
 if (Get-Process hookshot, longshot -ErrorAction SilentlyContinue) { "ABORT: a game is running (the user may be playing)"; exit 2 }

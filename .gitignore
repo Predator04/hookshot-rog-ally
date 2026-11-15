@@ -13,3 +13,7 @@ bench/hs/route_input.txt
 bench/hs/shots/
 bench/hs/save*/
 __pycache__/
+bench/hs/route-saves/
+bench/hs/flash_*/
+bench/hs/route_*/
+bench/hs/user/
