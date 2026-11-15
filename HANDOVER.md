@@ -22,7 +22,7 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | This folder (tools, results, notes) | `C:\Users\Admin\Desktop\LongShot Rog Ally` (`bench\` = scripts; `history-notes.md` = the full log of the work) |
 | Its GitHub copy (user asked 2026-11-14 00:1x: "update our github with all the information") | branch `longshot-ally` of https://github.com/Predator04/hookshot-rog-ally (this folder is that git repo, remote `fork`; .gitignore keeps saves, logs, dlls out). Commit + push after each milestone |
 | Longshot code changes (patches) | `patches\` here (the clone itself is never pushed) |
-| Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 414f56e2 since 2026-11-14 12:35, + our 2 patches uncommitted; push disabled) |
+| Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 6c9edffe since 2026-11-14 17:28 (414f56e2 at 12:35), + our 2 patches uncommitted; push disabled) |
 | Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
 | Newer Longshot, side by side | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-414f56e2-dirty, 2026-11-14 13:12; same speed as cf605c85; a copy of the user's save + options) |
 | User's current play build | `C:\Users\Admin\Games\Hookshot-Ally` (rog-ally-cb21687, Hookshot fork; don't touch) |
@@ -270,6 +270,26 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
 - Options and saves back in both Longshot folders after each queue (checked); keep-awake stopped.
 - `Games\Longshot-Ally-next` is kept (same speed; newer fixes, e.g. Gossip Stones whole under frame generation #59): the
   user decides whether to play from it or delete it (it was made this session; delete only with their OK).
+
+## Evening 2026-11-14: Longshot 6c9edffe and the render thread (q12, stopped: the Ally was unplugged at 18:19)
+- User: "Is there a new update that maybe we could test out?" then "Yes, start now". Upstream had 20 more commits: **#588 a
+  render thread** for the replay (Threaded rendering row, Auto: on from 12 logical processors; upstream -4 to -6 % frame time
+  on a 3090/7900X; merged untested as pushed), **#599 the play profile over the compute fallback** (the Ally's path; upstream
+  asks for an A/B on a GPU without mesh shaders), **#563 +22,987 shipped pipelines** from a tour of every map, actor and
+  cutscene. Clone fast-forwarded to 6c9edffe (our 2 patches kept); Longshot-Ally-next rebuilt in place (6 min; znver4,
+  profile read; build-next2.out).
+- **On the Ally, Auto leaves the render thread off:** "Threaded rendering: Auto: off (not safe on this run: the buffer pools
+  have no mirrors)": mirrors are off by default on integrated GPUs (vk_memory.cpp mirror_on), and Auto needs them. The
+  queue (`bench\ls-queue5.ps1`, q12.out) has the arms: n5 (as is), rt5 (+RX_VK_MIRROR=1: Auto turns on the render thread and
+  the recorder thread; env_ldc_rbl_mirror_rt.txt), mir5 (mirrors, threads forced off; env_ldc_rbl_mirror.txt), cur5 (cf605c85).
+- First start of 6c9edffe: 1,530 s (create mode warmed **32,841 noted + 9,687 compute pipelines**, 1,325 s; the new shipped list).
+- Results before the stop (next5_w, n5_a; no same-session current run yet, so speed only against earlier ones): route 36.5 /
+  36.9 game fps (cf605c85: 36.7-37.4 today), 1% low 41.1 / **47.1** (35-44 before). **Kokiri: p99 over the views 18.1 / 17.2 ms,
+  0 / 0 frames over 100 ms** (cf605c85: 31.8-31.9 ms, 20-23); Hyrule and Town as before. n5_a in play: 0 compiled, 0-23 draws
+  left out.
+- 18:19: "rt5_a Kokiri NOT STARTED: on battery" (Kernel-Power 105 power source change; 98%, discharging); route-bench stopped
+  before the spot (exit 3): nothing ran on battery; options and saves back in both folders (checked); keep-awake stopped.
+  Remaining: rt5_a, mir5_a, cur5_a, rt5_b, cur5_b, mir5_b, n5_b (~70 min, the Ally plugged in; edit ls-queue5.ps1's list).
 
 ## Next steps (each needs the user)
 - With the user watching the screen: `RX_VK_READBACK_LATE=newest,3980` (and maybe `,1b580`) for white exposure flashes;

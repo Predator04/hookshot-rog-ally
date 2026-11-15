@@ -1,0 +1,36 @@
+﻿17:36 queue q12 (render thread / mirrors / new vs current, 4 GB UMA) start
+17:36 next5_w in C:\Users\Admin\Games\Longshot-Ally-next env=env_ldc_rbl.txt spots=Kokiri,HyruleField,Town
+18:03 [next5_w] Kokiri: start 1530 s | game fps 40.7 | shown 82.8 (1% low 55.6) | GPU 16.68 ms | draws 1,407 | passes 176 | >=50ms 8 >=100ms 0 | views: 1_loaded 22.6 ms 31 fps; 2_left 14.6 ms 44 fps; 3_right 14.5 ms 44 fps; 4_half_left 16.2 ms 42 fps | alive=True   env=env_ldc_rbl.txt
+18:06 [next5_w] HyruleField: start 63 s | game fps 34.8 | shown 67.2 (1% low 45.4) | GPU 20.20 ms | draws 2,025 | passes 186 | >=50ms 28 >=100ms 11 | views: 1_loaded 20.7 ms 34 fps; 2_left 19.0 ms 37 fps; 3_right 22.3 ms 30 fps; 4_half_left 19.2 ms 38 fps | alive=True   env=env_ldc_rbl.txt
+18:09 [next5_w] Town: start 66 s | game fps 34.0 | shown 64.6 (1% low 22.3) | GPU 18.30 ms | draws 1,390 | passes 181 | >=50ms 49 >=100ms 14 | views: 1_loaded 15.9 ms 35 fps; 2_left 17.5 ms 37 fps; 3_right 26.1 ms 25 fps; 4_half_left 16.3 ms 36 fps | alive=True   env=env_ldc_rbl.txt
+18:10 [next5_w] ROUTE (3 spots): game fps 36.5 | 1% low 41.1 | GPU 18.40 ms | draws 1,607  env=env_ldc_rbl.txt
+18:10 [next5_w] Kokiri: private max 27,134 MB | working set max 7,808 MB | commit max 37.6 of 59.7 GB | available min 32 MB | GPU shared max 2,832 MB, dedicated max 3,289 MB | CPU perf mean 127% | disk page reads/s mean 542 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean 13% | 192 samples
+18:10 [next5_w] HyruleField: private max 17,668 MB | working set max 6,088 MB | commit max 28.3 of 59.7 GB | available min 207 MB | GPU shared max 3,434 MB, dedicated max 3,360 MB | CPU perf mean 103% | disk page reads/s mean 1,640 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean 67% | 21 samples
+18:10 [next5_w] Town: private max 174 MB | working set max 12 MB | commit max 29.3 of 59.7 GB | available min 259 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 116% | disk page reads/s mean 1,653 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 28 samples
+route-bench exit: 
+18:10 n5_a in C:\Users\Admin\Games\Longshot-Ally-next env=env_ldc_rbl.txt spots=Kokiri,HyruleField,Town
+18:12 [n5_a] Kokiri: start 60 s | game fps 41.1 | shown 83.1 (1% low 55.6) | GPU 16.34 ms | draws 1,415 | passes 176 | >=50ms 9 >=100ms 0 | views: 1_loaded 21.2 ms 34 fps; 2_left 14.6 ms 44 fps; 3_right 14.5 ms 44 fps; 4_half_left 16.1 ms 42 fps | alive=True   env=env_ldc_rbl.txt
+18:16 [n5_a] HyruleField: start 63 s | game fps 34.3 | shown 67.2 (1% low 45.8) | GPU 20.36 ms | draws 2,017 | passes 185 | >=50ms 31 >=100ms 9 | views: 1_loaded 21.5 ms 32 fps; 2_left 19.5 ms 36 fps; 3_right 22.0 ms 30 fps; 4_half_left 18.7 ms 38 fps | alive=True   env=env_ldc_rbl.txt
+18:19 [n5_a] Town: start 72 s | game fps 35.3 | shown 68.0 (1% low 40.0) | GPU 17.85 ms | draws 1,378 | passes 176 | >=50ms 27 >=100ms 14 | views: 1_loaded 15.4 ms 39 fps; 2_left 17.1 ms 36 fps; 3_right 26.0 ms 25 fps; 4_half_left 15.7 ms 37 fps | alive=True   env=env_ldc_rbl.txt
+18:19 [n5_a] ROUTE (3 spots): game fps 36.9 | 1% low 47.1 | GPU 18.18 ms | draws 1,603  env=env_ldc_rbl.txt
+18:19 [n5_a] Kokiri: private max 17,457 MB | working set max 6,265 MB | commit max 28.1 of 59.7 GB | available min 18 MB | GPU shared max 2,951 MB, dedicated max 3,289 MB | CPU perf mean 110% | disk page reads/s mean 1,319 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean 67% | 21 samples
+18:19 [n5_a] HyruleField: private max 17,552 MB | working set max 6,319 MB | commit max 28.1 of 59.7 GB | available min 350 MB | GPU shared max 3,309 MB, dedicated max 3,231 MB | CPU perf mean 102% | disk page reads/s mean 1,080 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean 61% | 21 samples
+18:19 [n5_a] Town: private max 18,592 MB | working set max 6,748 MB | commit max 29.2 of 59.7 GB | available min 412 MB | GPU shared max 3,673 MB, dedicated max 3,616 MB | CPU perf mean 116% | disk page reads/s mean 1,650 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean 61% | 22 samples
+route-bench exit: 
+18:19 rt5_a in C:\Users\Admin\Games\Longshot-Ally-next env=env_ldc_rbl_mirror_rt.txt spots=Kokiri,HyruleField,Town
+on battery: stopped
+route-bench exit: 3
+stopped at rt5_a: 3
+powershell.exe : Import-Csv : Could not find file 'C:\Users\Admin\Desktop\LongShot Rog Ally\bench\mem\mem_rt5_a.csv'.
+At line:1 char:414
++ ... ; exit 2 }; powershell.exe -NoProfile -ExecutionPolicy Bypass -File " ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Import-Csv : Co...mem_rt5_a.csv'.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+At C:\Users\Admin\Desktop\LongShot Rog Ally\bench\bench-route-ls.ps1:54 char:11
++ $rows = @(Import-Csv $csv | Where-Object { [int]$_.pid -ne 0 })
++           ~~~~~~~~~~~~~~~
+    + CategoryInfo          : OpenError: (:) [Import-Csv], FileNotFoundException
+    + FullyQualifiedErrorId : FileOpenFailure,Microsoft.PowerShell.Commands.ImportCsvCommand
+ 

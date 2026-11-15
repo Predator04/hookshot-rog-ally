@@ -1,0 +1,52 @@
+﻿Source:  C:\Users\Admin\Desktop\Zelda Ocrina\longshot (longshot-ally-6c9edffe-dirty)
+Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+Game:    C:\Users\Admin\Games\Hookshot
+Out:     C:\Users\Admin\Games\Longshot-Ally-next
+
+== 17:29 Preparing the working tools folder
+
+== 17:29 Building
+@@progress 0.999
+@@file vk_jobs.cpp 2.1 new
+@@eta 7
+  vk_temporal.cpp     0 MB       4s  (112s)
+@@progress 0.999
+@@file vk_temporal.cpp 3.5 new
+@@eta 7
+  verification_pass.cpp    0 MB       2s  (112s)
+@@progress 1.000
+@@file verification_pass.cpp 1.8 new
+@@eta 7
+  vk_replay.cpp       0 MB       7s  (113s)
+@@progress 1.000
+@@file vk_replay.cpp 6.6 new
+@@eta 4
+  vk_progcache.cpp    0 MB       3s  (115s)
+@@progress 1.000
+@@file vk_progcache.cpp 3.4 new
+@@eta 0
+compiled in 115s, 0 failed
+linked C:\Users\Admin\AppData\Local\LongshotBuilder-ally\work\sa\build\longshot.exe: 438 MB (5s)
+linked C:\Users\Admin\AppData\Local\LongshotBuilder-ally\work\sa\build\longshot_vk.dll: 13 MB (0s)
+@@stage finish Putting the game folder together
+the shader list is the one the last build made from the same files: not made again
+prompts: unchanged, kept
+the shipped pipeline state list: 63920 pipelines
+where the time went:
+  checks                                  4 s
+  read                                  218 s
+  lift                                    2 s
+  compile                               131 s
+    planning                             10 s
+    compiling                           115 s
+    linking longshot.exe                  5 s
+    linking longshot_vk.dll               0 s
+  finish                                  4 s
+the build took 0:05:59, compiled in 0:02:11 (the last one 0:35:08)
+@@times 359 131 2108
+the shaders were not prepared now ("Prepare shaders now" is unticked): the game prepares them at its first start
+@@done C:\Users\Admin\Games\Longshot-Ally-next
+built in 6 min
+
+== 17:35 Ally settings
+Done: C:\Users\Admin\Games\Longshot-Ally-next (longshot-ally-6c9edffe-dirty)
