@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-14, 20:15; UMA back at 4 GB since 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-15, 02:00; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -68,6 +68,11 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-15 02:00 (details: "Night" below): play `Games\Longshot-Ally-next` with its new longshot_env.txt.** With
+RX_VK_READBACK_LATE=newest,3980,9b040,1b580 Longshot runs ~39.5 game fps over the route (= the old build's 40.1; Kokiri
+walking ~48) with 0 one-frame flashes; with HOS_FPS_LOCK=30 (patch 0001, now really paced) it holds a steady 30 / 60 shown
+(97-100 % of frames within 15 % while walking). Delete the lock line for 75-97 shown fps instead.
 
 Update 2026-11-14 20:15 (q12, details: "Evening" below): **Longshot 6c9edffe in `Games\Longshot-Ally-next` is the Longshot
 to play**: same game fps as cf605c85 (route 37.4 vs 37.3), but Kokiri 0-1 frames over 100 ms per run against 17-20, Hyrule
@@ -360,17 +365,33 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
     1529 brighter ... cells 0,0-63,35") and a stall in Hyrule's views (issue 997, as the code comment warns). **fp rejected.**
     (A shot every present slows the game to ~25-27 fps, so timing-dependent glitches can be rarer there: rball's 0 is good
     evidence, not proof; the user should still watch for white flashes or popping objects.)
+- **q16 (00:51-01:56, q16-chain.ps1, q16.out):** rblk (rball + paced 30 lock), rb16 (rball), b16 (as is), two rounds, walks.
+  Route game fps: rblk 29.5 / 29.4, **rb16 39.5 / 38.9, b16 37.1 / 37.1**. Walks (uma_report.py --steady): **rblk 60.0 shown
+  at every spot, 97-100 % of frames within 15 % of 16.7 ms, sd 0.5-3.5 ms, p99 17.5-18.8 ms**; rb16 73-97 shown, 79-97 %;
+  b16 69-89 shown, 78-96 %.
+- **02:00: Games\Longshot-Ally-next\longshot_env.txt = bench\env_longshot_ally_next.txt** (old one: bench\next-env-before-
+  2026-11-15.txt): RX_VK_READBACK_LATE=newest,3980,9b040,1b580 + HOS_FPS_LOCK=30, each with an undo comment. Patch 0003's
+  switch stays off (in the dll, unused). All bench options/saves restored after every queue; keep-awake stopped at the end.
+- Clone state: 6c9edffe + uncommitted patches 0001 (paced lock), 0002 (anti-lag log), 0003 (fence first part switch), all
+  in patches\.
 
-## Next steps (each needs the user)
-- With the user watching the screen: `RX_VK_READBACK_LATE=newest,3980` (and maybe `,1b580`) for white exposure flashes;
-  they hold most of the remaining readback wait (s_ranges, 8 GB; not re-measured at 4 GB).
+## Next steps
+- The user plays -next and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none).
+- The remaining wait after the readback ranges: fence waits on whole scene submissions (e0dbf40c). The first-part mapping
+  (patch 0003) is +7 % more but flashes (issue 997). A safer middle: first part only for waits whose memory the game does not
+  reuse (needs code reading in vk_replay.cpp submit_recording / invalidate). Candidate for the 4090 laptop's help (builds).
+- Remaining long frames: the camera swings (a whole new view streamed: texture uploads + "memory sync capture" on the main
+  thread). RX_VK_UPLOAD_BUDGET_MS lower (e.g. 20) spreads uploads but risked ground flicker upstream: needs eyes.
+- Upstream issue worth posting (with the user's yes): readback/fence waits keep OoT's job threads polling on iGPUs without
+  mirrors (76bbe4aa only covers mirrored pages), with the poll counts and the flash counts above.
 - Post `issue-draft-uma8-submit-oom.md` upstream only with the user's OK. A second finding worth an upstream issue (draft
   `issue-draft-create-cold-driver-cache.md`, same rule): create mode does not rebuild its notes into an emptied driver cache.
 - The bisect of the CPU regression (below) is what would close the remaining ~8% to the old build: the upstream update and
   the recorder thread (afternoon) did not. Best run overnight (8-9 builds; the clone is now at 414f56e2, the range
   d7a7306..4dd972a is in its history).
 
-## Bisect (waiting on the user's yes: "Start hunting down the slowdown's cause?")
+## Bisect (2026-11-15: probably not needed any more: the cause was found by reading the range, see "Night": readback /
+## fence waits that hold one job thread while the others poll; RX_VK_READBACK_LATE ranges recovered the old build's speed)
 Asked again 2026-11-13 ~23:50; the user said "Not now". Don't start until they say yes.
 Bisect the CPU regression in the Longshot clone between the old build's base and Longshot's split: d7a7306..4dd972a (about
 362 commits; Longshot's history has them all). Signal: HOS_SLEEP_LOG count at lr 0x8009a478 or the vcores takes per 5 s in
