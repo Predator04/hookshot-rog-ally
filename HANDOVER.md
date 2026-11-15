@@ -24,7 +24,7 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot code changes (patches) | `patches\` here (the clone itself is never pushed) |
 | Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 6c9edffe since 2026-11-14 17:28 (414f56e2 at 12:35), + our 2 patches uncommitted; push disabled) |
 | Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
-| Newer Longshot, side by side | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-414f56e2-dirty, 2026-11-14 13:12; same speed as cf605c85; a copy of the user's save + options) |
+| Newer Longshot, side by side | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-6c9edffe-dirty since 2026-11-14 17:35; 414f56e2 before, same speed as cf605c85; a copy of the user's save + options) |
 | User's current play build | `C:\Users\Admin\Games\Hookshot-Ally` (rog-ally-cb21687, Hookshot fork; don't touch) |
 | Copy of the play build for A/B | `C:\Users\Admin\Games\Hookshot-Ally-ref` (34 GB; delete only with the user's OK) |
 | Game files the build reads (read only) | `C:\Users\Admin\Games\Hookshot` (romfs, .hookshot_exefs) |
