@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-14, 12:30; UMA back at 4 GB since 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-14, 17:30; UMA back at 4 GB since 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -22,8 +22,9 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | This folder (tools, results, notes) | `C:\Users\Admin\Desktop\LongShot Rog Ally` (`bench\` = scripts; `history-notes.md` = the full log of the work) |
 | Its GitHub copy (user asked 2026-11-14 00:1x: "update our github with all the information") | branch `longshot-ally` of https://github.com/Predator04/hookshot-rog-ally (this folder is that git repo, remote `fork`; .gitignore keeps saves, logs, dlls out). Commit + push after each milestone |
 | Longshot code changes (patches) | `patches\` here (the clone itself is never pushed) |
-| Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main cf605c85; push disabled) |
+| Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 414f56e2 since 2026-11-14 12:35, + our 2 patches uncommitted; push disabled) |
 | Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
+| Newer Longshot, side by side | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-414f56e2-dirty, 2026-11-14 13:12; same speed as cf605c85; a copy of the user's save + options) |
 | User's current play build | `C:\Users\Admin\Games\Hookshot-Ally` (rog-ally-cb21687, Hookshot fork; don't touch) |
 | Copy of the play build for A/B | `C:\Users\Admin\Games\Hookshot-Ally-ref` (34 GB; delete only with the user's OK) |
 | Game files the build reads (read only) | `C:\Users\Admin\Games\Hookshot` (romfs, .hookshot_exefs) |
@@ -245,12 +246,39 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
 - Options and saves: both bench folders' options equal ls-play-options.ini / ref-options.ini after the runs; no
   save.routebak left. Keep-awake (scratchpad keep-awake.ps1, 09:51-12:07) stopped.
 
+## Afternoon 2026-11-14: upstream update and the recorder thread (4 GB UMA, the user's OK for each)
+- User: "Do you think you could make it run better? Longshot." then "Yes, start now" (update + bench) and "Yes, test it"
+  (recorder thread).
+- **Upstream update, no gain on the Ally.** Clone fast-forwarded cf605c85 -> 414f56e2 (23 commits; our two opt-in patches
+  kept, no conflict). Built side by side into **`Games\Longshot-Ally-next`** (longshot-ally-414f56e2-dirty, 35 min: the game
+  built for this CPU "znver4" #524, the renderer with the shipped play profile #569; bench\build-next.out), the user's save
+  (14 files) and options copied in, longshot_env.txt = env_longshot_ally.txt. First start 3,105 s (translation + 24,450 noted
+  pipelines warmed: the stamp changed, so create mode warms by itself). q10 (`bench\ls-queue4.ps1`, q10.out), interleaved,
+  route game fps: next 35.2 / 35.1, current 34.8 / 35.5 (**35.15 both**); per spot within 0.5 fps; p99 alike. Both warm
+  (0 compiled in play, 0-25 draws left out). Upstream's 3-5% (play profile) was measured on desktops; not here. The
+  `1be60eae` reserved-core fix changes nothing on Windows without an affinity mask (log: "replays run on 0xc000" in both).
+- **Recorder thread (RX_VK_RECORDER=thread), no gain on the Ally.** Upstream docs/tested (11-13): +6% on a 6-core Ryzen
+  (Market), +13% on an 8-core 5700X3D, +15% with RX_VK_RECORDER_OWN=1; the Steam Deck profile turns it on. q11 (ls-queue.ps1
+  on Games\Longshot-Ally, q11.out; env_ldc_rbl_rec.txt / env_ldc_rbl_recown.txt), interleaved 16:33-17:19, route game fps:
+  rec 37.0 / 35.6 (36.3), rec+own 35.8 / 35.4 (35.6), **plain 37.4** (between them); 1% low 44.1 / 39.4, 38.0 / 40.8 vs 39.1.
+  The recorder was on ("recorder: 218645 packets run in 10.0 s ... spun idle 0.85 s"). Likely why: on the Ally the replay
+  thread is not what limits the frame (the game's job threads are), and the extra thread shares the APU's power with them.
+  Not kept.
+- **Time-of-day drift:** the same build and env ran 34.8-35.5 at 14:21-14:49 and 37.4 at 16:51 (CPU perf mean 106-113% vs
+  114-121% after the Ally sat idle 14:49-16:33). Only interleaved runs compare; numbers from different hours do not.
+- The user answered the recorder question at 16:33 (asked ~14:35); the test then ran 16:33-17:19 instead of ~14:50-15:40.
+- Options and saves back in both Longshot folders after each queue (checked); keep-awake stopped.
+- `Games\Longshot-Ally-next` is kept (same speed; newer fixes, e.g. Gossip Stones whole under frame generation #59): the
+  user decides whether to play from it or delete it (it was made this session; delete only with their OK).
+
 ## Next steps (each needs the user)
 - With the user watching the screen: `RX_VK_READBACK_LATE=newest,3980` (and maybe `,1b580`) for white exposure flashes;
   they hold most of the remaining readback wait (s_ranges, 8 GB; not re-measured at 4 GB).
 - Post `issue-draft-uma8-submit-oom.md` upstream only with the user's OK. A second finding worth an upstream issue (draft
   `issue-draft-create-cold-driver-cache.md`, same rule): create mode does not rebuild its notes into an emptied driver cache.
-- The bisect of the CPU regression (below) is what would close the remaining ~8% to the old build.
+- The bisect of the CPU regression (below) is what would close the remaining ~8% to the old build: the upstream update and
+  the recorder thread (afternoon) did not. Best run overnight (8-9 builds; the clone is now at 414f56e2, the range
+  d7a7306..4dd972a is in its history).
 
 ## Bisect (waiting on the user's yes: "Start hunting down the slowdown's cause?")
 Asked again 2026-11-13 ~23:50; the user said "Not now". Don't start until they say yes.

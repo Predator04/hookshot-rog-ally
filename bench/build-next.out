@@ -1,0 +1,53 @@
+﻿Source:  C:\Users\Admin\Desktop\Zelda Ocrina\longshot (longshot-ally-414f56e2-dirty)
+Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+Game:    C:\Users\Admin\Games\Hookshot
+Out:     C:\Users\Admin\Games\Longshot-Ally-next
+
+== 12:36 Preparing the working tools folder
+
+== 12:36 Building
+gsys_resource.Nin_Ounce_NVN2.release.sarc.zs                         49 programs
+Ndve-Nvn2-vid_seq5.dat.zs                                            22 programs
+Player.wbr.zs                                                         0 programs
+Effect (1433 particle sets)                                       17585 programs
+13 s
+38809 programs from 42856 stages
+by stages: [((0, 1), 33369), ((5,), 4128), ((1, 6, 7), 1180), ((1, 7), 132)]
+slots: [('slot 40, stage 1', 51785), ('slot 48, stage 5', 23162), ('slot 64, stage 6', 1825), ('slot 72, stage 7', 2015), ('slot 8, stage 0', 49770)]
+wrote C:\Users\Admin\Games\Longshot-Ally-next\longshot_shaders.bin 514 MB
+prompts: switch
+prompts: xbox
+prompts: ps4
+prompts: ps5
+prompts: steamdeck
+prompts: keyboard
+prompts: the Talk ring
+prompts: the size table lets the font have 55088 bytes
+prompts: regenerated (no stamp yet)
+the shipped pipeline state list: 42072 pipelines
+where the time went:
+  checks                                  5 s
+  read                                  365 s
+  lift                                  161 s
+    image and discovery                  37 s
+    coverage                             11 s
+    emit and write                       70 s
+    big chunks split                      8 s
+    patches                               8 s
+    output size and page-mark groups     18 s
+    runtime tables and standalone files (beside the edits)      0 s
+  compile                              1546 s
+    planning                             19 s
+    compiling                          1523 s
+    linking longshot.exe                  3 s
+    linking longshot_vk.dll               0 s
+  finish                                 32 s
+the build took 0:35:08, compiled in 0:25:46 (the last one 0:03:38)
+@@times 2108 1546 218
+the shaders were not prepared now ("Prepare shaders now" is unticked): the game prepares them at its first start
+@@done C:\Users\Admin\Games\Longshot-Ally-next
+built in 35 min
+
+== 13:12 Ally settings
+Wrote C:\Users\Admin\Games\Longshot-Ally-next\longshot_env.txt
+Done: C:\Users\Admin\Games\Longshot-Ally-next (longshot-ally-414f56e2-dirty)
