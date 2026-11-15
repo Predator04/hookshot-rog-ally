@@ -1,0 +1,129 @@
+diff --git a/gpu/vk/vk_replay.cpp b/gpu/vk/vk_replay.cpp
+index 9e875f82..94fa240d 100644
+--- a/gpu/vk/vk_replay.cpp
++++ b/gpu/vk/vk_replay.cpp
+@@ -87,6 +87,38 @@ uint64_t rec_seq = 0;                       // (the recordings submitted so far;
+ std::vector<uint64_t> rec_open_values;      // (the submissions finished in the recording being made; replay_mu)
+ std::mutex rec_map_mu;
+ std::map<uint64_t, uint64_t> value_rec;     // submission value (or a recording's own) -> the recording that finished it
++// (Ally test, patch 0004) RX_VK_FENCE_FIRST_PART=<sites>: which waits end at a submission's FIRST part (its first recording,
++// as before e0dbf40c) instead of its last: `rb` invalidate's readback wait (GPU results the CPU reads), `sync` a fence wait
++// (nvnSyncWait: wait()), `cap` a capture's write-back wait (vk_timeline_wait; mirrored pages only, so never with
++// RX_VK_MIRROR=0), comma separated; `1` all of them (patch 0003's switch). A first part is issue 997's risk on an iGPU
++// without mirrors: the game, let go, writes what the later parts still read in place (the HUD stretched, white grass,
++// whole-screen flashes). value_rec keeps the last part's recording for the other waits; value_rec_first the first's
++std::map<uint64_t, uint64_t> value_rec_first;   // (rec_map_mu; only filled while a site is on)
++enum : int { FP_RB = 1, FP_SYNC = 2, FP_CAP = 4 };
++int first_part_sites() {
++    static const int sites = [] {
++        const char* e = getenv("RX_VK_FENCE_FIRST_PART");
++        if (!e || !*e) return 0;
++        int v = 0;
++        if (!strcmp(e, "1")) {
++            v = FP_RB | FP_SYNC | FP_CAP;
++        } else {
++            for (const char* p = e; *p;) {
++                const char* q = p;
++                while (*q && *q != ',') q++;
++                const size_t n = (size_t)(q - p);
++                if (n == 2 && !strncmp(p, "rb", 2)) v |= FP_RB;
++                else if (n == 4 && !strncmp(p, "sync", 4)) v |= FP_SYNC;
++                else if (n == 3 && !strncmp(p, "cap", 3)) v |= FP_CAP;
++                p = *q ? q + 1 : q;
++            }
++        }
++        logf("vk: waits that end at a submission's first part (RX_VK_FENCE_FIRST_PART=%s):%s%s%s%s", e, v & FP_RB ? " readbacks" : "",
++             v & FP_SYNC ? " fences" : "", v & FP_CAP ? " captures" : "", v ? "" : " none");
++        return v;
++    }();
++    return sites;
++}
+ // (longshot) A submission is recorded in parts (maybe_split), and each part writes back, at its own end, the pages the GPU
+ // wrote in it (memory_end_submission). A CPU read of GPU results needs the part that writes its pages back, not the
+ // submission's last one: part (Recording::part) -> its number on the recordings' timeline, once it is submitted
+@@ -315,7 +347,7 @@ void wait_value(uint64_t v) {
+     wi.pValues = &v;
+     vkWaitSemaphores(dev.device, &wi, UINT64_MAX);
+ }
+-bool wait_recorded(uint64_t f, uint64_t timeout_ns, int* ok);
++bool wait_recorded(uint64_t f, uint64_t timeout_ns, int* ok, bool first = false);
+ } // namespace
+ uint64_t vk_timeline_completed() { return timeline ? completed() : 0; }
+ void vk_timeline_wait(uint64_t v) {   // (at most 250 ms: a submission held back behind the caller's thread goes on without it)
+@@ -323,7 +355,7 @@ void vk_timeline_wait(uint64_t v) {   // (at most 250 ms: a submission held back
+     // (a burst recording whose write-back stamped wb_pages with burst_value does not advance `timeline` while an older queue
+     // submission is stopped at an event wait; wait on `rec_timeline` where that recording actually signalled completion)
+     int ok = 0;
+-    if (wait_recorded(v, 250000000ull, &ok)) {
++    if (wait_recorded(v, 250000000ull, &ok, (first_part_sites() & FP_CAP) != 0)) {
+         if (!ok) {
+             static std::atomic<int> logged{0};
+             if (logged++ < 8)
+@@ -759,19 +791,20 @@ void submit_recording(Recording& r, bool signal_value = true, uint64_t signal_at
+         // the game wrote the next frame's uniforms, vertices and its exposure meter over memory the later parts still
+         // read (with no VRAM mirror, an iGPU: guest memory read in place). A frame of the HUD stretched across the
+         // screen, grass and objects glowing white, whole-screen flashes: issue 997)
+-        // (Ally test, RX_VK_FENCE_FIRST_PART=1: the value's recording is its first part's again, as before e0dbf40c: a fence
+-        // or readback wait comes back once the first part is done. On an iGPU without mirrors that is issue 997's risk (the
+-        // HUD stretched, white grass, flashes); measured against the job threads' polling while one of them waits)
+-        static const bool first_part = env_on("RX_VK_FENCE_FIRST_PART");
++        // (Ally test, patch 0004, RX_VK_FENCE_FIRST_PART=<sites>: the first part's recording kept beside it, value_rec_first,
++        // for the waits named there; measured against the job threads' polling while one of them waits)
++        const bool first_part = first_part_sites() != 0;
+         const auto finished_in = [&](uint64_t v) {
+             auto it = value_rec.find(v);
+             if (it == value_rec.end()) value_rec.emplace(v, seq);
+-            else if (!first_part && it->second < seq) it->second = seq;
++            else if (it->second < seq) it->second = seq;
++            if (first_part) value_rec_first.emplace(v, seq);   // (emplace: the first part's stays)
+         };
+         for (uint64_t v : rec_open_values) finished_in(v);
+         if (r.value) finished_in(r.value);
+         rec_open_values.clear();
+         while (value_rec.size() > 8192) value_rec.erase(value_rec.begin());
++        while (value_rec_first.size() > 8192) value_rec_first.erase(value_rec_first.begin());
+         if (r.part) part_rec.emplace_hint(part_rec.end(), r.part, seq);
+         while (part_rec.size() > 8192) part_rec.erase(part_rec.begin());
+         rec_map_cv.notify_all();
+@@ -2742,15 +2775,19 @@ uint64_t get_replayed() {
+     return hold ? std::min(hold, completed()) : completed();
+ }
+ /// (longshot) Waits for the recording submission value f (or the recording of value f) was finished in, on the recordings'
+-/// timeline: true when that recording is known (the result in *ok), false when it is not (f not finished yet)
++/// timeline: true when that recording is known (the result in *ok), false when it is not (f not finished yet). first (patch
++/// 0004, RX_VK_FENCE_FIRST_PART): the submission's first part's recording, when it is known; else its last part's
+ static void wait_rec_seq(uint64_t seq, uint64_t timeout_ns, int* ok);
+-bool wait_recorded(uint64_t f, uint64_t timeout_ns, int* ok) {
++bool wait_recorded(uint64_t f, uint64_t timeout_ns, int* ok, bool first) {
+     if (!rec_timeline) return false;
+     uint64_t seq = 0;
+     {
+         std::lock_guard mk(rec_map_mu);
+-        auto it = value_rec.find(f);
+-        if (it == value_rec.end()) return false;
++        auto it = first ? value_rec_first.find(f) : value_rec.end();
++        if (!first || it == value_rec_first.end()) {
++            it = value_rec.find(f);
++            if (it == value_rec.end()) return false;
++        }
+         seq = it->second;
+     }
+     wait_rec_seq(seq, timeout_ns, ok);
+@@ -2833,7 +2870,7 @@ int wait(uint64_t f, uint64_t timeout_ns) {
+             }
+         }
+         int ok = 0;
+-        if (mine && wait_recorded(f, timeout_ns, &ok)) return ok;
++        if (mine && wait_recorded(f, timeout_ns, &ok, (first_part_sites() & FP_SYNC) != 0)) return ok;
+     }
+     // (a wait that needs stopped work: another queue's submit usually lets that on in a moment. Forced at once, as the main thread
+     // waits ~15 times a second, 69000 waits went past in five minutes, and each one that mattered was a black frame.
+@@ -3175,7 +3212,7 @@ void invalidate(uint64_t gpu, uint64_t size) {
+                 if (by_part && part && in_place_after) held_back++;
+                 const bool parted = unforced && by_part && part && whole <= completed() && !in_place_after &&
+                                     wait_recorded_part(part, UINT64_MAX, &ok);
+-                if (!parted && !(unforced && wait_recorded(v, UINT64_MAX, &ok))) {
++                if (!parted && !(unforced && wait_recorded(v, UINT64_MAX, &ok, (first_part_sites() & FP_RB) != 0))) {
+                     if (unforced && replay_behind()) wait_queue_empty();   // (not recorded whole: as before)
+                     if (behind) readback_fell_back();
+                     readback_wait_value(v);
