@@ -344,9 +344,22 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   with a VRAM mirror (none on an iGPU). Also 8d64fa10 (#2125, sync_settle), 128c32e4 (#2458). The code's own comment: the
   last-part mapping fixed issue 997 on iGPUs (HUD stretched, white grass, flashes). Patch 0003: RX_VK_FENCE_FIRST_PART=1
   (first part again), tested with the flash detector (RX_VK_FLASH=1 + RX_VK_SHOT_EVERY=1: one-frame flashes logged).
-- **q15 (from 22:02, q15-chain.ps1, q15.out):** -next rebuilt in place with patches 0001 (paced lock), 0002, 0003; poll counts
-  (HOS_SLEEP_LOG, Kokiri) as is / rball / fp; speed with walks, two rounds: rball (RX_VK_READBACK_LATE=newest,3980,9b040,1b580),
-  fp, as is, r39 (newest,3980), lk (paced 30 lock); flash counts for as is / rball / fp / r39.
+- **q15 (22:02-00:51, q15-chain.ps1, q15.out):** -next rebuilt in place (4 min) with patches 0001 (paced lock), 0002, 0003.
+  - **Poll counts (HOS_SLEEP_LOG, Kokiri; lr 0x8009a478 calls per 5 s summed over the job threads / vcore takes per 5 s):**
+    as is 722k / 221k; rball 458k (-37 %) / 172k; fp 554k (-23 %) / 185k. Confirms the research lead: the job threads poll
+    while one of them is held in a GPU readback / fence wait.
+  - **Speed, two rounds each, with walks (game fps per spot, walk in brackets; route):**
+    as is: Kokiri 40.8 (43.5), Hyrule 34.8 (34.2), Town 36.6 (35.2); route 37.5 / 37.3.
+    **rball** (RX_VK_READBACK_LATE=newest,3980,9b040,1b580): 43.7 (48.7), 37.0 (37.9), 39.5 (38.7); **route 39.8 / 40.3 (+7 %)**.
+    r39 (newest,3980): 40.8 (47.5), 35.2 (36.0), 38.5 (38.4); route 38.6 / 37.8 (+2 %).
+    fp (RX_VK_FENCE_FIRST_PART=1): 46.0 (49.3), 40.6 (40.5), 41.7 (41.1); route 42.6 / 42.9 (+14 %).
+    **lk (paced 30 lock):** 29.9 (30.0), 29.4 (30.0), 29.4 (29.9): walks 30.0 game / 60.0 shown, Kokiri 97-99 % of shown frames
+    within 15 % of 16.7 ms, walk sd 1.5 ms, jitter 0.5 ms, p99 17.7 ms; the views' camera swings still make 0-12 long frames.
+  - **Flash counts (RX_VK_FLASH=1 + RX_VK_SHOT_EVERY=1, "vk: flash at present"; Kokiri / Hyrule / Town):** as is 0/0/0;
+    **rball 0/0/0**; r39 0/0/0; **fp 0/10/2**: whole-picture one-frame flashes ("1529 of 2304 cells differ from both neighbours,
+    1529 brighter ... cells 0,0-63,35") and a stall in Hyrule's views (issue 997, as the code comment warns). **fp rejected.**
+    (A shot every present slows the game to ~25-27 fps, so timing-dependent glitches can be rarer there: rball's 0 is good
+    evidence, not proof; the user should still watch for white flashes or popping objects.)
 
 ## Next steps (each needs the user)
 - With the user watching the screen: `RX_VK_READBACK_LATE=newest,3980` (and maybe `,1b580`) for white exposure flashes;
