@@ -1,0 +1,143 @@
+diff --git a/gpu/vk/vk_internal.h b/gpu/vk/vk_internal.h
+index 7b8a9271..a99b99ec 100644
+--- a/gpu/vk/vk_internal.h
++++ b/gpu/vk/vk_internal.h
+@@ -318,6 +318,9 @@ uint64_t vk_timeline_completed();
+ /// A future submission completion covering images retired during replay; zero: no safe value.
+ uint64_t vk_retirement_value();
+ void vk_timeline_wait(uint64_t v);
++/// (Ally test, patch 0005, RX_VK_CAP_WRITER_PART) the recording part `part` done (vk_replay.cpp's part_rec, at most 250 ms):
++/// true when it is; false when that part is unknown or not done in time (the caller then waits as before)
++bool vk_timeline_wait_part(uint64_t part);
+ uint32_t memory_generation();
+ /// 1: a page of [guest, guest + size) was written after generation gen; 0: none was
+ bool memory_written_since(uint64_t guest, uint64_t size, uint32_t gen);
+diff --git a/gpu/vk/vk_memory.cpp b/gpu/vk/vk_memory.cpp
+index d0efb765..da7273b4 100644
+--- a/gpu/vk/vk_memory.cpp
++++ b/gpu/vk/vk_memory.cpp
+@@ -1476,14 +1476,38 @@ WbPages wb_parts;
+ // (longshot) the pages' last write in place (part 0: note_direct_write), for the late pages' fix: no record of which words,
+ // so a capture with such a page late waits, as before, whatever else writes it back
+ WbPages wb_direct;
+-void wb_pages_note(uint64_t guest_lo, uint64_t guest_hi, uint64_t value, uint64_t part) {
++// (Ally test, patch 0005) and the recording part whose draw or dispatch wrote the page in place (Recording::part, the one
++// being recorded when note_direct_write saw the written binding), for a capture's wait for its late pages: with no VRAM
++// mirror (an iGPU, RX_VK_MIRROR=0) every page the GPU writes is written in place, the late pages' fix cannot take them
++// (late_fix_build: "which words, unknown"), and the capture waited for the writer's whole submission: OoT's exposure meter
++// page, ~5 ms a capture on the game's thread in Hyrule Field (RTX 4090 with mirrors off). That part's recording done is
++// enough: its submit ends on the recordings' timeline like the last part's, and binds are noted in recording order, so a
++// later part writing the page again stamps its own. RX_VK_CAP_WRITER_PART=1 (off by default; not with RX_VK_PARALLEL,
++// whose segments record parts on several threads at once)
++WbPages wb_direct_part;
++bool cap_writer_part_on() {
++    static const bool on = [] {
++        const char* e = getenv("RX_VK_CAP_WRITER_PART");
++        const char* par = getenv("RX_VK_PARALLEL");
++        const bool want = e && atoi(e) != 0, parallel = par && atoi(par) > 0;
++        if (want)
++            logf("vk: a capture's late pages wait for the part that wrote them (RX_VK_CAP_WRITER_PART)%s",
++                 parallel ? ": not with RX_VK_PARALLEL, off" : "");
++        return want && !parallel;
++    }();
++    return on;
++}
++void wb_pages_note(uint64_t guest_lo, uint64_t guest_hi, uint64_t value, uint64_t part, uint64_t direct_part = 0) {
+     static const bool off = env_on("RX_VK_NO_READBACK_WAIT");
+     if (off || !value || guest_hi <= guest_lo) return;
+     std::lock_guard lk(wb_pages_mu);
+     for (uint64_t p = guest_lo >> kPageShift; p <= (guest_hi - 1) >> kPageShift; p++) {
+         wb_pages.set(p, value);
+         if (part || !wb_parts.empty()) wb_parts.set(p, part);
+-        if (!part) wb_direct.set(p, value);
++        if (!part) {
++            wb_direct.set(p, value);
++            if (direct_part || !wb_direct_part.empty()) wb_direct_part.set(p, direct_part);
++        }
+     }
+ }
+ } // namespace
+@@ -2517,6 +2541,24 @@ void late_fix_emit() {
+         for (int64_t& f : st_lf_fell) f = 0;
+     }
+ }
++/// (patch 0005) the newest recording part that wrote a late page of the capture still pending (from its mirror: wb_parts;
++/// in place: wb_direct_part, when that in-place write is the page's last write-back), or 0 when a pending page's part is
++/// not known: then the capture waits for the whole submission, as before
++uint64_t late_writer_part(const Capture& c) {
++    const uint64_t done = vk_timeline_completed();
++    uint64_t part = 0;
++    std::lock_guard lk(wb_pages_mu);
++    for (uint32_t i : c.late) {
++        if (i >= c.pages.size()) return 0;
++        const uint64_t pg = c.pages[i], pv = wb_pages.get(pg);
++        if (pv <= done) continue;   // (its write-back done by now)
++        uint64_t pp = wb_parts.get(pg);
++        if (!pp && wb_direct.get(pg) == pv) pp = wb_direct_part.get(pg);
++        if (!pp) return 0;
++        part = std::max(part, pp);
++    }
++    return part;
++}
+ bool take_capture(std::unique_ptr<Capture> c, uint64_t value, uint64_t completed) {
+     const auto tk0 = std::chrono::steady_clock::now();
+     bool fixed = false;   // (the late pages fixed on the GPU, no wait: late_fix_take)
+@@ -2526,7 +2568,18 @@ bool take_capture(std::unique_ptr<Capture> c, uint64_t value, uint64_t completed
+         // RX_VK_MIRROR_MB=1024 on an 8 GB card it was most of a capture's 2.4-3 ms, six submits a frame: Hyrule Field at
+         // 35-45 fps instead of 55, issue 995)
+         const auto tw = std::chrono::steady_clock::now();
+-        vk_timeline_wait(c->late_value);
++        // (patch 0005, RX_VK_CAP_WRITER_PART=1: the part that wrote the late pages, when every one of them has its part)
++        bool by_part = false;
++        if (cap_writer_part_on()) {
++            const uint64_t part = late_writer_part(*c);
++            by_part = part && vk_timeline_wait_part(part);
++            static std::atomic<int64_t> n_part{0}, n_whole{0};
++            (by_part ? n_part : n_whole)++;
++            if ((n_part + n_whole) % 600 == 0)
++                logf("vk: captures' late-page waits (600, RX_VK_CAP_WRITER_PART): %lld for the part that wrote them, %lld for "
++                     "the whole submission (a page's part unknown)", (long long)n_part.exchange(0), (long long)n_whole.exchange(0));
++        }
++        if (!by_part) vk_timeline_wait(c->late_value);
+         st_tk_late += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tw).count();
+         st_late_wait_ns.fetch_add(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - tw).count(),
+                                   std::memory_order_relaxed);   // (longshot: the frame trace's late_wait_ms)
+@@ -3970,7 +4023,8 @@ thread_local BindMemo bind_memo[256];
+ void note_direct_write(Pool& p, uint64_t off, uint64_t size) {   // (pools_mu held)
+     p.direct_write_epoch = mirror_epoch;
+     if (size <= (1u << 20))   // (EvilBoyce: GPU results written in place; small ones: the readbacks are)
+-        wb_pages_note(p.lo + off, p.lo + std::min(off + size, p.hi - p.lo), mem_rec_value, 0);
++        wb_pages_note(p.lo + off, p.lo + std::min(off + size, p.hi - p.lo), mem_rec_value, 0,
++                      cap_writer_part_on() ? mem_rec_part.load() : 0);   // (patch 0005: the part writing it)
+ }
+
+ BufferRef gpu_buffer_bind(uint64_t gpu, uint64_t size, bool written) {
+diff --git a/gpu/vk/vk_replay.cpp b/gpu/vk/vk_replay.cpp
+index 94fa240d..2840d392 100644
+--- a/gpu/vk/vk_replay.cpp
++++ b/gpu/vk/vk_replay.cpp
+@@ -348,7 +348,24 @@ void wait_value(uint64_t v) {
+     vkWaitSemaphores(dev.device, &wi, UINT64_MAX);
+ }
+ bool wait_recorded(uint64_t f, uint64_t timeout_ns, int* ok, bool first = false);
++bool per_queue_fences_off();
++static void wait_rec_seq(uint64_t seq, uint64_t timeout_ns, int* ok);
+ } // namespace
++// (patch 0005: vk_internal.h) only a part already submitted (in part_rec): not wait_recorded_part's 250 ms for one still
++// being recorded or held in a batch, which on the submitting thread's replay nothing would send meanwhile
++bool vk_timeline_wait_part(uint64_t part) {
++    if (!part || !rec_timeline || per_queue_fences_off()) return false;
++    uint64_t seq = 0;
++    {
++        std::lock_guard mk(rec_map_mu);
++        const auto it = part_rec.find(part);
++        if (it == part_rec.end()) return false;
++        seq = it->second;
++    }
++    int ok = 0;
++    wait_rec_seq(seq, 250000000ull, &ok);
++    return ok != 0;
++}
+ uint64_t vk_timeline_completed() { return timeline ? completed() : 0; }
+ void vk_timeline_wait(uint64_t v) {   // (at most 250 ms: a submission held back behind the caller's thread goes on without it)
+     if (!timeline || completed() >= v) return;
