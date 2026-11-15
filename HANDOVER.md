@@ -315,6 +315,39 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   slower with more long frames, 1% low lower; the mirrors it needs cost ~2-3 ms of GPU a frame (Kokiri 16.3-16.4 -> 18.5-18.7 ms, Hyrule 19.3-20.4 -> 22.7-22.9) and
   ~0.5-3 fps in Hyrule. Net: nothing to gain on the Ally; Auto's off is right here.
 
+## Night 2026-11-14/15: stable FPS (the user: "optimize it the best as possible ... See if you can get stable FPS")
+- **Standing OK (~20:35):** "Is there a reason you need my okay?", "are you able to just get it running better?": build and
+  bench whenever plugged in and not playing, overnight too (memory: standing-ok-ally-benchmarks). Still: no system settings,
+  nothing public without a yes. The user also offered a GLM account (not usable) and the 4090 laptop (later, for a bisect).
+- Ally already on the Turbo power plan (powercfg: Turbo, max CPU 100 %): nothing to gain there. Free RAM 6.4 GB idle; the
+  game's ~17 GB private (~10 GB the console's memory) pages, not other programs. Slow-frame causes (RX_VK_SLOW_LOG lines):
+  texture uploads/lookups (15-95 ms; one 1280x720 CPU upload of 3.8 MB took 49 ms: paged-out guest memory) and the main
+  thread's "memory sync ... capture" (25-51 ms). ASTC already decodes on the GPU; capture already uses 4 helper threads.
+- **q13 (20:15-21:14, ls-queue6.ps1, q13.out), on -next:** as is (s6) vs HOS_FPS_LOCK=30 (l6) vs lock + RX_VK_FIFO=1 (f6).
+  Route game fps 35.7/37.2, 36.2/37.8, 37.1/36.7: **the lock did not hold** (game 40-44 fps) and V-Sync changed nothing
+  measurable (uma_report.py --steady: shown median 11-15 ms, sd 2.4-9.5 ms in all). One l6_a Town run hitched badly (46
+  frames over 100 ms), not repeated.
+- **Why the lock never held:** HOS_FPS_LOG=1 (d7) shows "frame limiter 60" right after "frame rate locked at 30": with
+  variable refresh on (+0x231), the engine's controller writes +0xfc back every frame. At 8 GB UMA the game ran near 30
+  anyway, which looked like a lock. **Patch 0001 now paces the host's display queue at 60/lock vsyncs** (lock_interval(),
+  nn_vi.c period: 30 -> 2 vsyncs = 33.3 ms), in q15.
+- **Walk phase (route-bench-ls.ps1 -WalkS 25; the user: "have the character move around"):** after the views Link runs fixed
+  timed stick inputs ('0:LUP/5000,5:LLEFT/1500,7:LUP/5000,12:LRIGHT/3000,15:LUP/4000,19:LDOWN/5000'). **While running the
+  frames are steady:** shown 70-90 fps, p99 15-21 ms, sd 1.8-4.6 ms, 83-96 % of frames within 15 % of the median, 0-1 over
+  100 ms per spot (q14). The long frames of the views come from the 1.5-3 s camera swings (a whole new view streamed in).
+- **q14 (21:14-22:01, q14.out): HOS_SHORT_SLEEP_TIMER=1** (all short sleeps on the high-resolution timer) vs as is: route
+  36.1 / 36.8 vs 37.4 / 37.0, walks alike. **No gain** (slightly worse): not kept.
+- **Research agent (~20:50) on d7a7306..4dd972a:** the 20 us job-worker sleep path is the same in both builds; the extra
+  polls are a symptom. Lead: **e0dbf40c (#2419)** maps a submission's value to its LAST part, so the readback wait in
+  invalidate() waits for the whole scene submission while the other job threads poll (#2602's numbers: one job thread 38.7 %
+  in a readback, 3.9 polling: ~360k polls per 5 s, our +378k). Upstream's fix 76bbe4aa (#2602) narrows it only for pages
+  with a VRAM mirror (none on an iGPU). Also 8d64fa10 (#2125, sync_settle), 128c32e4 (#2458). The code's own comment: the
+  last-part mapping fixed issue 997 on iGPUs (HUD stretched, white grass, flashes). Patch 0003: RX_VK_FENCE_FIRST_PART=1
+  (first part again), tested with the flash detector (RX_VK_FLASH=1 + RX_VK_SHOT_EVERY=1: one-frame flashes logged).
+- **q15 (from 22:02, q15-chain.ps1, q15.out):** -next rebuilt in place with patches 0001 (paced lock), 0002, 0003; poll counts
+  (HOS_SLEEP_LOG, Kokiri) as is / rball / fp; speed with walks, two rounds: rball (RX_VK_READBACK_LATE=newest,3980,9b040,1b580),
+  fp, as is, r39 (newest,3980), lk (paced 30 lock); flash counts for as is / rball / fp / r39.
+
 ## Next steps (each needs the user)
 - With the user watching the screen: `RX_VK_READBACK_LATE=newest,3980` (and maybe `,1b580`) for white exposure flashes;
   they hold most of the remaining readback wait (s_ranges, 8 GB; not re-measured at 4 GB).

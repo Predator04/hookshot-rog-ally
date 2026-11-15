@@ -1,1 +1,10 @@
-﻿21:19 waiting for q14 to end
+﻿22:02 q15 chain start
+22:02 building Longshot-Ally-next (6c9edffe + patches 0001 with the paced 30 lock, 0002, 0003) in place
+Source:  C:\Users\Admin\Desktop\Zelda Ocrina\longshot (longshot-ally-6c9edffe-dirty)
+Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+Game:    C:\Users\Admin\Games\Hookshot
+Out:     C:\Users\Admin\Games\Longshot-Ally-next
+
+== 22:02 Preparing the working tools folder
+
+== 22:02 Building
