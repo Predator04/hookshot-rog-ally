@@ -1,5 +1,10 @@
 param([string]$Tag, [string]$Game, [string]$EnvFile, [string]$Saves = '', [string[]]$Spots = @('Kokiri', 'HyruleField'),
-      [int]$HoldS = 20, [int]$StartMaxMin = 75, [string]$Ini = '', [switch]$Shots)
+      [int]$HoldS = 20, [int]$StartMaxMin = 75, [string]$Ini = '', [switch]$Shots, [int]$WalkS = 0,
+      [string]$Walk = '0:LUP/5000,5:LLEFT/1500,7:LUP/5000,12:LRIGHT/3000,15:LUP/4000,19:LDOWN/5000')
+# -WalkS <s> (2026-11-14, the user: "have the character move around"): after the four views, Link runs the -Walk inputs (the
+# same timed stick inputs every run: forward, left, forward, right, forward, back) and the frames are measured for -WalkS
+# seconds from the first input, then the game closes. The result line gets "| walk: ..." and walk_<Tag>_<spot>.txt holds
+# -WalkS, so uma_report.py takes the walk from the frame log's end and the views before it.
 # Fixed-route benchmark: the same places and the same views every run, so two builds see the same scenes.
 #   -Saves <folder>: one folder a spot (<Saves>\<Spot>), each a copy of a game's user\save folder whose newest slot (the
 #                    one Continue loads) stands at that spot: play there, save, close the game and copy its user\save
@@ -141,6 +146,14 @@ foreach ($spot in $Spots) {
             if (-not (OnAC)) { $battery = $true }
             $marks += , @($v[0], $n, (LogLines), $from, ((Get-Date) - $t0).TotalSeconds)
         }
+        $walkMark = $null
+        if ($WalkS -gt 0) {   # (Link runs; measured from the first input to the end, the game closed right after)
+            $n = LogLines; $from = ((Get-Date) - $t0).TotalSeconds
+            for ($try = 0; $try -lt 20; $try++) { try { Add-Content $in $Walk -Encoding ascii -ErrorAction Stop; break } catch { Start-Sleep -Milliseconds 50 } }
+            Start-Sleep $WalkS
+            if (-not (OnAC)) { $battery = $true }
+            $walkMark = @('5_walk', $n, (LogLines), $from, ((Get-Date) - $t0).TotalSeconds)
+        }
         $alive = [bool](Get-Process -Id $p.Id -ErrorAction SilentlyContinue)
         Close
         Copy-Item (GameLog) "$s\log_route_${Tag}_$spot.txt" -Force
@@ -157,8 +170,19 @@ foreach ($spot in $Spots) {
         $st = Stats ($whole | ForEach-Object { $_ }) $marks[0][3] $marks[-1][4] $csv
         # (the measured window, for frames_report.py: p99 / p99.9 frame time and hitches over the same frames)
         Set-Content "$s\window_${Tag}_$spot.txt" ("{0:F3} {1:F3}" -f $marks[0][3], $marks[-1][4]) -Encoding ascii
+        $walkTxt = ''
+        if ($walkMark) {
+            # (the frame log counts from the first shown frame, ~7 s after the process start these marks count from, and it
+            # ends where the game closed, right after the walk: the walk is the log's last walk-length seconds)
+            $lastT = 0.0
+            if (Test-Path $csv) { $tail = @(Get-Content $csv -Tail 1); if ($tail.Count) { $q = $tail[0].Split(','); if ($q.Count -ge 2) { [void][double]::TryParse($q[1], [Globalization.NumberStyles]::Float, $inv, [ref]$lastT) } } }
+            $len = $walkMark[4] - $walkMark[3]
+            $ws = Stats ($all[$walkMark[1]..([Math]::Max($walkMark[1], $walkMark[2] - 1))]) ($lastT - $len) $lastT $csv
+            Set-Content "$s\walk_${Tag}_$spot.txt" ("{0:F3}" -f ($walkMark[4] - $walkMark[3])) -Encoding ascii
+            $walkTxt = " | walk: game fps {0:N1} | shown {1:N1} (1% low {2:N1}) | GPU {3:N2} ms | >=50ms {4} >=100ms {5}" -f $ws.fps, $ws.shown, $ws.low, $ws.gpu, $ws.h50, $ws.h100
+        }
         # (the whole spot from the first view's start to the last's end includes the camera moves: hitches and 1% low over that)
-        $line = "{0} [{1}] {2}: start {3:F0} s | game fps {4:N1} | shown {5:N1} (1% low {6:N1}) | GPU {7:N2} ms | draws {8:N0} | passes {9:N0} | >=50ms {10} >=100ms {11} | views: {12} | alive={13} {14}{15}  env={16}" -f (Get-Date -Format HH:mm), $Tag, $spot, $startS, $st.fps, $st.shown, $st.low, $st.gpu, $st.draws, $st.passes, $st.h50, $st.h100, ($per -join '; '), $alive, $(if ($battery) { 'ON BATTERY: not comparable ' } else { '' }), $lost, (Split-Path $EnvFile -Leaf)
+        $line = "{0} [{1}] {2}: start {3:F0} s | game fps {4:N1} | shown {5:N1} (1% low {6:N1}) | GPU {7:N2} ms | draws {8:N0} | passes {9:N0} | >=50ms {10} >=100ms {11} | views: {12}{17} | alive={13} {14}{15}  env={16}" -f (Get-Date -Format HH:mm), $Tag, $spot, $startS, $st.fps, $st.shown, $st.low, $st.gpu, $st.draws, $st.passes, $st.h50, $st.h100, ($per -join '; '), $alive, $(if ($battery) { 'ON BATTERY: not comparable ' } else { '' }), $lost, (Split-Path $EnvFile -Leaf), $walkTxt
         Add-Content "$s\route_results.txt" $line; $line
         if (-not $battery) { $route += $st }
     } finally {

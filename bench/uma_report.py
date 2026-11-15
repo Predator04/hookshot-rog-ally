@@ -57,24 +57,39 @@ def stats(ms):
     if len(ms) < 50:
         return None
     s = sorted(ms)
+    mean = sum(ms) / len(ms)
+    med = pct(s, 50)
     return {"n": len(ms), "fps": 1000.0 * len(ms) / sum(ms), "p99": pct(s, 99), "p999": pct(s, 99.9),
-            "h50": sum(1 for x in ms if x > 50), "h100": sum(1 for x in ms if x > 100)}
+            "h50": sum(1 for x in ms if x > 50), "h100": sum(1 for x in ms if x > 100),
+            # (steadiness: standard deviation and mean frame-to-frame change of the shown frame time, ms; the share of frames
+            # within +-15 % of the median)
+            "sd": (sum((x - mean) ** 2 for x in ms) / len(ms)) ** 0.5,
+            "jit": sum(abs(a - b) for a, b in zip(ms[1:], ms[:-1])) / (len(ms) - 1),
+            "steady": 100.0 * sum(1 for x in ms if 0.85 * med <= x <= 1.15 * med) / len(ms), "med": med}
 
 
 def windows(d, tag, spot):
+    """(run, views, walk): walk is None for runs without route-bench-ls.ps1 -WalkS (walk_<tag>_<spot>.txt: its length, the
+    log's last seconds; the views end where it begins)."""
     rows = frames(d, tag, spot)
     if not rows:
-        return None, None
+        return None, None, None
     last = rows[-1][0]
     a = next((t for t, ms in rows if 0 < ms < 40), 0.0) + 20.0
-    run = stats([ms for t, ms in rows if a <= t <= last and ms > 0])
     length = VIEWS_S
     win = os.path.join(d, "window_%s_%s.txt" % (tag, spot))
     if os.path.exists(win):
         w = [float(x) for x in open(win).read().split()[:2]]
         length = w[1] - w[0]
-    views = stats([ms for t, ms in rows if last - length <= t <= last and ms > 0])
-    return run, views
+    wl = 0.0
+    wf = os.path.join(d, "walk_%s_%s.txt" % (tag, spot))
+    if os.path.exists(wf):
+        wl = float(open(wf).read().split()[0])
+    end = last - wl
+    run = stats([ms for t, ms in rows if a <= t <= end and ms > 0])
+    views = stats([ms for t, ms in rows if end - length <= t <= end and ms > 0])
+    walk = stats([ms for t, ms in rows if end < t <= last and ms > 0]) if wl else None
+    return run, views, walk
 
 
 def route_line(d, tag, spot):
@@ -120,7 +135,7 @@ def report(tag):
                 for line in f:
                     fails += bool(SUBMIT.search(line))
                     lost += bool(LOST.search(line))
-        run, views = windows(d, tag, spot)
+        run, views, walk = windows(d, tag, spot)
         failed = re.search(r"\] \S+ ((?:START TIMEOUT|GAME EXITED|SUBMIT FAILED|LOAD FAILED|NOT STARTED)[^|]*?)\s+env=", rl)
         note = failed.group(1).strip() if failed else ""
         if fails:
@@ -131,7 +146,7 @@ def report(tag):
             "tag": tag, "spot": spot, "build": "Longshot" if d == LS_HS else "old",
             "start": num(r"start (\d+) s", rl), "game": num(r"game fps ([\d.]+)", rl), "shown": num(r"shown ([\d.]+)", rl),
             "low": num(r"1% low ([\d.]+)", rl), "gpu": num(r"GPU ([\d.]+) ms", rl),
-            "run": run, "views": views, "fails": fails, "note": note,
+            "run": run, "views": views, "walk": walk, "fails": fails, "note": note,
             "private": num(r"private max ([\d,]+) MB", ml), "avail": num(r"available min ([\d,]+) MB", ml),
             "shared": num(r"GPU shared max ([\d,]+) MB", ml), "pages": num(r"page reads/s mean ([\d,]+)", ml),
             "commit": num(r"commit max ([\d.]+) of", ml), "limit": num(r"of ([\d.]+) GB", ml),
@@ -153,5 +168,23 @@ def main(tags):
                 fmt(r["private"], "%.0f"), r["note"]))
 
 
+def steadiness(tags):
+    """The views window's shown frames: mean fps, median, p99, sd, jitter, the share within +-15 % of the median."""
+    print("| tag | spot | shown fps | median ms | p99 ms | sd ms | jitter ms | within 15 % | >50 ms | >100 ms |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
+    for t in tags:
+        for r in report(t):
+            for what, v in (("", r["views"]), (" walk", r["walk"])):
+                if what and not v:
+                    continue
+                v = v or {}
+                print("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
+                    r["tag"], r["spot"] + what, fmt(v.get("fps")), fmt(v.get("med")), fmt(v.get("p99")), fmt(v.get("sd")),
+                    fmt(v.get("jit")), fmt(v.get("steady"), "%.0f %%"), fmt(v.get("h50"), "%d"), fmt(v.get("h100"), "%d")))
+
+
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    if sys.argv[1:2] == ["--steady"]:
+        steadiness(sys.argv[2:])
+    else:
+        main(sys.argv[1:])
