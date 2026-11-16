@@ -1,0 +1,85 @@
+diff --git a/gpu/vk/fps_stats.h b/gpu/vk/fps_stats.h
+index 6c677e85..62749346 100644
+--- a/gpu/vk/fps_stats.h
++++ b/gpu/vk/fps_stats.h
+@@ -204,7 +204,8 @@ void columns(const Ring<N>& r, int64_t now, int64_t window, int count, int* out,
+ /// The Game frame rate cap row's rate (-1 30, 0 60, then 90, 120, 144, 165, 240; 6 Uncapped: 0, no rate); HOS_FPS_MAX over it
+ /// (env_max, 0 when not set: host/nn_vi.c fps_max's rules, 1000 and over is uncapped)
+ inline int cap_rate(int fps_cap, int env_max = 0) {
+-    if (env_max == 30 || (fps_cap == -1 && env_max <= 0)) return 30;
++    if (env_max >= 20 && env_max < 60) return env_max;   // (patch 0007: HOS_FPS_MAX=20-59, host/nn_vi.c fps_of)
++    if (fps_cap == -1 && env_max <= 0) return 30;
+     static const int rates[] = {60, 90, 120, 144, 165, 240, 0};
+     if (env_max > 0) return env_max >= 1000 ? 0 : std::max(env_max, 60);
+     return fps_cap >= 0 && fps_cap <= 6 ? rates[fps_cap] : 60;   // (a value this build does not know: 60, as the host)
+diff --git a/host/nn_vi.c b/host/nn_vi.c
+index 1e766667..0cf57d3c 100644
+--- a/host/nn_vi.c
++++ b/host/nn_vi.c
+@@ -130,7 +130,10 @@ enum { FPS_UNCAPPED = 1000, FPS_MOVIE = 240 };   /* (FPS_MOVIE: the pacing while
+ static volatile uint64_t movie_seen_at;
+ static const int64_t MOVIE_STALE_NS = 250000000LL;   /* (a quarter second: three 60 fps frames of grace) */
+ static volatile int fps_now;   /* (the cap this present runs at, 0 before the first: fps_refresh) */
+-static int fps_of(int want) { return want == 30 ? 30 : want > 60 ? (want > FPS_UNCAPPED ? FPS_UNCAPPED : want) : 60; }
++/* (Ally, patch 0007) and HOS_FPS_MAX=<20-59> below the console's 60 the way #609 does 30 (40 for a handheld that holds ~40,
++   where 30 throws frames away): the host's period (25 ms for 40), the game's limiter lowered to it and its time step real
++   time. The menu keeps its rows (30 is its one below 60); only the environment asks for the others */
++static int fps_of(int want) { return want >= 20 && want < 60 ? want : want > 60 ? (want > FPS_UNCAPPED ? FPS_UNCAPPED : want) : 60; }
+ static void fps_refresh(void) {
+     /* (the Insert menu's Frame rate cap, frame_rate_cap=: 0 the console's 60, then 90, 120, 144, 165, 240, 6 Uncapped, -1 the 30 FPS cap; a value
+        this build does not know is 60. The options file's until the renderer answers, HOS_FPS_MAX over both) */
+@@ -188,7 +191,7 @@ int hos_vi_native_interval(Ctx *c, int requested) {
+     /* (longshot) 30 has its own display period; interval 2 would pace it to 15.
+        It also keeps real time even when the saved Game speed is Per frame. */
+     fps_refresh();
+-    present_interval = fps_max() == 30 ? 1 : game_interval || !rx_option(0, 1) ? clamped : 1;
++    present_interval = fps_max() < 60 ? 1 : game_interval || !rx_option(0, 1) ? clamped : 1;   /* (0007: every cap below 60) */
+     return requested;
+ }
+ /* (longshot) The window's textures as the console's display queue has them: each present is shown at its display
+@@ -439,7 +442,7 @@ static void realtime_step(int64_t now) {
+         /* (longshot) 30 lowers the limiter; higher caps raise it. On return to 60, restore the game's value
+            from before the override, unless the game has written a new one since. */
+         static int raised, game_limit;
+-        if (fps_max() != 60 && *limit > 0 && (fps_max() == 30 || *limit < fps_max())) {
++        if (fps_max() != 60 && *limit > 0 && (fps_max() < 60 || *limit < fps_max())) {   /* (0007: every cap below 60 lowers it) */
+             if (*limit != raised) game_limit = *limit;
+             *limit = raised = fps_max();
+         } else if (raised && *limit == raised && fps_max() != raised) {
+diff --git a/tests/test_fps_stats.cpp b/tests/test_fps_stats.cpp
+index ffecd2f3..88ca88e9 100644
+--- a/tests/test_fps_stats.cpp
++++ b/tests/test_fps_stats.cpp
+@@ -140,6 +140,7 @@ int main() {
+     CHECK("Override keeps priority", fs::cap_rate(-1, 60) == 60 && fs::cap_rate(-1, 120) == 120);
+     CHECK("Uncapped: no target", fs::cap_rate(6) == 0 && fs::target_ms(6) == 0);
+     CHECK("HOS_FPS_MAX over the row", fs::cap_rate(0, 144) == 144 && fs::cap_rate(3, 30) == 30 && fs::cap_rate(0, 1000) == 0);
++    CHECK("HOS_FPS_MAX=20-59 (patch 0007)", fs::cap_rate(0, 40) == 40 && fs::cap_rate(-1, 45) == 45 && fs::cap_rate(0, 19) == 60);
+     CHECK("V-Sync On at a slower display", near(fs::target_ms_for(144, true, 60), 1000.0 / 60) &&
+                                                near(fs::target_ms_for(60, true, 144), 1000.0 / 60) &&
+                                                near(fs::target_ms_for(0, true, 165), 1000.0 / 165));
+diff --git a/tests/test_frame_rate_cap_30.py b/tests/test_frame_rate_cap_30.py
+index e5eb6abe..fec102b5 100644
+--- a/tests/test_frame_rate_cap_30.py
++++ b/tests/test_frame_rate_cap_30.py
+@@ -58,8 +58,9 @@ int main(int argc, char **argv) {
+     for (int i = 0; i < 10000; ++i) fps_refresh();
+     assert(fps_max() == expected && env_reads == 1 && ini_reads == 1);
+     assert(hos_vi_native_interval(NULL, 2) == 2);
+-    assert(present_interval == (expected == 30 ? 1 : 2));
++    assert(present_interval == (expected < 60 ? 1 : 2));   /* (patch 0007: every cap below 60, as 30) */
+     if (expected == 30) assert(1000000000LL / fps_max() * present_interval == 33333333LL);
++    if (expected == 40) assert(1000000000LL / fps_max() * present_interval == 25000000LL);
+     if (!override) {
+         chosen = 0; fps_refresh(); assert(fps_max() == 60);
+         chosen = -1; fps_refresh(); assert(fps_max() == 30);
+@@ -90,7 +91,8 @@ int main(int argc, char **argv) {
+         subprocess.run([args.cc, "-x", "c", "-std=c11", "-Wall", "-Wextra", "-Werror", str(source), "-o", str(exe)], check=True)
+         for cap, env, expected in [(-1,"unset",30), (0,"30",30), (6,"30",30), (-1,"60",60),
+                                     (-1,"120",120), (-1,"1000",1000), (-1,"0",60), (-1,"invalid",60),
+-                                    (7,"unset",60), (-2,"unset",60)]:
++                                    (7,"unset",60), (-2,"unset",60),
++                                    (0,"40",40), (6,"45",45), (0,"19",60), (0,"20",20)]:   # (patch 0007: HOS_FPS_MAX=20-59)
+             for movie in ("unset", "0"):
+                 subprocess.run([str(exe), str(cap), env, str(expected), movie], check=True)
+     replay = (ROOT / "gpu/vk/vk_replay.cpp").read_text(encoding="utf-8")

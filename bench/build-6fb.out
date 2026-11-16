@@ -1,0 +1,54 @@
+﻿Source:  C:\Users\Admin\Desktop\Zelda Ocrina\longshot-6fb (longshot-ally-6fb13fe5-dirty)
+Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+Game:    C:\Users\Admin\Games\Hookshot
+Out:     C:\Users\Admin\Games\Longshot-Ally-6fb
+
+== 19:09 Preparing the working tools folder
+
+== 19:09 Building
+wrote C:\Users\Admin\Games\Longshot-Ally-6fb\longshot_shaders.bin 514 MB
+texts: 16 languages reworded for a PC
+prompts: switch
+prompts: xbox
+prompts: ps4
+prompts: ps5
+prompts: steamdeck
+prompts: keyboard
+prompts: the Talk ring
+prompts: the size table lets the font have 55088 bytes
+prompts: regenerated (no stamp yet)
+the shipped pipeline state list: 63920 pipelines
+where the time went:
+  checks                                  5 s
+  read                                  429 s
+  lift                                  320 s
+    image and discovery                  35 s
+    coverage                             10 s
+    emit and write                      195 s
+    big chunks split                     17 s
+    patches                              12 s
+    output size and page-mark groups     30 s
+    runtime tables and standalone files     10 s
+  compile                              1928 s
+    planning                             21 s
+    compiling                          1895 s
+    linking longshot.exe                  5 s
+    linking longshot_vk.dll               5 s
+  finish                                 38 s
+    copying the new files in              0 s
+    swap and runtimes                     1 s
+    shader list                          14 s
+    button prompts                       23 s
+    pipeline lists, icon and stamps       0 s
+    build files deleted                   0 s
+    object store                          0 s
+the build took 0:45:20, compiled in 0:32:08
+@@times 2720 1928 -1
+the shaders were not prepared now ("Prepare shaders now" is unticked): the game prepares them at its first start
+@@done C:\Users\Admin\Games\Longshot-Ally-6fb
+built in 45 min
+
+== 19:55 Ally settings
+Wrote C:\Users\Admin\Games\Longshot-Ally-6fb\longshot_env.txt
+Done: C:\Users\Admin\Games\Longshot-Ally-6fb (longshot-ally-6fb13fe5-dirty)
+build exit: 0

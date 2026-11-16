@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-15, 18:35; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-15, 23:10; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -24,7 +24,8 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot code changes (patches) | `patches\` here (the clone itself is never pushed) |
 | Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 6c9edffe since 2026-11-14 17:28 (414f56e2 at 12:35), + our 2 patches uncommitted; push disabled) |
 | Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
-| Newer Longshot, side by side | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-6c9edffe-dirty since 2026-11-14 17:35; 414f56e2 before, same speed as cf605c85; a copy of the user's save + options) |
+| **User's play folder (since 2026-11-15 23:10)** | `C:\Users\Admin\Games\Longshot-Ally-6fb` (longshot-ally-6fb13fe5-dirty: 6fb13fe5 + 0001, 0002, 0003, 0004-on-6fb13fe5, 0006; built 19:09-19:55 from the worktree `Zelda Ocrina\longshot-6fb`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-6fb`; the user's save + options; longshot_env.txt = bench\env_longshot_ally_6fb.txt, HOS_FPS_LOCK=40) |
+| Previous play folder (fallback) | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-6c9edffe-dirty + 0001-0004; rball5 + cap + lock 30; the same save) |
 | User's current play build | `C:\Users\Admin\Games\Hookshot-Ally` (rog-ally-cb21687, Hookshot fork; don't touch) |
 | Copy of the play build for A/B | `C:\Users\Admin\Games\Hookshot-Ally-ref` (34 GB; delete only with the user's OK) |
 | Game files the build reads (read only) | `C:\Users\Admin\Games\Hookshot` (romfs, .hookshot_exefs) |
@@ -68,6 +69,13 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-15 23:10 (details: "Night 2026-11-15" below): play `Games\Longshot-Ally-6fb`, Longshot 6fb13fe5 (153
+commits past 6c9edffe; inside v3.0.0-rc.5) with our patches and a real 40 lock (patch 0006).** Same session, same env
+(rball5 + cap), unlocked: route 41.9 / 40.5 vs the old build's 40.6 / 39.6; Kokiri tiebreak 45.0 / 45.2 vs 44.3 / 44.1
+(+2 %), Hyrule 37.4 / 37.0 vs 36.5 / 35.5 (+3-4 %), Town even. HOS_FPS_LOCK=40: 80 shown, walks 89-98 % of frames within
+15 %; Kokiri/Town hold 40, Hyrule and the heaviest views 31-37. HOS_FPS_LOCK=30 holds everywhere (97-99 %). 0 flashes on
+the 4090 with the play env on the new build.
 
 **Update 2026-11-15 18:35 (details: "Day 2026-11-15" below): -next's longshot_env.txt now reads the 0x8b040 readbacks late
 too (RX_VK_READBACK_LATE=newest,3980,9b040,1b580,8b040: route 40.1 / 40.2 game fps vs 38.2 / 38.7, Town +8 %, Kokiri +5 %)
@@ -474,8 +482,48 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
 - Bench note: route-bench-ls.ps1 alone looks for saves only in bench\hs\route-saves, which this machine does not have: pass
   `-Saves` (bench-route-ls.ps1 and q19-chain.ps1 fall back to `Zelda Ocrina\hookshot-rog-ally\ally\tools\hs\route-saves`).
 
+## Night 2026-11-15: the new build (6fb13fe5) and a 40 lock (the user, via the 4090 session: "do 2. also check for a new build")
+- **Build:** Longshot main 6fb13fe5 (153 commits past 6c9edffe; the speed ones: 02608169 fast float regions in the lift,
+  371377de integrated GPUs keep big ASTC as BC3, 6109660c replay-thread costs incl. bookkeeping without mirrors, 3d880bf6,
+  c9fbb0d6, 1db4c290; fixes 999102a6, 69ff5beb). a4ead95c (AMD desktop iGPUs decode ASTC on the CPU) does not touch the
+  Ally: its GPU is PCI 1002:15BF, and the log says "ASTC is decoded on the GPU". 0001-0003 apply as they are; 0004
+  conflicted and was ported by the laptop (patches\0004-...-on-6fb13fe5.patch); patch 0006 (laptop) makes HOS_FPS_LOCK=20-59
+  that is no divisor of 60 pace every 1/lock s (lock_period_ns, 25 ms for 40). Built on the Ally in 45 min (compiled 32) into
+  Games\Longshot-Ally-6fb from a worktree (`git worktree add ../longshot-6fb origin/main`); the -next clone is untouched.
+- **Warm-up (w22, 19:55-21:18):** Kokiri's first start 4,452 s (74 min; the new translator: "noted pipelines: N of 32623"),
+  Hyrule 66 s, Town 69 s, then no "in no cache" and 0 new pipelines in play. Gotcha: since 343a1dfa create is the default on
+  the compute fallback, so leaving RX_VK_LOAD out no longer means start mode (env_6fb_start.txt says start out loud; not
+  needed here: the first start built the noted pipelines anyway).
+- **4090 (laptop) on the new build:** fl4n_play x2 (rball5 + cap, MIRROR=0) 0 flashes in 6 starts (~21,600 presents); with
+  mirrors on, lock 40 = 40.0 game / 80 shown everywhere, 1% low within 2-4 %; lock 30 = 30.0 / 60.
+- **q22 (21:18-22:46, q22-chain.ps1, q22.out), two rounds with walks, play env (rball5 + cap):**
+  | Run | Kokiri | Hyrule | Town | Route |
+  |---|---|---|---|---|
+  | u22 new, unlocked a / b | 49.4 (54.6) / 43.8 (45.2) | 37.4 (38.4) / 37.0 (37.8) | 38.7 (41.3) / 40.7 (42.1) | **41.9 / 40.5** |
+  | o22 old (-next), unlocked a / b | 44.2 (49.4) / 43.6 (48.3) | 36.5 (36.6) / 35.5 (34.7) | 41.0 (41.2) / 39.8 (39.4) | 40.6 / 39.6 |
+  | l40 new, HOS_FPS_LOCK=40 a / b | 38.3 (40.0) / 38.3 (40.0) | 35.9 (36.8) / 35.7 (35.5) | 37.5 (39.2) / 36.9 (39.1) | 37.2 / 37.0 |
+  | l30 new, HOS_FPS_LOCK=30 a / b | 29.9 (29.7) / 29.8 (30.0) | 29.6 (30.0) / 30.0 (30.0) | 29.7 (30.0) / 29.2 (29.8) | 29.7 / 29.7 |
+  q23 (Kokiri tiebreak, 22:46-23:01): new 45.0 (50.1) / 45.2 (49.9), old 44.3 (49.5) / 44.1 (48.8): u22_a's 49.4 was an
+  outlier (its view 4 drew 1,032 objects, u22_b's 1,443). **New build: Kokiri +2 %, Hyrule +3-4 %, Town even, route ~+3 %.**
+- **Steadiness of the walks (uma_report.py --steady, q22-steady.txt), shown frames within 15 % of the median:** l40 89-98 %
+  (Kokiri 97-98, Hyrule 98 / 89, Town 91; p99 14-22 ms), l30 95-99 % (p99 17.7-27.9 ms), unlocked 83-95 %. Under the 40 lock
+  Hyrule runs 35.5-36.8 game fps, evenly (GPU ~22 ms a frame there); the heavy loaded views 30-33. The swapchain is
+  "immediate (V-Sync Auto)", fullscreen; 80 shown on the 120 Hz panel is even only with its variable refresh. The 30 lock's
+  GPU ms are higher (19-20 vs 17) at the same scene: the GPU clocks down with the spare time.
+- **Shadow resolution (rc.5's new setting):** Auto already picks the game's 1600 px on 4-6 GB, the smallest; nothing to gain.
+- **23:10: the user's play folder is Games\Longshot-Ally-6fb** (saves identical to -next's, options = ls-play-options.ini),
+  longshot_env.txt = -next's (rball5 + cap) with HOS_FPS_LOCK=40 and a comment for 30 (backup
+  bench\env-6fb-before-lock40-2026-11-15.txt; copy bench\env_longshot_ally_6fb.txt). -next stays as the fallback.
+- **The newest main (02903b04, 2026-11-16 06:26 UTC) adds #609: a 30 FPS cap in the menu and HOS_FPS_MAX=30, paced by the
+  host with real game time.** It clashes with 0001/0006 (nn_vi.c). The laptop's port: drop 0001 and 0006 there, use
+  HOS_FPS_MAX=30, and patch 0007 (HOS_FPS_MAX=20-59 on #609's pacer; its tests pass) for 40. On 02903b04, 0002 + 0003 +
+  0004-on-6fb13fe5 + 0007 apply (checked). Not built yet: nothing in it for speed (audio device menu, mouse fix, docs).
+
 ## Next steps
-- The user plays -next and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none on
+- Moving the play build to the newest main: build 02903b04 + 0002, 0003, 0004-on-6fb13fe5, 0007 in place over
+  Games\Longshot-Ally-6fb (same translator, so its driver cache should stay warm), env HOS_FPS_MAX=40 in place of
+  HOS_FPS_LOCK=40, then a lock check (game time is real-time stepped under #609).
+- The user plays and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none on
   the Ally or the 4090). If one shows, remove ",8b040" first.
 - The waits on whole scene submissions (e0dbf40c) are now handled as far as tested safe: readbacks (rball5) and the capture
   (FIRST_PART=cap), together ~+6 % over rball (route ~40.5 vs 38.3); all three sites (~+9 %) flash. The fence site (sync)

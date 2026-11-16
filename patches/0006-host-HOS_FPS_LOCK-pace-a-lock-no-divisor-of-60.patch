@@ -1,0 +1,36 @@
+diff --git a/host/nn_vi.c b/host/nn_vi.c
+index 50601962..9f63c4a7 100644
+--- a/host/nn_vi.c
++++ b/host/nn_vi.c
+@@ -185,6 +185,21 @@ static int lock_interval(void) {
+     }
+     return fps_max() <= 60 ? v : 0;
+ }
++/* (Ally, patch 0006) HOS_FPS_LOCK=<20-59> that is no divisor of 60 (40, 45, 50): the frames paced every 1/lock s (25 ms for
++   40) rather than a whole number of 60 Hz vsyncs, which lock_interval cannot give it: on the Ally's 120 Hz panel 40 is 3 of
++   its vsyncs, and a variable-refresh panel shows each frame as it comes. With the game's limiter held at the lock too
++   (realtime_step, patch 0001), the rate holds where the limiter alone did not. Divisors (30, 20, 15) keep lock_interval's
++   vsyncs of 60, as before; only with the cap at 60 */
++static int64_t lock_period_ns(void) {
++    static int64_t v = -1;
++    if (v < 0) {
++        const char *e = getenv("HOS_FPS_LOCK");
++        const int l = e ? atoi(e) : 0;
++        v = l >= 20 && l <= 59 && 60 % l != 0 ? 1000000000LL / l : 0;
++        if (v) hos_log("vi: frames paced every %.2f ms (HOS_FPS_LOCK=%d, no divisor of 60): a steady %d fps", v / 1e6, l, l);
++    }
++    return fps_max() <= 60 ? v : 0;
++}
+ static int64_t next_frame_at, window_start, frames_in_window;
+ static volatile LONG64 presents;
+ int hos_vi_native_interval(Ctx *c, int requested) {
+@@ -575,7 +590,8 @@ void hos_vi_native_presented(const int64_t phases[4]) {
+     }
+     const int64_t now = hos_now_ns();
+     realtime_step(now);   /* (first: it reads the menu's cap, fps_refresh) */
+-    const int64_t period = 1000000000LL / fps_max() * (lock_interval() ? lock_interval() : present_interval);
++    const int64_t period = lock_period_ns() ? lock_period_ns()   /* (patch 0006: a lock no divisor of 60) */
++                                            : 1000000000LL / fps_max() * (lock_interval() ? lock_interval() : present_interval);
+     /* (behind by more than a frame: the next one is paced from now, with no burst to catch up) */
+     next_frame_at = next_frame_at && now - next_frame_at < period ? next_frame_at + period : now + period;
+     {   /* (the display queue: this frame is shown one interval after the last, or now when the display waits) */
