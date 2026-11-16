@@ -24,6 +24,11 @@ RX_VK_LOAD=create
 # see that, first remove ",8b040" (the line before 2026-11-15 evening was RX_VK_READBACK_LATE=newest,3980,9b040,1b580); if
 # it stays, change the line to RX_VK_READBACK_LATE=newest. To undo everything: delete the line.
 RX_VK_READBACK_LATE=newest,3980,9b040,1b580,8b040
+# (this build's patch 0004, 2026-11-15 evening) The capture's GPU waits end when the first part of a submission is done
+# instead of the last: with the 8b040 readbacks above read late, the capture wait was next: +2 % route (40.6 / 40.5 vs
+# 39.8 / 39.4), Hyrule Field +3.5 %; 0 flashes on the Ally and the 4090 test laptop. Only `cap`: never add sync (sync and cap
+# together flashed once; all three flood). If you see a white flash or one-frame popping: delete this line first.
+RX_VK_FENCE_FIRST_PART=cap
 # A steady frame rate: the game held at 30 fps (this build's patch 0001: frames paced at 2 vsyncs of 60), which frame
 # generation 2x shows as a steady 60 (97-100 % of frames within 15 % of 16.7 ms while walking, 2026-11-15). The game runs
 # 37-44 fps without it, so it holds everywhere. For more fps instead (75-97 shown, less even): delete this line.

@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-15, 17:15; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-15, 18:35; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -69,9 +69,11 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
 
-**Update 2026-11-15 17:15 (details: "Day 2026-11-15" below): -next's longshot_env.txt now reads the 0x8b040 readbacks late
-too (RX_VK_READBACK_LATE=newest,3980,9b040,1b580,8b040): route 40.1 / 40.2 game fps vs 38.2 / 38.7 (Town +8 %, Kokiri
-+5 %), 0 flashes on the Ally and on the 4090 lab laptop, nothing missing in shots, occlusion culling unchanged.**
+**Update 2026-11-15 18:35 (details: "Day 2026-11-15" below): -next's longshot_env.txt now reads the 0x8b040 readbacks late
+too (RX_VK_READBACK_LATE=newest,3980,9b040,1b580,8b040: route 40.1 / 40.2 game fps vs 38.2 / 38.7, Town +8 %, Kokiri +5 %)
+and ends the capture's waits at a submission's first part (RX_VK_FENCE_FIRST_PART=cap, patch 0004: +2 % more, Hyrule
++3.5 %; route 40.6 / 40.5). 0 flashes for both on the Ally and on the 4090 lab laptop, nothing missing in shots, occlusion
+culling unchanged. HOS_FPS_LOCK=30 stays (steady 60 shown); unlocked it is now ~6 % above this morning's setting.**
 
 **Update 2026-11-15 02:00 (details: "Night" below): play `Games\Longshot-Ally-next` with its new longshot_env.txt.** With
 RX_VK_READBACK_LATE=newest,3980,9b040,1b580 Longshot runs ~39.5 game fps over the route (= the old build's 40.1; Kokiri
@@ -451,16 +453,35 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
 - **~17:12: Games\Longshot-Ally-next\longshot_env.txt now has RX_VK_READBACK_LATE=newest,3980,9b040,1b580,8b040** (rball5;
   the comment says how to step back; backup bench\next-env-before-rball5-2026-11-15.txt; bench\env_longshot_ally_next.txt =
   the new file). HOS_FPS_LOCK=30 stays.
+- **q20 (17:13-18:18, q20-chain.ps1, q20.out): on top of rball5, FIRST_PART=cap (c20) or =sync (s20), two rounds, walks.**
+  | Run | Kokiri | Hyrule | Town | Route |
+  |---|---|---|---|---|
+  | r20 (rball5) a / b | 44.4 (48.8) / 44.4 (48.9) | 35.7 (36.6) / 35.1 (37.2) | 39.3 (41.7) / 38.7 (40.9) | 39.8 / 39.4 |
+  | c20 (+cap) a / b | 44.5 (49.1) / 43.8 (49.0) | 36.8 (37.8) / 36.7 (36.1) | 40.4 (35.4) / 41.0 (40.6) | **40.6 / 40.5** |
+  | s20 (+sync) a / b | 44.3 (48.9) / 44.4 (48.8) | 35.8 (36.7) / 36.1 (38.0) | 38.1 (40.5) / 39.6 (40.7) | 39.4 / 40.0 |
+  **sync: nothing. cap: ~+2 % route** (Hyrule 36.8 / 36.7 against rball5's 35.0-36.1 in all six of its runs today, +3.5 %;
+  Town +2.5 %, inside rball5's range; Kokiri 0). On plain rball cap gave nothing (q17b): it pays only once the 8b040 wait is
+  gone. c20_a's Town walk hitched (23 frames over 100 ms; the log's 167 ms frame was "descriptors 128 ms" + 30-41 ms
+  uploads, the paging pattern), not repeated in c20_b. 4090 (stage r5pair): rball5+cap and rball5+sync 0 flashes in 12
+  starts (~44,000 presents). Never stack sync and cap (on rball+rb all three flooded; sync+cap alone flashed once).
+  uma_report.py --steady: c20's views and walks as even as r20's or more (Hyrule walk 94-97 % within 15 %, views p99
+  20.5-21.1 ms vs 20.9-24.4), except c20_a's one Town walk episode.
+- **q21 (18:19-18:30, q21-chain.ps1): the Ally's flash count of rball5 + cap: 0** at Kokiri / Hyrule / Town (4,560 / 4,200 /
+  4,440 presents). The log confirms "waits that end at a submission's first part (RX_VK_FENCE_FIRST_PART=cap): captures".
+- **~18:35: -next's longshot_env.txt gets RX_VK_FENCE_FIRST_PART=cap** below the readback line (comment: delete it first if
+  a flash shows; never add sync). Backup bench\next-env-before-fpcap-2026-11-15.txt; bench\env_longshot_ally_next.txt = the
+  new file. The switch needs patch 0004 (in -next's build); a build without it ignores the line.
 - Bench note: route-bench-ls.ps1 alone looks for saves only in bench\hs\route-saves, which this machine does not have: pass
   `-Saves` (bench-route-ls.ps1 and q19-chain.ps1 fall back to `Zelda Ocrina\hookshot-rog-ally\ally\tools\hs\route-saves`).
 
 ## Next steps
 - The user plays -next and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none on
   the Ally or the 4090). If one shows, remove ",8b040" first.
-- The remaining wait: fence and capture waits on whole scene submissions (e0dbf40c). On the Ally rb was worth ~+4 % (now had
-  through 8b040), cap alone 0, all three ~+9 % but they flash (issue 997). Once the readback wait is gone, cap or sync may
-  be the next limit: rball5 + FIRST_PART=cap and rball5 + FIRST_PART=sync were never speed-tested (q20, running 17:13-~18:25;
-  the 4090 flash-counts both at the same time, stage r5pair). On the 4090 rb+cap and rb+sync were clean, sync+cap flashed once.
+- The waits on whole scene submissions (e0dbf40c) are now handled as far as tested safe: readbacks (rball5) and the capture
+  (FIRST_PART=cap), together ~+6 % over rball (route ~40.5 vs 38.3); all three sites (~+9 %) flash. The fence site (sync)
+  gives nothing on the Ally. What would close the rest is an upstream fix that makes the first-part mapping safe on
+  mirrorless iGPUs (issue 997): worth an upstream issue with these numbers (only with the user's yes).
+- If the user reports a white flash or one-frame popping: delete the FIRST_PART=cap line first, then remove ",8b040".
 - If the game stutters badly or sits long at the progress screen after many hours unused: the AMD driver evicted its
   pipelines (seen 2026-11-15 after ~10 h). One session with RX_VK_LOAD=start (up to ~1 h the first time) refills them.
 - Remaining long frames: the camera swings (a whole new view streamed: texture uploads + "memory sync capture" on the main
