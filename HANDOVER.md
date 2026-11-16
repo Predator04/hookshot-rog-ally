@@ -543,7 +543,23 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
   0001 lock 30. The game clock is real time under our 6fb locks too (the log's "real-time step on: ratio 1.499, game's frame
   rate 40"). CPU pre-screen there (mirrors on, uncapped, CPU-bound at 65-80 fps): REPLAY_PIN=0 +0.8 %, RESERVE_CORE=0
   +0.6 %, both +0.5 %, NATIVE_ZSTD(_FRAMES) 0; noise ~0.3 %.
-- q25 (CPU switches on the Ally) and q26 (GPU submission switches + HOS_SHORT_SLEEP_POLLERS=2): below when done.
+- **q25 (03:06-04:35), CPU switches from upstream's docs/cpu-profile.md, play env unlocked, route a / b:** base 40.9 / 41.3,
+  RX_VK_REPLAY_PIN=0 39.9 / 41.4, HOS_RESERVE_CORE=0 40.6 / 40.5, HOS_NATIVE_ZSTD=1 + HOS_NATIVE_ZSTD_FRAMES=1 41.3 / 40.9.
+  Nothing beats base (the 4090's +0.8 % for pin0 did not carry over); the long-frame counts don't improve either.
+- **q26 (04:35-06:28), how work reaches the GPU (each flash-free on the 4090 in 6 starts; PASS_BARRIER=game also clean in
+  shots there):** base 40.5 / 41.1, RX_VK_PASS_BARRIER=game 40.8 / 40.6, RX_VK_BATCH=1 39.0 / 39.1 (slower), RX_VK_CHUNK=240
+  41.5 / 41.1, HOS_SHORT_SLEEP_POLLERS=2 41.2 / 40.5. chunk240's +1.2 % is inside the base's own spread tonight (7 runs,
+  40.5-41.9). **Nothing adopted.** The play env stays rball5 + cap + HOS_FPS_LOCK=40.
+- The Ally's realistic ceiling on this build is reached with switches: Hyrule is GPU-bound (~21-22 ms, the 3D at 1024x576,
+  no single pass to cut), Kokiri/Town hover at 41-45 game fps unlocked. More needs code (upstream) or a lower 3D size.
+- **q27 (06:29-07:13), as played: the user's own options (ls-play-options.ini: anisotropic_filtering=4, output_res=2048x1152,
+  ...; the benches use b4-before's options), play env, walks, two rounds (q27-steady.txt):** lock 40 route 37.6 / 37.6,
+  walks within 15 %: Kokiri 96-98 %, Hyrule 92-96 % (73-78 shown), **Town 80-89 % with 8-14 frames over 50 ms**; lock 36 route
+  34.4 / 34.6, walks 95-98 % everywhere (Town 95-96 %, 4-5 frames over 50 ms), 71-72 shown. With the user's settings, 36 is
+  clearly the steadier one in Town; 40 gives ~9 % more frames. Kept 40 (the user asked for it); 36 is the one-line switch
+  and the recommendation if Town feels uneven.
+- Play folder checked after the night: save identical to -next's, options = ls-play-options.ini, longshot_env.txt unchanged
+  except the comment naming 36.
 
 ## Next steps
 - Moving the play build to the newest main: build 02903b04 + 0002, 0003, 0004-on-6fb13fe5, 0007 in place over
