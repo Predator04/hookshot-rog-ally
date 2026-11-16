@@ -29,12 +29,13 @@ RX_VK_READBACK_LATE=newest,3980,9b040,1b580,8b040
 # 39.8 / 39.4), Hyrule Field +3.5 %; 0 flashes on the Ally and the 4090 test laptop. Only `cap`: never add sync (sync and cap
 # together flashed once; all three flood). If you see a white flash or one-frame popping: delete this line first.
 RX_VK_FENCE_FIRST_PART=cap
-# A steady frame rate (this build: Longshot 6fb13fe5 + patch 0006, 2026-11-15 night): the game held at 40 fps, frames
-# paced every 25 ms, which frame generation 2x shows as 80. Walking, 89-98 % of frames are within 15 % of each other (no
-# lock: 83-95 %). Kokiri and Town hold 40 (39 in Town); Hyrule Field and the heaviest camera views run 31-37, still evenly.
-# 80 shown on the 120 Hz screen looks even with its variable refresh (FreeSync) on.
-# For a perfectly even 60 instead (holds everywhere, 97-99 % even): change 40 to 30. In between: 36 holds 36 while walking
-# everywhere, Hyrule Field too (72 shown, 94-98 % even; 2026-11-16 night). For the most fps (less even): delete the line.
-HOS_FPS_LOCK=40
+# A steady frame rate (this build: Longshot 6fb13fe5 + patch 0006; 36 since 2026-11-16): the game held at 36 fps, frames
+# paced every ~27.8 ms, which frame generation 2x shows as 72. Walking with your own options (2026-11-16 night), 36 holds
+# everywhere, Hyrule Field too: 95-98 % of frames within 15 % of each other, Town 95-96 % with 4-5 frames over 50 ms.
+# Lock 40 (80 shown, the setting from 2026-11-15 night) gave Kokiri 96-98 % but Town only 80-89 % with 8-14 frames over
+# 50 ms, and Hyrule Field can't hold 40 (73-78 shown). 72 shown on the 120 Hz screen looks even with variable refresh (FreeSync).
+# For more fps where it holds (Kokiri, parts of Town): change 36 to 40. For a perfectly even 60 (holds everywhere, 97-99 %
+# even): change it to 30. For the most fps (less even): delete the line.
+HOS_FPS_LOCK=36
 # --- Optional diagnostics (this fork's patches): they only write a line when something is slow or memory is allocated.
 RX_VK_SLOW_LOG=80

@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-15, 23:10; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-16, 09:05; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -24,7 +24,7 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot code changes (patches) | `patches\` here (the clone itself is never pushed) |
 | Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 6c9edffe since 2026-11-14 17:28 (414f56e2 at 12:35), + our 2 patches uncommitted; push disabled) |
 | Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
-| **User's play folder (since 2026-11-15 23:10)** | `C:\Users\Admin\Games\Longshot-Ally-6fb` (longshot-ally-6fb13fe5-dirty: 6fb13fe5 + 0001, 0002, 0003, 0004-on-6fb13fe5, 0006; built 19:09-19:55 from the worktree `Zelda Ocrina\longshot-6fb`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-6fb`; the user's save + options; longshot_env.txt = bench\env_longshot_ally_6fb.txt, HOS_FPS_LOCK=40) |
+| **User's play folder (since 2026-11-15 23:10)** | `C:\Users\Admin\Games\Longshot-Ally-6fb` (longshot-ally-6fb13fe5-dirty: 6fb13fe5 + 0001, 0002, 0003, 0004-on-6fb13fe5, 0006; built 19:09-19:55 from the worktree `Zelda Ocrina\longshot-6fb`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-6fb`; the user's save + options; longshot_env.txt = bench\env_longshot_ally_6fb.txt, HOS_FPS_LOCK=36 since 2026-11-16 09:04, 40 before) |
 | Previous play folder (fallback) | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-6c9edffe-dirty + 0001-0004; rball5 + cap + lock 30; the same save) |
 | User's current play build | `C:\Users\Admin\Games\Hookshot-Ally` (rog-ally-cb21687, Hookshot fork; don't touch) |
 | Copy of the play build for A/B | `C:\Users\Admin\Games\Hookshot-Ally-ref` (34 GB; delete only with the user's OK) |
@@ -69,6 +69,11 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-16 09:04 (the user's yes): the play env's lock is 36 (HOS_FPS_LOCK=36, 72 shown), not 40.** With the
+user's own options (q27, "Night 2026-11-16" below) 36 holds while walking everywhere, Hyrule Field too: 95-98 % of frames
+within 15 %, Town 95-96 % with 4-5 frames over 50 ms; 40 gave Town 80-89 % with 8-14 and couldn't hold in Hyrule (73-78
+shown). The env comment names 40 and 30 as the one-line alternatives.
 
 **Update 2026-11-15 23:10 (details: "Night 2026-11-15" below): play `Games\Longshot-Ally-6fb`, Longshot 6fb13fe5 (153
 commits past 6c9edffe; inside v3.0.0-rc.5) with our patches and a real 40 lock (patch 0006).** Same session, same env
@@ -560,11 +565,14 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
   and the recommendation if Town feels uneven.
 - Play folder checked after the night: save identical to -next's, options = ls-play-options.ini, longshot_env.txt unchanged
   except the comment naming 36.
+- **09:04, with the user's yes ("yea" to switching): HOS_FPS_LOCK=40 -> 36 in Games\Longshot-Ally-6fb\longshot_env.txt**
+  (copied to bench\env_longshot_ally_6fb.txt); the comment now gives 40 (more fps where it holds) and 30 (perfectly even 60)
+  as the alternatives. Nothing else changed.
 
 ## Next steps
 - Moving the play build to the newest main: build 02903b04 + 0002, 0003, 0004-on-6fb13fe5, 0007 in place over
-  Games\Longshot-Ally-6fb (same translator, so its driver cache should stay warm), env HOS_FPS_MAX=40 in place of
-  HOS_FPS_LOCK=40, then a lock check (game time is real-time stepped under #609).
+  Games\Longshot-Ally-6fb (same translator, so its driver cache should stay warm), env HOS_FPS_MAX=36 in place of
+  HOS_FPS_LOCK=36, then a lock check (game time is real-time stepped under #609).
 - The user plays and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none on
   the Ally or the 4090). If one shows, remove ",8b040" first.
 - The waits on whole scene submissions (e0dbf40c) are now handled as far as tested safe: readbacks (rball5) and the capture
