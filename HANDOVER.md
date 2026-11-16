@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-15, 02:00; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-15, 17:15; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -68,6 +68,10 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-15 17:15 (details: "Day 2026-11-15" below): -next's longshot_env.txt now reads the 0x8b040 readbacks late
+too (RX_VK_READBACK_LATE=newest,3980,9b040,1b580,8b040): route 40.1 / 40.2 game fps vs 38.2 / 38.7 (Town +8 %, Kokiri
++5 %), 0 flashes on the Ally and on the 4090 lab laptop, nothing missing in shots, occlusion culling unchanged.**
 
 **Update 2026-11-15 02:00 (details: "Night" below): play `Games\Longshot-Ally-next` with its new longshot_env.txt.** With
 RX_VK_READBACK_LATE=newest,3980,9b040,1b580 Longshot runs ~39.5 game fps over the route (= the old build's 40.1; Kokiri
@@ -375,11 +379,90 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
 - Clone state: 6c9edffe + uncommitted patches 0001 (paced lock), 0002 (anti-lag log), 0003 (fence first part switch), all
   in patches\.
 
+## Day 2026-11-15: the 4090 laptop as a flash lab, first part per wait site (patch 0004), rball5
+- **Two machines (the user: "Do you want to use the 4090 laptop...? What helps you?", "if you could do two things at once, by
+  all means"):** the laptop (DESKTOP-K4ELB80, i9-13950HX, RTX 4090 Laptop + Intel UHD, 128 GB) runs its own Claude session,
+  reached over Remote Control (SendMessage to "New session"). It has a copy of this repo, the clone and the game files +
+  spot saves (copied over the user's E: USB drive, robocopy /MT:32; D: is the slow microSD), never in a repo. It builds the
+  same clone state into `Games\Longshot-4090` and runs the Ally's GPU path: RX_VK_MIRROR=0 (no VRAM mirrors: the GPU reads
+  and writes guest memory in place, as on the iGPU) + the compute mesh fallback (bench\q4090-chain.ps1, env_4090_*.txt,
+  flash_report.ps1, shot_diff.py). Its speed does not transfer (other GPU, other limits), but **it flashes far more often
+  where the Ally flashes at all: a stricter flash judge.** Split: the laptop screens for flashes, the Ally measures speed.
+  (The "really buggy, flickering" picture the user saw on the laptop was the fp runs, the expected failure.)
+- **Patch 0004: RX_VK_FENCE_FIRST_PART=<sites|1>, per wait site:** `rb` = invalidate()'s readback wait, `sync` = fence waits
+  (nvnSyncWait, its polls too), `cap` = vk_timeline_wait (a capture's write-back waits); `1` = all three (= 0003).
+  **Laptop flash counts:** rbl / rball as is 0; all three sites (on rbl and on rball) floods (the detector's 400 cap per
+  process); **each site alone 0, rb+cap and rb+sync 0, sync+cap 1 whole-screen flash** (present 261, title/menu, 1 of 4
+  starts); safety stage: rball+rb and rball+cap at all three
+  spots with walks, 0 in 12 starts (~65,000 presents). So issue 997's flashes need all three together.
+- **q17 hit a cold driver cache:** its first runs (12:2x, 13:0x; bench\q17-aborted-*.out) had 227 s of start-up shaders,
+  "1557 listed pipelines in no cache" and Hyrule/Town GPU 22-26 ms (17-20 normally). First blamed on a build-vk dll (so
+  -next was rebuilt in full at 12:39); the real cause: **the AMD driver evicted -next's pipelines after ~10 h unused.**
+  Fix: one start-mode warm-up (w17, env_rball_start.txt): Kokiri's start took 3,424 s (57 min, 38,488 pipelines), then
+  Hyrule 134 s, Town 96 s. Its pl17 poll counts were cold-cache runs: not used.
+- **q17b (13:03-15:4x, q17b-chain.ps1, q17b.out), -next with 0001-0004, two rounds, 25 s walks.** Game fps per spot (walk):
+  | Run | Kokiri | Hyrule | Town | Route | draws Kokiri / Town |
+  |---|---|---|---|---|---|
+  | r17 (rball) a / b | 41.6 (46.1) / 41.4 (47.2) | 36.0 (36.9) / 35.7 (36.7) | 37.6 (37.5) / 37.6 (37.5) | **38.4 / 38.2** | 1,387 / 1,337, 1,345 / 1,331 |
+  | rb17 (+rb) a / b | 44.7 (48.6) / 44.2 (48.6) | 36.2 (37.7) / 34.2 (34.7) | 39.3 (41.1) / 39.4 (40.5) | **40.1 / 39.3** | 1,288 / 1,286, 1,305 / 1,303 |
+  | cap17 (+cap) a / b | 40.8 (46.4) / 41.5 (45.5) | 33.8 (34.6) / 35.1 (35.0) | 38.2 (37.6) / 37.3 (38.4) | 37.6 / 38.0 | 1,345 / 1,271, 1,336 / 1,319 |
+  | fp17 (all three) a / b | 45.1 (48.8) / 45.1 (48.9) | 40.7 (40.6) / 40.8 (40.9) | 38.0 (42.6) / 40.7 (39.8) | 41.3 / 42.2 | 1,367 / 1,356, 1,400 / 1,384 |
+  **rb gives ~+4 % (route 39.7 vs 38.3; Kokiri +7 %, Town +5 %, Hyrule 0), cap nothing; fp's ceiling is ~+9 % but it
+  flashes.** uma_report.py --steady: rb's views are a little less even (p99 Kokiri 21 ms vs 17.4-18.5, Town 25-26 vs 22-22.5);
+  walks alike (p99 14-22 ms, 82-96 % of frames within 15 %).
+- **Draws (the route line's "draws" is a mean over all stat lines, so it moves with how many lines fall in each view):**
+  per view (the log's "a frame: N draws ..., P passes" lines grouped), **Kokiri is identical in all 13 runs** (3,57x-3,65x /
+  71x / 74x / 1,0xx): its route-level "drop" was an averaging artifact. **Town differs:** the view after the heavy one drew
+  1,062-1,168 in all 7 runs without an early 8b040 read but 753-1,143 in the 6 with one (rb17, fp17, r5; 4 of 6 under 1,000),
+  and r5_b's first view drew 688 objects / 171 passes against 1,612-1,890 / 190-207 in all 12 other runs (GPU 13.2 ms vs
+  17.6-18.5). Town has moving people, but that pattern points at occlusion culling (OoT draws each object's bounds, reads
+  the samples-passed counts back a frame or two later and leaves out those at 0; Longshot writes 4096 = visible until the
+  real count is in). Either more true counts arrive in time (harmless: hidden objects culled) or objects in view are
+  culled (popping). Laptop checks: a late read of 0x8b040 (and 0x9b040) returns exactly what the waited read does
+  (local diagnostic RX_VK_READBACK_LATE_CHECK, 0 differing words in ~240 reads a spot), and its shots (no flash detector)
+  show rball vs rball5 within each one's own noise, no draw drop there. The Ally's own shots + RX_VK_OCC_LOG: q19.
+- **Where rb's gain comes from (laptop, RX_VK_LOG_READBACK_RANGES):** the two 0x8b040-byte readbacks, ~16.5 ms of wait each
+  in Town / Kokiri. Upstream's RX_VK_READBACK_LATE takes sizes, so **rball5 = RX_VK_READBACK_LATE=newest,3980,9b040,1b580,8b040**
+  should give rb's gain with no patch: q18 measures it (below).
+- **The capture's wait (cap) is small on the Ally:** ~1.1 ms in 1 of 6 frames in Hyrule, ~0 in Kokiri (the laptop's 5 ms
+  was its mirrorless 4090 path). Patch 0005 (RX_VK_CAP_WRITER_PART=1: a capture's late pages wait for the recording part
+  that wrote them) works but gains nothing: OoT's exposure meter page is written at the frame's end. Kept in patches\ for
+  the record; not in any build.
+- **q18 (q18-chain.ps1, q18.out):** rball5 vs rball, two rounds with walks, then an rball5 flash count (fl_r5); the laptop
+  flash-counts rball5 at the same time (fl4_rb5). **Laptop: rball5 0 flashes in 6 starts** (Kokiri / Hyrule / Town x2 with
+  walks, ~22,000 presents; the log confirms "newest 1, 4 sizes"), its fps = rball+rb's there, and no draw drop (Kokiri
+  1,511 / 1,494, Town 1,289 / 1,334 vs rball's 1,475-1,485 / 1,305-1,382). Ally results (15:37-16:32), game fps (walk):
+  | Run | Kokiri | Hyrule | Town | Route |
+  |---|---|---|---|---|
+  | rball5 a / b | 44.8 (48.0) / 43.5 (48.2) | 35.0 (37.0) / 35.8 (36.1) | 40.5 (40.8) / 41.2 (40.9) | **40.1 / 40.2** |
+  | rball a / b | 41.9 (46.3) / 42.1 (46.6) | 35.6 (36.4) / 35.6 (35.7) | 37.1 (38.7) / 38.3 (36.3) | **38.2 / 38.7** |
+  **rball5 = rb's gain (+4 %: Kokiri +5 %, Town +8 %, Hyrule 0) with no patch, and 0 flashes on the Ally too** (fl_r5:
+  Kokiri / Hyrule / Town 4,560 / 4,080 / 4,560 presents). Two of its six spot runs hitched more (r5_a Hyrule 35 frames over
+  100 ms, r5_b Town 32, against 9-14 otherwise; neither repeated in the other round), and r5_b Town is the 688-draw view.
+- **q19 (16:32-17:11, q19-chain.ps1, q19.out): the Ally's own check, rball / rball5 / rball5 / rball with a PNG at each view
+  and RX_VK_OCC_LOG=1 (env_ldc_rball*_occ.txt).** Route 38.3 / 39.1 / 40.2 / 38.0. Occlusion reports alike: 0-counts Kokiri
+  41.4-42.5 % in all four, Town 63.7-65.9 % in all four, Hyrule 16-20 %; written 1.5-2.5 recordings after the report; **0 left
+  visible** in every line. Per-view Town draws normal in both rball5 runs (1,755 / 1,683, 2,647 / 2,554, 1,078 / 1,121 vs
+  rball 1,620, 2,080, 1,089): the 688-draw view did not come back (1 of 8 Town runs with an early 8b040 read, likely the
+  market's people). Shots: the one still view (Town_1_loaded) differs 4,649 px rball vs rball, 1,259 rball5 vs rball5,
+  1,329-5,576 rball vs rball5; the turned views differ 58k-533k px in every pairing (the camera stops a little differently);
+  Town_2_left viewed by eye in both: the same guard, Link, Navi, door, nothing missing. (The laptop, 4090: rball5 changes
+  neither occlusion 0-counts nor lag; ~720 late 0x8b040 reads equal to the waited data.)
+- **~17:12: Games\Longshot-Ally-next\longshot_env.txt now has RX_VK_READBACK_LATE=newest,3980,9b040,1b580,8b040** (rball5;
+  the comment says how to step back; backup bench\next-env-before-rball5-2026-11-15.txt; bench\env_longshot_ally_next.txt =
+  the new file). HOS_FPS_LOCK=30 stays.
+- Bench note: route-bench-ls.ps1 alone looks for saves only in bench\hs\route-saves, which this machine does not have: pass
+  `-Saves` (bench-route-ls.ps1 and q19-chain.ps1 fall back to `Zelda Ocrina\hookshot-rog-ally\ally\tools\hs\route-saves`).
+
 ## Next steps
-- The user plays -next and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none).
-- The remaining wait after the readback ranges: fence waits on whole scene submissions (e0dbf40c). The first-part mapping
-  (patch 0003) is +7 % more but flashes (issue 997). A safer middle: first part only for waits whose memory the game does not
-  reuse (needs code reading in vk_replay.cpp submit_recording / invalidate). Candidate for the 4090 laptop's help (builds).
+- The user plays -next and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none on
+  the Ally or the 4090). If one shows, remove ",8b040" first.
+- The remaining wait: fence and capture waits on whole scene submissions (e0dbf40c). On the Ally rb was worth ~+4 % (now had
+  through 8b040), cap alone 0, all three ~+9 % but they flash (issue 997). Once the readback wait is gone, cap or sync may
+  be the next limit: rball5 + FIRST_PART=cap and rball5 + FIRST_PART=sync were never speed-tested (q20, running 17:13-~18:25;
+  the 4090 flash-counts both at the same time, stage r5pair). On the 4090 rb+cap and rb+sync were clean, sync+cap flashed once.
+- If the game stutters badly or sits long at the progress screen after many hours unused: the AMD driver evicted its
+  pipelines (seen 2026-11-15 after ~10 h). One session with RX_VK_LOAD=start (up to ~1 h the first time) refills them.
 - Remaining long frames: the camera swings (a whole new view streamed: texture uploads + "memory sync capture" on the main
   thread). RX_VK_UPLOAD_BUDGET_MS lower (e.g. 20) spreads uploads but risked ground flicker upstream: needs eyes.
 - Upstream issue worth posting (with the user's yes): readback/fence waits keep OoT's job threads polling on iGPUs without
@@ -421,3 +504,12 @@ as fast.
   in-process (as the queues do), or `-Command`.
 - A BIOS UMA change resets the AMD driver cache (the driver treats it as a new device); it also invalidates Longshot's
   create-mode warm state without telling it (see Daytime above): one start-mode session fixes it.
+- ~10 h without running a folder can do the same (2026-11-15: -next's first start 227 s, "1557 listed pipelines in no cache",
+  GPU 22-26 ms in Hyrule/Town; the refill took a 57-min start-mode session). Symptoms look like a bad build; check the
+  log's "in no cache" count first. Benches after a long idle need a warm-up start first.
+- Shot diffs: only Town_1_loaded holds still between runs; the turned views differ 50k-500k px in every pairing (the camera
+  stops a little differently), so compare each setting against its own repeat, and look at the PNGs by eye.
+- The route line's "draws" is a mean over stat lines: it moves with timing. Compare draws per view (group the log's
+  "a frame: N draws, P passes" lines into plateaus).
+- In a bash-run background command, a trailing PowerShell `"chain exit: $LASTEXITCODE"` is not a command: exit 127 there
+  is harmless when the chain's own .out says done.

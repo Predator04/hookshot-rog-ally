@@ -1,0 +1,21 @@
+﻿16:21 q19 chain: waiting for q18 to end
+16:32 sh19_r_a in C:\Users\Admin\Games\Longshot-Ally-next env=env_ldc_rball_occ.txt spots=Kokiri,Town,HyruleField (shots)
+ABORT: no save for spot Kokiri in C:\Users\Admin\Desktop\LongShot Rog Ally\bench\hs\route-saves
+route-bench exit: 1
+16:32 sh19_r5_a in C:\Users\Admin\Games\Longshot-Ally-next env=env_ldc_rball5_occ.txt spots=Kokiri,Town,HyruleField (shots)
+ABORT: no save for spot Kokiri in C:\Users\Admin\Desktop\LongShot Rog Ally\bench\hs\route-saves
+route-bench exit: 1
+16:32 sh19_r5_b in C:\Users\Admin\Games\Longshot-Ally-next env=env_ldc_rball5_occ.txt spots=Kokiri,Town,HyruleField (shots)
+ABORT: no save for spot Kokiri in C:\Users\Admin\Desktop\LongShot Rog Ally\bench\hs\route-saves
+route-bench exit: 1
+16:32 sh19_r_b in C:\Users\Admin\Games\Longshot-Ally-next env=env_ldc_rball_occ.txt spots=Kokiri,Town,HyruleField (shots)
+ABORT: no save for spot Kokiri in C:\Users\Admin\Desktop\LongShot Rog Ally\bench\hs\route-saves
+route-bench exit: 1
+A                          B                          view                  pixels  cells  where                peak (cell)
+sh19_r_a                   no shots in C:\Users\Admin\Desktop\LongShot Rog Ally\bench\hs\route_sh19_r_a
+sh19_r5_a                  no shots in C:\Users\Admin\Desktop\LongShot Rog Ally\bench\hs\route_sh19_r5_a
+sh19_r_a                   no shots in C:\Users\Admin\Desktop\LongShot Rog Ally\bench\hs\route_sh19_r_a
+sh19_r_b                   no shots in C:\Users\Admin\Desktop\LongShot Rog Ally\bench\hs\route_sh19_r_b
+sh19_r_a                   no shots in C:\Users\Admin\Desktop\LongShot Rog Ally\bench\hs\route_sh19_r_a
+draws per spot:
+16:32 q19 chain done

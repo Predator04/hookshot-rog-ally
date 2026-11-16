@@ -17,9 +17,13 @@ RX_VK_LOAD=create
 # +13% game fps on the Ally (32.4 -> 36.5). The three ranges that still waited (0x3980, 0x9b040, 0x1b580) too (2026-11-15):
 # while one of OoT's job threads waits on a readback the others poll; without those waits the polls fell 37 % and the game
 # ran +6-7 % (route 37.1 -> 39.5, Kokiri walking 43 -> 48 game fps), 0 one-frame flashes at all three spots (RX_VK_FLASH).
+# And 0x8b040 (2026-11-15 evening): the two readbacks of that size waited ~16.5 ms each in Town and Kokiri; without them
+# +4 % more (route 38.4 -> 40.1, Town +8 %, Kokiri +5 %), 0 flashes on the Ally and on a 4090 test laptop, the data read
+# early equal to the waited data, the same occlusion culling and nothing missing in screenshots.
 # Risk: a value a frame old (the exposure meter, the culling tables): a white flash or an object popping for a frame. If you
-# see that, change the line back to RX_VK_READBACK_LATE=newest. To undo everything: delete the line.
-RX_VK_READBACK_LATE=newest,3980,9b040,1b580
+# see that, first remove ",8b040" (the line before 2026-11-15 evening was RX_VK_READBACK_LATE=newest,3980,9b040,1b580); if
+# it stays, change the line to RX_VK_READBACK_LATE=newest. To undo everything: delete the line.
+RX_VK_READBACK_LATE=newest,3980,9b040,1b580,8b040
 # A steady frame rate: the game held at 30 fps (this build's patch 0001: frames paced at 2 vsyncs of 60), which frame
 # generation 2x shows as a steady 60 (97-100 % of frames within 15 % of 16.7 ms while walking, 2026-11-15). The game runs
 # 37-44 fps without it, so it holds everywhere. For more fps instead (75-97 shown, less even): delete this line.
