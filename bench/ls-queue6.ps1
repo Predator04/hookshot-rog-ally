@@ -29,15 +29,16 @@ function Busy {
 function Restore { foreach ($g in $benches) { Copy-Item "$S\ls-play-options.ini" "$g\longshot_options.ini" -Force } }
 "$(Get-Date -Format HH:mm) queue $Name start: $($Runs.Count) runs"
 foreach ($r in $Runs) {
-    # ('tag|next or cur|env file|spots': spots comma separated, all three when left out)
-    $tag, $which, $envf, $sp = $r.Split('|')
+    # ('tag|next or cur|env file|spots|ini|shots': spots comma separated, all three when left out; ini (2026-11-15 night) an
+    # options file in bench\ in place of b4-before's bench options; shots: a PNG at each view, route-bench-ls -Shots)
+    $tag, $which, $envf, $sp, $ini, $sh = $r.Split('|')
     $spots = if ($sp) { $sp.Split(',') } else { @('Kokiri', 'HyruleField', 'Town') }
     $g = $dirs[$which]
     if ((Get-Date) -gt $stop) { "$(Get-Date -Format HH:mm) time limit ($StopAt) before ${tag}: queue ends here"; Restore; exit 0 }
     if (Busy) { "ABORT before ${tag}: a game is running (the user may be playing)"; Restore; exit 2 }
-    Copy-Item $ini0 "$g\longshot_options.ini" -Force
-    "$(Get-Date -Format HH:mm) $tag in $g env=$envf spots=$($spots -join ',')"
-    & "$S\bench-route-ls.ps1" -Tag $tag -Game $g -EnvFile "$S\$envf" -Spots $spots -StartMaxMin 15 -WalkS $WalkS
+    Copy-Item $(if ($ini) { "$S\$ini" } else { $ini0 }) "$g\longshot_options.ini" -Force
+    "$(Get-Date -Format HH:mm) $tag in $g env=$envf spots=$($spots -join ',')$(if ($ini) { " ini=$ini" })$(if ($sh) { ' (shots)' })"
+    & "$S\bench-route-ls.ps1" -Tag $tag -Game $g -EnvFile "$S\$envf" -Spots $spots -StartMaxMin 15 -WalkS $WalkS -Shots:([bool]$sh)
     if ($LASTEXITCODE -eq 2 -or $LASTEXITCODE -eq 3) { "stopped at ${tag}: $LASTEXITCODE"; Restore; exit $LASTEXITCODE }
 }
 Restore

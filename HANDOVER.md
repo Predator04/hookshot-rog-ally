@@ -519,6 +519,32 @@ GPL only; build -> run -> measure -> fix loop, before/after frame times for each
   HOS_FPS_MAX=30, and patch 0007 (HOS_FPS_MAX=20-59 on #609's pacer; its tests pass) for 40. On 02903b04, 0002 + 0003 +
   0004-on-6fb13fe5 + 0007 apply (checked). Not built yet: nothing in it for speed (audio device menu, mouse fix, docs).
 
+## Night 2026-11-16 (the user, via the 4090 session: "Continue. Use both see you in 10 hours you got this. Optimize!")
+Split: the Ally measures speed, the 4090 builds, flash-counts and digs in the source. All on Games\Longshot-Ally-6fb with
+the play env (rball5 + cap), 25 s walks, two rounds each.
+- **q24 A, locks in between (23:56-01:03):** route game fps l35 34.0 / 33.8, l36 34.5 / 34.7, l40 38.0 / 37.9. Walks within
+  15 % (uma_report.py --steady, q24a-steady.txt): l36 94-98 % at 71-72 shown and it holds 36 while walking at every spot,
+  Hyrule too; l40 91-97 % at 77-80 shown (Hyrule walks 38.6 / 39.8 game fps tonight, 35.5-36.8 earlier); l35 like l36
+  (one Hyrule walk episode, 64 %, not repeated). The heavy loaded views stay 28-33 under any lock. Play env keeps 40; its
+  comment now names 36 as the even middle.
+- **q24 B, GPU pass timing (gp24, RX_VK_PASS_TIMING=1; gp24-summary.txt):** Hyrule 20.6 ms profiled = passes 8.3 (40 %),
+  dispatch 3.9 (19 %), ~540 barriers 1.24, 6.75 ms between spans; Town 15.5 and Kokiri 16.6 alike (dispatch 24-25 %). Every
+  heavy pass is 1024x576: the 3D is drawn at that size whatever output_res is (the game's handheld profile); the only
+  output-sized pass in a top 25 is Town's 2560x1440 one at 0.16 ms. No single big pass (the top one 0.6-1.3 ms).
+- **q24 C, output_res (01:14-02:44; round a with a PNG at each view):** route a / b: 2048x1152 (the user's) 39.7 / 40.7,
+  1920x1080 40.7 / 41.1, 1600x900 40.4 / 40.7, 1280x720 41.0 / 40.7. Kokiri and Town unchanged; Hyrule 36.1 / 36.1 at 2048
+  against 36.3-37.4 lower (+2-3 %). Round a's shots took time in every run (r2048_a Kokiri 42.8 vs r2048_b 45.2), so compare
+  within a round. Shots: Town's still view differs 1.5-5.4k px (rball vs rball's own repeat: 1.3-4.6k); crops of Town's
+  arch and Hyrule's grass and Link look the same at 1280x720 as at 2048x1152 (the screen is 1280x720: the desktop is set to
+  1280x720 @ 120 on a 1920x1080 panel). **Not worth a change: ~1 % overall.** Kept at 2048x1152.
+- **q24 D, lock 40 at 1600x900:** route 37.7 / 37.4 vs 37.9-38.0 at 2048x1152: no help for the lock either.
+- **The 4090's checks of the newest main (7045ca7c + 0002-0004 + 0007, Games\Longshot-4090-main):** play env 0 flashes in
+  6 starts; HOS_FPS_MAX=40 holds 40.0 (80 shown, 1% low 77-79) with "real-time step on: ratio 1.504"; HOS_FPS_MAX=30 = the
+  0001 lock 30. The game clock is real time under our 6fb locks too (the log's "real-time step on: ratio 1.499, game's frame
+  rate 40"). CPU pre-screen there (mirrors on, uncapped, CPU-bound at 65-80 fps): REPLAY_PIN=0 +0.8 %, RESERVE_CORE=0
+  +0.6 %, both +0.5 %, NATIVE_ZSTD(_FRAMES) 0; noise ~0.3 %.
+- q25 (CPU switches on the Ally) and q26 (GPU submission switches + HOS_SHORT_SLEEP_POLLERS=2): below when done.
+
 ## Next steps
 - Moving the play build to the newest main: build 02903b04 + 0002, 0003, 0004-on-6fb13fe5, 0007 in place over
   Games\Longshot-Ally-6fb (same translator, so its driver cache should stay warm), env HOS_FPS_MAX=40 in place of

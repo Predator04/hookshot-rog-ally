@@ -33,8 +33,8 @@ RX_VK_FENCE_FIRST_PART=cap
 # paced every 25 ms, which frame generation 2x shows as 80. Walking, 89-98 % of frames are within 15 % of each other (no
 # lock: 83-95 %). Kokiri and Town hold 40 (39 in Town); Hyrule Field and the heaviest camera views run 31-37, still evenly.
 # 80 shown on the 120 Hz screen looks even with its variable refresh (FreeSync) on.
-# For a perfectly even 60 instead (holds everywhere, 97-99 % even): change 40 to 30. For the most fps (less even): delete
-# the line.
+# For a perfectly even 60 instead (holds everywhere, 97-99 % even): change 40 to 30. In between: 36 holds 36 while walking
+# everywhere, Hyrule Field too (72 shown, 94-98 % even; 2026-11-16 night). For the most fps (less even): delete the line.
 HOS_FPS_LOCK=40
 # --- Optional diagnostics (this fork's patches): they only write a line when something is slow or memory is allocated.
 RX_VK_SLOW_LOG=80

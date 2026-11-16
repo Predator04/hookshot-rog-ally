@@ -1,5 +1,5 @@
 param([string]$Tag, [string]$Game, [string]$EnvFile, [string[]]$Spots = @('Kokiri', 'HyruleField', 'Town'), [int]$StartMaxMin = 75, [int]$WalkS = 0,
-      [string]$Saves = '')
+      [string]$Saves = '', [switch]$Shots)
 # One route-bench run (called in-process, as the task asks) with a memory sampler beside it:
 # hookshot's private bytes and working set, system commit / limit, available RAM, the game's GPU shared + dedicated memory.
 # Output: scratchpad\mem\mem_<Tag>.csv, and a summary line per spot appended to scratchpad\mem\mem_results.txt.
@@ -48,7 +48,7 @@ $job = Start-Job -ArgumentList $csv -ScriptBlock {
 }
 $t0 = Get-Date
 try {
-    & $rb -Tag $Tag -Game $Game -EnvFile $EnvFile -Saves $saves -Spots $Spots -StartMaxMin $StartMaxMin -WalkS $WalkS
+    & $rb -Tag $Tag -Game $Game -EnvFile $EnvFile -Saves $saves -Spots $Spots -StartMaxMin $StartMaxMin -WalkS $WalkS -Shots:$Shots
     $code = $LASTEXITCODE
 } finally {
     Stop-Job $job -ErrorAction SilentlyContinue; Remove-Job $job -Force -ErrorAction SilentlyContinue

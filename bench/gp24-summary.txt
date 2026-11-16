@@ -1,0 +1,75 @@
+== HyruleField (block at line 3438)
+  20.59 ms a frame in all (recordings' command buffers + upload command buffers; the present's blit to the window is not timed; the 'GPU time' line of
+  recordings' command buffers: 20.59 ms from the first timestamp to the last in 26.1 a frame (13.84 ms in spans, 6.75 ms between them: glue the spans 
+  upload command buffers: 0.00 ms in 0.0 a frame (0.00 ms in spans, 0.00 ms between them: texture uploads and decodes, the page table, glue)
+  by kind (cb: m = recordings' command buffers, u = upload ones; items: draws of a pass, copies of a copy batch):
+    m pass        8.345 ms  40.5%    181.2 spans    1980.2 items     0.00 MB     46.1 us a span
+    m dispatch    3.899 ms  18.9%    146.4 spans     146.4 items     0.00 MB     26.6 us a span
+    m barrier     1.238 ms   6.0%    540.4 spans     540.4 items     0.00 MB      2.3 us a span
+    m xfer        0.152 ms   0.7%      6.8 spans       6.8 items     0.00 MB     22.4 us a span
+    m ubupd       0.133 ms   0.6%      4.1 spans      79.9 items     0.00 MB     32.6 us a span
+    m event       0.052 ms   0.3%     19.0 spans      19.0 items     0.00 MB      2.7 us a span
+    m clear       0.018 ms   0.1%      1.0 spans       1.0 items     0.00 MB     18.2 us a span
+  the 25 spans that took the most (ms a frame, spans a frame, us a span, items a frame, MB a frame):
+  m   0.585 ms     0.9 x    632.8 us      14.8 items    0.00 MB  pass 1024x576 f122 1c+d, 5-32 draws, first prog 7fd6e4fd3ed2ab48, last prog c9ac7b656
+  m   0.498 ms   257.6 x      1.9 us     257.6 items    0.00 MB  barrier (other)
+  m   0.456 ms     1.0 x    455.6 us       1.0 items    0.00 MB  pass 1024x576 f122 1c+d, 0-4 draws, first prog d905f52b7517c681, last prog d905f52b7517c681
+  m   0.415 ms   111.6 x      3.7 us     111.6 items    0.00 MB  barrier (the game's nvnCommandBufferBarrier)
+  m   0.404 ms     0.6 x    632.3 us      25.0 items    0.00 MB  pass 1024x576 f122 1c+d, 33-256 draws, first prog 739acd678ae08655, last prog de97d1daff5eb7a7
+  m   0.372 ms     1.0 x    372.2 us       1.0 items    0.00 MB  pass 1024x576 f37 1c+d, 0-4 draws, first prog 3427a1dbefd5e02c, last prog 3427a1dbefd5e02c
+  m   0.318 ms     1.0 x    318.2 us       1.0 items    0.00 MB  dispatch  prog ee7764a6b1ef459c
+  m   0.282 ms     1.0 x    282.0 us       1.0 items    0.00 MB  dispatch  prog b612216258832b9c
+  m   0.272 ms    59.0 x      4.6 us      59.0 items    0.00 MB  dispatch  prog 755a777ada52677d
+  m   0.259 ms     0.5 x    560.6 us      44.3 items    0.00 MB  pass 1024x576 f122 1c+d, 33-256 draws, first prog 46c14f8ee79c5349, last prog 310e017268637a16
+  m   0.253 ms     1.0 x    252.6 us       1.0 items    0.00 MB  pass 1024x576 f37 1c, 0-4 draws, first prog 590952439f58fc96, last prog 590952439f58fc96
+  m   0.245 ms     1.0 x    245.5 us       1.0 items    0.00 MB  dispatch  prog 435a0138b9013040
+== Town (block at line 3922)
+  15.54 ms a frame in all (recordings' command buffers + upload command buffers; the present's blit to the window is not timed; the 'GPU time' line of
+  recordings' command buffers: 15.44 ms from the first timestamp to the last in 19.0 a frame (12.23 ms in spans, 3.21 ms between them: glue the spans 
+  upload command buffers: 0.10 ms in 0.2 a frame (0.00 ms in spans, 0.10 ms between them: texture uploads and decodes, the page table, glue)
+  by kind (cb: m = recordings' command buffers, u = upload ones; items: draws of a pass, copies of a copy batch):
+    m pass        7.134 ms  46.2%    200.5 spans    1108.1 items     0.00 MB     35.6 us a span
+    m dispatch    3.647 ms  23.6%     95.5 spans      95.5 items     0.00 MB     38.2 us a span
+    m barrier     1.073 ms   6.9%    434.4 spans     434.4 items     0.00 MB      2.5 us a span
+    m xfer        0.158 ms   1.0%      6.8 spans       6.8 items     0.00 MB     23.3 us a span
+    m ubupd       0.145 ms   0.9%      4.1 spans      82.0 items     0.00 MB     35.1 us a span
+    m event       0.056 ms   0.4%     19.0 spans      19.0 items     0.00 MB      3.0 us a span
+    m clear       0.015 ms   0.1%      1.0 spans       1.0 items     0.00 MB     15.2 us a span
+    u barrier     0.002 ms   1.7%      0.7 spans       0.7 items     0.00 MB      2.3 us a span
+  the 25 spans that took the most (ms a frame, spans a frame, us a span, items a frame, MB a frame):
+  m   0.499 ms   146.0 x      3.4 us     146.0 items    0.00 MB  barrier (the game's nvnCommandBufferBarrier)
+  m   0.284 ms   167.2 x      1.7 us     167.2 items    0.00 MB  barrier (other)
+  m   0.277 ms     1.0 x    276.5 us       1.0 items    0.00 MB  dispatch  prog 435a0138b9013040
+  m   0.267 ms     1.0 x    267.2 us       1.0 items    0.00 MB  pass 1024x576 f37 1c, 0-4 draws, first prog d8180bd8c6ecc77b, last prog d8180bd8c6ecc77b
+  m   0.234 ms     1.0 x    234.5 us       1.0 items    0.00 MB  dispatch  prog ee7764a6b1ef459c
+  m   0.213 ms     1.0 x    212.9 us       1.0 items    0.00 MB  pass 1024x576 f122 1c+d, 0-4 draws, first prog 1a7482c0ec9991ea, last prog 1a7482c0ec9991ea
+  m   0.206 ms     1.0 x    205.7 us       1.0 items    0.00 MB  dispatch  prog 35de103a233e6361
+  m   0.191 ms     2.0 x     94.3 us       2.0 items    0.00 MB  pass 1024x576 f37 1c+d, 0-4 draws, first prog c254a02b6a76abe8, last prog c254a02b6a76abe8
+  m   0.184 ms     1.0 x    184.0 us       1.0 items    0.00 MB  dispatch  prog 6e36cb36b062d2e2
+  m   0.173 ms     1.0 x    173.5 us       1.0 items    0.00 MB  pass 1024x576 f37 1c+d, 0-4 draws, first prog 3427a1dbefd5e02c, last prog 3427a1dbefd5e02c
+  m   0.163 ms     1.0 x    162.9 us       1.0 items    0.00 MB  pass 2560x1440 f43 1c, 0-4 draws, first prog b7914ae65792d0c8, last prog b7914ae65792d0c8
+== Kokiri (block at line 3890)
+  16.57 ms a frame in all (recordings' command buffers + upload command buffers; the present's blit to the window is not timed; the 'GPU time' line of
+  recordings' command buffers: 16.54 ms from the first timestamp to the last in 17.1 a frame (11.97 ms in spans, 4.57 ms between them: glue the spans 
+  upload command buffers: 0.03 ms in 0.0 a frame (0.00 ms in spans, 0.03 ms between them: texture uploads and decodes, the page table, glue)
+  by kind (cb: m = recordings' command buffers, u = upload ones; items: draws of a pass, copies of a copy batch):
+    m pass        6.462 ms  39.1%    163.3 spans     882.3 items     0.00 MB     39.6 us a span
+    m dispatch    4.047 ms  24.5%    100.8 spans     100.8 items     0.00 MB     40.1 us a span
+    m barrier     1.143 ms   6.9%    426.1 spans     426.1 items     0.00 MB      2.7 us a span
+    m xfer        0.140 ms   0.8%      6.8 spans       6.8 items     0.00 MB     20.6 us a span
+    m ubupd       0.116 ms   0.7%      4.3 spans      79.9 items     0.00 MB     27.1 us a span
+    m event       0.053 ms   0.3%     19.0 spans      19.0 items     0.00 MB      2.8 us a span
+    m clear       0.014 ms   0.1%      1.0 spans       1.0 items     0.00 MB     13.7 us a span
+    u barrier     0.000 ms   0.6%      0.1 spans       0.1 items     0.00 MB      2.3 us a span
+  the 25 spans that took the most (ms a frame, spans a frame, us a span, items a frame, MB a frame):
+  m   0.488 ms   202.2 x      2.4 us     202.2 items    0.00 MB  barrier (other)
+  m   0.398 ms   119.3 x      3.3 us     119.3 items    0.00 MB  barrier (the game's nvnCommandBufferBarrier)
+  m   0.396 ms     1.0 x    396.5 us       1.0 items    0.00 MB  pass 512x288 f97 2c+d, 0-4 draws, first prog da7a7ab28b8e73d9, last prog da7a7ab28b8e73d9
+  m   0.359 ms     3.0 x    119.8 us       3.0 items    0.00 MB  dispatch  prog 317da56ff6c842c7
+  m   0.292 ms     2.8 x    103.4 us       2.8 items    0.00 MB  dispatch  prog cc62764061c44f6a
+  m   0.284 ms     1.0 x    284.7 us       1.0 items    0.00 MB  pass 1024x576 f37 1c, 0-4 draws, first prog d8180bd8c6ecc77b, last prog d8180bd8c6ecc77b
+  m   0.249 ms     0.8 x    326.2 us      12.4 items    0.00 MB  pass 1024x576 f122 1c+d, 5-32 draws, first prog 7fd6e4fd3ed2ab48, last prog 79323d04f98f23d3
+  m   0.226 ms     1.0 x    226.0 us       1.0 items    0.00 MB  dispatch  prog 435a0138b9013040
+  m   0.220 ms     1.0 x    220.0 us       1.0 items    0.00 MB  dispatch  prog ee7764a6b1ef459c
+  m   0.217 ms     1.0 x    217.2 us       1.0 items    0.00 MB  pass 1024x576 f122 1c+d, 0-4 draws, first prog 1a7482c0ec9991ea, last prog 1a7482c0ec9991ea
+  m   0.216 ms     1.0 x    216.6 us       1.0 items    0.00 MB  pass 1024x576 f122 1c+d, 0-4 draws, first prog d8e59341cf4f629c, last prog d8e59341cf4f629c
