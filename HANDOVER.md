@@ -568,6 +568,8 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
 - **09:04, with the user's yes ("yea" to switching): HOS_FPS_LOCK=40 -> 36 in Games\Longshot-Ally-6fb\longshot_env.txt**
   (copied to bench\env_longshot_ally_6fb.txt); the comment now gives 40 (more fps where it holds) and 30 (perfectly even 60)
   as the alternatives. Nothing else changed.
+- **~09:14, the 4090 session (with the user's OK) posted the findings as Longshot issue #1190** under the user's Forgejo
+  account (details in "Next steps").
 
 ## Next steps
 - Moving the play build to the newest main: build 02903b04 + 0002, 0003, 0004-on-6fb13fe5, 0007 in place over
@@ -578,14 +580,17 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
 - The waits on whole scene submissions (e0dbf40c) are now handled as far as tested safe: readbacks (rball5) and the capture
   (FIRST_PART=cap), together ~+6 % over rball (route ~40.5 vs 38.3); all three sites (~+9 %) flash. The fence site (sync)
   gives nothing on the Ally. What would close the rest is an upstream fix that makes the first-part mapping safe on
-  mirrorless iGPUs (issue 997): worth an upstream issue with these numbers (only with the user's yes).
+  mirrorless iGPUs (issue 997). **Posted 2026-11-16 ~09:14 with the user's OK, from the 4090 session under the user's
+  Forgejo account: Longshot issue #1190** (https://git.magicbean.dev/MagicBeanDev/Longshot/issues/1190, open): the 8b040
+  readback size (+4 %), FENCE_FIRST_PART=cap (+2 %), all three sites flooding, the q17b/q18/q20 tables, the nine switches
+  with no gain, and a link to patch 0007 (20-59 cap). Its text is on the laptop: hookshot-rog-ally\issue-draft-ally-readback-
+  capture-waits.md (not committed). Watch #1190 for replies; a fix there may let a later build drop patches 0003/0004.
 - If the user reports a white flash or one-frame popping: delete the FIRST_PART=cap line first, then remove ",8b040".
 - If the game stutters badly or sits long at the progress screen after many hours unused: the AMD driver evicted its
   pipelines (seen 2026-11-15 after ~10 h). One session with RX_VK_LOAD=start (up to ~1 h the first time) refills them.
 - Remaining long frames: the camera swings (a whole new view streamed: texture uploads + "memory sync capture" on the main
   thread). RX_VK_UPLOAD_BUDGET_MS lower (e.g. 20) spreads uploads but risked ground flicker upstream: needs eyes.
-- Upstream issue worth posting (with the user's yes): readback/fence waits keep OoT's job threads polling on iGPUs without
-  mirrors (76bbe4aa only covers mirrored pages), with the poll counts and the flash counts above.
+- The readback/fence waits on iGPUs without mirrors (76bbe4aa only covers mirrored pages) are now upstream as #1190 (above).
 - Post `issue-draft-uma8-submit-oom.md` upstream only with the user's OK. A second finding worth an upstream issue (draft
   `issue-draft-create-cold-driver-cache.md`, same rule): create mode does not rebuild its notes into an emptied driver cache.
 - The bisect of the CPU regression (below) is what would close the remaining ~8% to the old build: the upstream update and
