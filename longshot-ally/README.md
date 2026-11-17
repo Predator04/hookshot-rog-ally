@@ -62,7 +62,7 @@ You get everything here except the 36 fps cap.
 | `RX_VK_FORCE_MESH_FALLBACK=1` | Runs the game's mesh shaders as compute shaders. With the native ones the Ally's GPU hangs or the PC restarts. AMD's current driver (32.0.32015.14001) doesn't offer mesh shaders on the Ally, but Longshot's automatic rule doesn't know the Ally's GPU, so a driver update could bring the hang back. **Keep this line.** |
 | `RX_VK_READBACK_LATE=newest` | CPU reads of the newest GPU work's results don't wait for it: they get the values a frame late. Together with the next line, +1.3 fps on rc.7 (see Measurements). |
 | `RX_VK_PCACHE_LOAD=0` | No second shader cache next to the AMD driver's own. |
-| `RX_VK_FSR_FG=0` | Frame generation by the renderer's own maker. Longshot's default here, AMD FSR 3.1, looks better but costs about 10 % of the frame rate on the Ally (4.2 fps). Delete the line to try it. |
+| `RX_VK_FSR_FG=0` | Frame generation by the renderer's own maker. Longshot's default here, AMD FSR 3.1, costs about 10 % of the frame rate on the Ally (4.2 fps). Delete the line to try it. |
 | `HOS_FPS_MAX=36` | The 36 fps cap (installer build only). |
 
 `longshot_options_ally.ini` (the installer sets these rows and keeps a copy of your file first):

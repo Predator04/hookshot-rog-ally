@@ -25,7 +25,7 @@ Market Town, with the handheld picture and no flashing.
 - **36 fps holds everywhere tested:** 98-99 % of frames within 15 % of the target, with the installer's own build. In
   Hyrule Field only these settings hold 36 with room to spare; 40 dips there.
 - **The renderer's own frame generation instead of FSR 3.1:** Longshot now uses AMD FSR 3.1 frame generation by default
-  on the Ally. It looks better, but costs about 10 % of the frame rate there. One line in `longshot_env.txt`
+  on the Ally. It costs about 10 % of the frame rate there. One line in `longshot_env.txt`
   (`RX_VK_FSR_FG=0`) keeps the renderer's own; delete it to try FSR 3.1.
 - **Mesh shaders as compute shaders:** the Ally's GPU hangs with the native ones. AMD's current driver doesn't offer them
   on the Ally, but Longshot's automatic rule doesn't know the Ally's GPU, and Longshot dropped the menu row for it. So
