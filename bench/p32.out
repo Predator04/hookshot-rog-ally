@@ -1,0 +1,13 @@
+﻿22:04 p32 check start
+22:04 queue p32 start: 1 runs
+22:04 p32 in C:\Users\Admin\Games\Longshot-Ally-new env=env_longshot_ally_rc6.txt spots=Kokiri,HyruleField,Town ini=ls-play-options.ini
+22:08 [p32] Kokiri: start 63 s | game fps 34.6 | shown 70.9 (1% low 55.9) | GPU 17.54 ms | draws 1,325 | passes 173 | >=50ms 4 >=100ms 0 | views: 1_loaded 23.6 ms 28 fps; 2_left 15.7 ms 36 fps; 3_right 16.2 ms 36 fps; 4_half_left 16.8 ms 36 fps | walk: game fps 36.0 | shown 72.1 (1% low 68.4) | GPU 15.65 ms | >=50ms 0 >=100ms 0 | alive=True   env=env_longshot_ally_rc6.txt
+22:11 [p32] HyruleField: start 78 s | game fps 35.6 | shown 70.2 (1% low 43.6) | GPU 19.22 ms | draws 1,978 | passes 183 | >=50ms 22 >=100ms 5 | views: 1_loaded 20.6 ms 36 fps; 2_left 18.3 ms 36 fps; 3_right 19.7 ms 34 fps; 4_half_left 18.4 ms 36 fps | walk: game fps 36.0 | shown 71.9 (1% low 63.2) | GPU 19.46 ms | >=50ms 0 >=100ms 0 | alive=True   env=env_longshot_ally_rc6.txt
+22:15 [p32] Town: start 81 s | game fps 35.3 | shown 70.5 (1% low 51.2) | GPU 16.79 ms | draws 1,345 | passes 175 | >=50ms 21 >=100ms 7 | views: 1_loaded 15.7 ms 35 fps; 2_left 17.5 ms 35 fps; 3_right 18.3 ms 35 fps; 4_half_left 15.7 ms 36 fps | walk: game fps 35.7 | shown 71.4 (1% low 50.6) | GPU 16.54 ms | >=50ms 2 >=100ms 0 | alive=True   env=env_longshot_ally_rc6.txt
+22:16 [p32] ROUTE (3 spots): game fps 35.2 | 1% low 50.2 | GPU 17.85 ms | draws 1,549  env=env_longshot_ally_rc6.txt
+22:16 [p32] Kokiri: private max 178 MB | working set max 8 MB | commit max 38.2 of 59.7 GB | available min 67 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 122% | disk page reads/s mean 1,908 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 31 samples
+22:16 [p32] HyruleField: private max 178 MB | working set max 8 MB | commit max 38.0 of 59.7 GB | available min 51 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 110% | disk page reads/s mean 1,442 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 33 samples
+22:16 [p32] Town: private max 178 MB | working set max 8 MB | commit max 38.6 of 59.7 GB | available min 80 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 116% | disk page reads/s mean 1,599 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 35 samples
+route-bench exit: 
+22:16 queue p32 done
+22:16 p32 check done

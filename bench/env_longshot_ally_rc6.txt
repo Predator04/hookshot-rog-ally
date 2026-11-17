@@ -1,0 +1,36 @@
+# Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme): this build is Longshot main 6d72ca93 + this folder's patches 0002, 0003,
+# 0004, 0007 (play folder from 2026-11-16 night, the user: "Switch to the new build with the old frame generation").
+# The previous play build stays as it was in C:\Users\Admin\Games\Longshot-Ally-6fb (the fallback: start that folder's longshot.exe).
+# Ally Z1E: the native mesh path hangs the GPU or reboots (upstream #997). Use the compute mesh fallback (also the options file's mesh_shaders=2).
+RX_VK_FORCE_MESH_FALLBACK=1
+# main predicts ~65,000 extra pipelines (hours on the Ally): build them for 60 s at most, the rest when first drawn
+RX_VK_PREDICT_S=60
+# 32 MB image blocks instead of 128: each fresh block costs ~0.5 ms/MB to allocate on the Ally (~27 ms vs ~65 ms per hitch)
+RX_VK_IMAGE_BLOCK_MB=32
+# Don't load (or save) the 1-2.5 GB pipeline cache file; the AMD driver's own shader cache covers it: +3.5 game fps, better 1% lows,
+# ~1/3 less stutter time (interleaved runs). The driver keeps its cache per exe path: keep this folder where it is, or the first
+# start rebuilds every shader (~78 min). After an AMD driver update or a big Windows update the driver cache can be empty too.
+# To undo: delete this line.
+RX_VK_PCACHE_LOAD=0
+# Programs and their pipelines loaded when the game makes them, not all (~4-5 GB) before the title (load_default.h). With the BIOS
+# UMA frame buffer at 8 GB Windows has 7.9 GB of RAM and a 3.9 GB shared GPU heap; the default start mode then fails GPU submits
+# (-2) and freezes on most loads. The real fix is UMA 4 GB. To undo: delete this line.
+RX_VK_LOAD=create
+# CPU reads of GPU results written by the newest submission read last frame's values instead of waiting (upstream PR #238):
+# +13% game fps on the Ally. On this build (with #977's early reads) the newest submission alone is as fast as the old build's
+# size list + capture switch (2026-11-16, q28/q29/q32: route 40.2-41.3 vs 39.9-41.3) and reads up-to-date data; 0 flashes
+# with this setting on the 4090 test laptop (5c284721 and 6d72ca93, all three spots, 2 rounds each). If you see a white
+# flash or an object popping for a frame: delete this line.
+RX_VK_READBACK_LATE=newest
+# Frame generation by the renderer's built-in maker, as on the old build. This build's default on the Ally is AMD FSR 3.1
+# frame generation (less ghosting around moving things), which costs 11-12 % of the frames here (2026-11-16, q32: route 35.7
+# vs 40.2-40.4, +3.9 ms GPU). To try FSR 3.1 anyway: delete this line (then the menu's "Frame generation by" row decides).
+RX_VK_FSR_FG=0
+# A steady frame rate (patch 0007, this build's form of the old HOS_FPS_LOCK): the game held at 36 fps, its time step real
+# time, which frame generation 2x shows as 72. Walking with your own options (2026-11-16), 36 holds everywhere, Hyrule Field
+# too: 94-98 % of frames within 15 % of each other. 40 (80 shown) holds in Kokiri and Town (90-97 %) but not in Hyrule Field
+# (73-75 shown, 90-93 %). For more fps where it holds: change 36 to 40. For a perfectly even 60: change it to 30. For the most
+# fps (less even): delete the line.
+HOS_FPS_MAX=36
+# --- Optional diagnostics: they only write a line when something is slow or memory is allocated.
+RX_VK_SLOW_LOG=80

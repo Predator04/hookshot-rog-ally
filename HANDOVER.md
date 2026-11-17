@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-16, 21:10; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-16, 22:25; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -24,8 +24,8 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot code changes (patches) | `patches\` here (the clone itself is never pushed) |
 | Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 6c9edffe since 2026-11-14 17:28 (414f56e2 at 12:35), + our 2 patches uncommitted; push disabled) |
 | Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
-| **User's play folder (since 2026-11-15 23:10)** | `C:\Users\Admin\Games\Longshot-Ally-6fb` (longshot-ally-6fb13fe5-dirty: 6fb13fe5 + 0001, 0002, 0003, 0004-on-6fb13fe5, 0006; built 19:09-19:55 from the worktree `Zelda Ocrina\longshot-6fb`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-6fb`; the user's save + options; longshot_env.txt = bench\env_longshot_ally_6fb.txt, HOS_FPS_LOCK=36 since 2026-11-16 09:04, 40 before) |
-| Newest main, tested 2026-11-16 evening (q32; not for play; warm) | `C:\Users\Admin\Games\Longshot-Ally-new` (longshot-ally-6d72ca93-dirty: 6d72ca93 + 0002, 0003, 0004-on-6fb13fe5, 0007; worktree `Zelda Ocrina\longshot-rc6`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-rc6`; built at the path 5c284721 had, with its program cache copied; 6fb's save copied) |
+| Previous play folder, the fallback since 2026-11-16 22:20 (desktop `Longshot (old build).lnk`) | `C:\Users\Admin\Games\Longshot-Ally-6fb` (longshot-ally-6fb13fe5-dirty: 6fb13fe5 + 0001, 0002, 0003, 0004-on-6fb13fe5, 0006; built 19:09-19:55 from the worktree `Zelda Ocrina\longshot-6fb`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-6fb`; the user's save + options; longshot_env.txt = bench\env_longshot_ally_6fb.txt, HOS_FPS_LOCK=36 since 2026-11-16 09:04, 40 before) |
+| **User's play folder (since 2026-11-16 22:20; desktop `Longshot.lnk`)** | `C:\Users\Admin\Games\Longshot-Ally-new` (longshot-ally-6d72ca93-dirty: 6d72ca93 + 0002, 0003, 0004-on-6fb13fe5, 0007; worktree `Zelda Ocrina\longshot-rc6`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-rc6`; built at the path 5c284721 had, with its program cache copied, so its driver file F44F0B87...parc is warm: don't move the folder; the user's save + options; longshot_env.txt = bench\env_longshot_ally_rc6.txt, HOS_FPS_MAX=36, RX_VK_FSR_FG=0) |
 | Main 5c284721, tested 2026-11-16 (q28-q30; not for play) | `C:\Users\Admin\Games\Longshot-Ally-5c2` (renamed from Longshot-Ally-new at 18:44; worktree `Zelda Ocrina\longshot-new`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-new`) |
 | Backup of the play build's AMD driver cache file | `%LOCALAPPDATA%\VkCache-backup-2026-11-16\66947ED760F03CCAB0E1094909B13A50.parc` (1,728 MB, as of 14:41; copied before q32; put it back in `%LOCALAPPDATA%\AMD\VkCache` only if 6fb loses pipelines again) |
 | Previous play folder (fallback) | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-6c9edffe-dirty + 0001-0004; rball5 + cap + lock 30; the same save) |
@@ -72,6 +72,12 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-16 22:20 (the user via the 4090 session: "Switch to the new build with the old frame generation"):
+play `Games\Longshot-Ally-new`, Longshot 6d72ca93 + 0002, 0003, 0004, 0007, env bench\env_longshot_ally_rc6.txt
+(READBACK_LATE=newest, RX_VK_FSR_FG=0, HOS_FPS_MAX=36; no FENCE_FIRST_PART).** Checked as played (p32): 36 holds at all
+three spots (72 shown, walks 94-99 % even), the built-in frame generation makes the frames. Desktop `Longshot.lnk` starts
+it; `Longshot (old build).lnk` starts the unchanged Games\Longshot-Ally-6fb.
 
 **Update 2026-11-16 21:05 (q32, details: "Day 2026-11-16" below): Longshot main 6d72ca93 ties with the play build at
 the same frame generation; its new default, FSR 3.1 frame generation, costs ~11 % on the Ally; nothing adopted.** Both
@@ -705,21 +711,29 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
   "Frame generation by" row) unless the user prefers FSR's look, use HOS_FPS_MAX in place of HOS_FPS_LOCK, and build at
   the play folder's own path so the driver's file stays warm for what didn't change.
 - Play folder checked after q32: no save.routebak, options = ls-play-options.ini, HOS_FPS_LOCK=36.
+- **~22:00, the user via the 4090 session: "Switch to the new build with the old frame generation".** Done in place, so
+  the warm driver file is kept (`Games\Longshot-Ally-new`, F44F0B87...parc): longshot_env.txt =
+  bench\env_longshot_ally_rc6.txt (the 6fb play env's base lines, READBACK_LATE=newest only, no FENCE_FIRST_PART,
+  RX_VK_FSR_FG=0, HOS_FPS_MAX=36 in place of HOS_FPS_LOCK=36); options = the user's (identical to -6fb's); the save
+  identical to -6fb's (all 14 files hashed). Desktop shortcut `Longshot.lnk` now starts Games\Longshot-Ally-new\longshot.exe
+  (it started -6fb's); new `Longshot (old build).lnk` starts -6fb's. Games\Longshot-Ally-6fb is unchanged (env, options, save).
+- **p32 (p32-check.ps1, 22:04-22:16): the new play folder with its own env and the user's options, one route with 25 s
+  walks (p32-steady.txt):** walks game fps 36.0 / 36.0 / 35.7, shown 72.1 / 71.9 / 71.4, within 15 % 99 / 98 / 94 %, 0 / 0
+  / 2 frames over 50 ms; route 35.2 (6fb at lock 36: 34.3 / 34.7, q31). Log: "vi: frame rate cap 36: pacing, the game's
+  limiter and its time step follow it"; "switches set (9): ... RX_VK_FSR_FG=0 (player) ..."; no "fsr3fi" line in any
+  spot (FSR 3.1 made no frames), shown = 2 x game fps (the built-in maker). Driver files not written; 0 pipelines missing.
 
 ## Next steps
-- The new build's driver cache file (`F44F0B871E202D93B0E1094909B13A50.parc`, 2.4 GB) was in the Recycle Bin from
-  2026-11-16 16:20 (the user's OK; it didn't help, q30) and was moved back to `%LOCALAPPDATA%\AMD\VkCache` at 18:43 for
-  q32: 6d72ca93 is built at the same path, so if the driver names its file by the exe's path, the new build starts warm.
-- After the user's next long play session, read the newest log in `Games\Longshot-Ally-6fb\logs`: if the next start shows
-  "0 asked that way were in no cache", the 227 compute pipelines are stored again. If not, one start-mode session
-  (RX_VK_LOAD=start) may store them (it did on 2026-11-15 night).
-- Moving the play build to a newer main: 5c284721 was a tie (Day 2026-11-16). #906 changed the translator, so any build
-  from main needs its pipelines built once (~78 min cold), unless it goes to a path whose driver file already holds them:
-  Games\Longshot-Ally-new (6d72ca93, q32: a tie at the same frame generation) is built and warm. On main builds the lock
-  line is HOS_FPS_MAX=36 in place of HOS_FPS_LOCK=36, frame generation needs RX_VK_FSR_FG=0 (or the menu's "Frame
-  generation by" row) to stay as fast, and a lock check comes first (game time is real-time stepped under #609).
-- The user plays and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none on
-  the Ally or the 4090). If one shows, remove ",8b040" first.
+- **Play folder is `Games\Longshot-Ally-new` (6d72ca93) since 2026-11-16 22:20.** Its driver file is
+  `F44F0B871E202D93B0E1094909B13A50.parc` (named by the exe's path): never move or rename the folder, or the first start
+  rebuilds every shader (~78 min). The user's save now changes only there; the fallback `Games\Longshot-Ally-6fb` keeps the
+  save as of 2026-11-16 (copy `user\save` across before playing the fallback, if ever).
+- The user plays and reports any white flash or one-frame popping (READBACK_LATE=newest's risk; none on the 4090 with
+  this setting). If one shows: delete the RX_VK_READBACK_LATE line in Games\Longshot-Ally-new\longshot_env.txt.
+- A newer main later: build it at the play folder's own path (build-longshot.ps1 -Out Games\Longshot-Ally-new, after
+  copying the folder aside as a fallback) so the driver's file keeps what didn't change; HOS_FPS_MAX and RX_VK_FSR_FG=0
+  stay; check the lock again.
+- The old 6fb build's 227 compute pipelines missing from its driver file no longer matter for play (6d72ca93 has 0).
 - The waits on whole scene submissions (e0dbf40c) are now handled as far as tested safe: readbacks (rball5) and the capture
   (FIRST_PART=cap), together ~+6 % over rball (route ~40.5 vs 38.3); all three sites (~+9 %) flash. The fence site (sync)
   gives nothing on the Ally. What would close the rest is an upstream fix that makes the first-part mapping safe on
@@ -728,7 +742,8 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
   readback size (+4 %), FENCE_FIRST_PART=cap (+2 %), all three sites flooding, the q17b/q18/q20 tables, the nine switches
   with no gain, and a link to patch 0007 (20-59 cap). Its text is on the laptop: hookshot-rog-ally\issue-draft-ally-readback-
   capture-waits.md (not committed). Watch #1190 for replies; a fix there may let a later build drop patches 0003/0004.
-- If the user reports a white flash or one-frame popping: delete the FIRST_PART=cap line first, then remove ",8b040".
+- (Old 6fb build only, the fallback) If a white flash or one-frame popping shows there: delete the FIRST_PART=cap line
+  first, then remove ",8b040".
 - If the game stutters badly or sits long at the progress screen after many hours unused: the AMD driver evicted its
   pipelines (seen 2026-11-15 after ~10 h). One session with RX_VK_LOAD=start (up to ~1 h the first time) refills them.
 - Remaining long frames: the camera swings (a whole new view streamed: texture uploads + "memory sync capture" on the main
