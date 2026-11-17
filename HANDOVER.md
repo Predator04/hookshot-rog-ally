@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-16, 16:50; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-16, 18:50; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -25,7 +25,9 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 6c9edffe since 2026-11-14 17:28 (414f56e2 at 12:35), + our 2 patches uncommitted; push disabled) |
 | Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
 | **User's play folder (since 2026-11-15 23:10)** | `C:\Users\Admin\Games\Longshot-Ally-6fb` (longshot-ally-6fb13fe5-dirty: 6fb13fe5 + 0001, 0002, 0003, 0004-on-6fb13fe5, 0006; built 19:09-19:55 from the worktree `Zelda Ocrina\longshot-6fb`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-6fb`; the user's save + options; longshot_env.txt = bench\env_longshot_ally_6fb.txt, HOS_FPS_LOCK=36 since 2026-11-16 09:04, 40 before) |
-| Newest main, tested 2026-11-16 (not for play) | `C:\Users\Admin\Games\Longshot-Ally-new` (longshot-ally-5c284721-dirty: 5c284721 + 0002, 0003, 0004-on-6fb13fe5, 0007; worktree `Zelda Ocrina\longshot-new`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-new`; 6fb's save copied; env = env_ldc_rball5_fpcap.txt; its driver cache is warm) |
+| Newest main, q32 from 2026-11-16 18:45 (not for play) | `C:\Users\Admin\Games\Longshot-Ally-new` (longshot-ally-6d72ca93-dirty: 6d72ca93 + 0002, 0003, 0004-on-6fb13fe5, 0007; worktree `Zelda Ocrina\longshot-rc6`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-rc6`; built at the path 5c284721 had, with its program cache copied; 6fb's save copied) |
+| Main 5c284721, tested 2026-11-16 (q28-q30; not for play) | `C:\Users\Admin\Games\Longshot-Ally-5c2` (renamed from Longshot-Ally-new at 18:44; worktree `Zelda Ocrina\longshot-new`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-new`) |
+| Backup of the play build's AMD driver cache file | `%LOCALAPPDATA%\VkCache-backup-2026-11-16\66947ED760F03CCAB0E1094909B13A50.parc` (1,728 MB, as of 14:41; copied before q32; put it back in `%LOCALAPPDATA%\AMD\VkCache` only if 6fb loses pipelines again) |
 | Previous play folder (fallback) | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-6c9edffe-dirty + 0001-0004; rball5 + cap + lock 30; the same save) |
 | User's current play build | `C:\Users\Admin\Games\Hookshot-Ally` (rog-ally-cb21687, Hookshot fork; don't touch) |
 | Copy of the play build for A/B | `C:\Users\Admin\Games\Hookshot-Ally-ref` (34 GB; delete only with the user's OK) |
@@ -70,6 +72,13 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-16 18:40 (q31, details: "Day 2026-11-16" below): the lock stays 36; 38 is no middle ground, and the
+in-game FPS counter costs nothing.** As played (the user's options, play build, two rounds), walks within 15 %: lock 36
+Kokiri 98 / 98, Hyrule 95 / 98, Town 94 / 94 (72 shown); lock 38 98 / 98, 97 / 91, 94 / 87 (Town 2 and 7 frames over
+50 ms; 72-76 shown); lock 40 97 / 97, 90 / 93, 94 / 90 (73-80 shown); lock 40 without the FPS counter 97 / 98, 93 / 96,
+88 / 92. q27's Town 80-89 % at 40 didn't repeat: Hyrule Field (GPU-bound, ~21 ms) is where 40 loses evenness, not Town.
+A newer main, 6d72ca93, is being tested (q32, from 18:45).
 
 **Update 2026-11-16 16:20 (details: "Day 2026-11-16" below): Longshot main 5c284721 is a tie with the play build;
 nothing adopted.** Both warm, interleaved (q29): 6fb play env route 40.6 / 40.3, 5c284721 with the same env 41.2 / 41.1,
@@ -626,18 +635,35 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
   new build's real gain is correctness: READBACK_LATE=newest alone (d) is as fast as the size list + cap and reads current
   data.
 - Play folder checked after q29: no save.routebak, options = ls-play-options.ini, HOS_FPS_LOCK=36.
+- **q31 (q31-chain.ps1, 17:12-18:38; the user: "You're optimizing."), as played: the user's options (ls-play-options.ini),
+  play build and env, 25 s walks, m38 n40 m40 m36 m36 m40 n40 m38 (q31-steady.txt).** New: env_6fb_lock38.txt
+  (HOS_FPS_LOCK=38, 26.3 ms pacing under patch 0006), ls-play-options-nofps.ini (fps_counter=0, else the user's file).
+
+  | Lock | Route game fps | Walks within 15 %: Kokiri / Hyrule / Town | Walk frames over 50 ms | Walks shown fps |
+  |---|---|---|---|---|
+  | 36 (m36) | 34.3 / 34.7 | 98 / 95 / 94; 98 / 98 / 94 | 1 / 1 / 6; 1 / 0 / 4 | 71-72 |
+  | 38 (m38) | 36.3 / 35.5 | 98 / 97 / 94; 98 / 91 / 87 | 1 / 0 / 2; 1 / 4 / 7 | 72-76 |
+  | 40 (m40) | 37.8 / 37.8 | 97 / 90 / 94; 97 / 93 / 90 | 0 / 2 / 3; 0 / 1 / 3 | 73-80 |
+  | 40, no FPS counter (n40) | 37.2 / 37.5 | 97 / 93 / 88; 98 / 96 / 92 | 0 / 5 / 3; 0 / 0 / 3 | 71-80 |
+
+  38 sits between 36 and 40 in frames but isn't more even than 40 (its second round was the least even run); the FPS counter
+  changes nothing (n40 vs m40 within noise). Town at 40 was 94 / 90 % this time (q27: 80-89 %), so Town's unevenness at 40
+  in q27 was partly run-to-run; Hyrule Field can't hold 40 (36-37 game fps, ~21 ms GPU) and loses 3-8 points of evenness
+  there. Kept 36 (the user's choice); 40 stays the one-line alternative. One harmless error: m36_b's Kokiri walk end hit
+  "Add-Content : Stream was not readable" on route_input.txt (route-bench-ls.ps1:124, the game had the file open); the next
+  spot loaded normally.
 
 ## Next steps
-- The new build's driver cache file (`F44F0B871E202D93B0E1094909B13A50.parc`, 2.4 GB) is in the Recycle Bin since
-  2026-11-16 16:20 (the user's OK). It didn't help (q30). Restoring it to `%LOCALAPPDATA%\AMD\VkCache` makes
-  Games\Longshot-Ally-new warm again; leaving it out only means a ~78-min first start if that build is ever used.
+- The new build's driver cache file (`F44F0B871E202D93B0E1094909B13A50.parc`, 2.4 GB) was in the Recycle Bin from
+  2026-11-16 16:20 (the user's OK; it didn't help, q30) and was moved back to `%LOCALAPPDATA%\AMD\VkCache` at 18:43 for
+  q32: 6d72ca93 is built at the same path, so if the driver names its file by the exe's path, the new build starts warm.
 - After the user's next long play session, read the newest log in `Games\Longshot-Ally-6fb\logs`: if the next start shows
   "0 asked that way were in no cache", the 227 compute pipelines are stored again. If not, one start-mode session
   (RX_VK_LOAD=start) may store them (it did on 2026-11-15 night).
 - Moving the play build to a newer main: 5c284721 was a tie (Day 2026-11-16). #906 changed the translator, so any build
-  from main now needs its own long first start (~78 min) and a second large driver cache file. If the user wants it anyway:
-  Games\Longshot-Ally-new is built and warm; its env needs HOS_FPS_MAX=36 in place of HOS_FPS_LOCK=36, and a lock check
-  first (game time is real-time stepped under #609).
+  from main now needs its own long first start (~78 min) and a second large driver cache file. 6d72ca93 (q32) is being
+  tested in Games\Longshot-Ally-new; on main builds the lock line is HOS_FPS_MAX=36 in place of HOS_FPS_LOCK=36, and it
+  needs a lock check first (game time is real-time stepped under #609).
 - The user plays and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none on
   the Ally or the 4090). If one shows, remove ",8b040" first.
 - The waits on whole scene submissions (e0dbf40c) are now handled as far as tested safe: readbacks (rball5) and the capture
