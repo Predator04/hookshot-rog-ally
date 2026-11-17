@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-16, 23:58; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-17, 03:30; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -73,6 +73,33 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-17 03:30 (s34, the user via the 4090 session: "Run everything all night and report tomorrow"; the
+user's rule: no reason to publish unless ours beats stock): ours beats stock in every round, +5.5 game fps (+15 %).**
+rc.7 + 0007 in `Games\Longshot-Ally-installtest`, unlocked, the installer's options (frame generation 2x, cap off),
+one stock warm-up route, then s f o o f s s f o o f s (bench\s34-chain.ps1, bench\s34.out). s = stock (only
+FORCE_MESH_FALLBACK=1; FSR 3.1 made 594-600 of each 600 presents in play), f = stock + RX_VK_FSR_FG=0, o = ours (the old
+7 lines without the cap: f + READBACK_LATE=newest, PCACHE_LOAD=0, and three that do nothing here: PREDICT_S=60,
+IMAGE_BLOCK_MB=32 (rc.7's default), LOAD=create (the default without a slow-loads marker)).
+
+| arm | route game fps a / b / c / d (mean) | route GPU ms (mean) | walk game fps Kokiri / Field / Town (4-round means) | start s |
+|---|---|---|---|---|
+| s stock | 36.3 / 36.7 / 36.2 / 36.7 (36.5) | 21.76 | 46.0 / 32.7 / 38.7 | 76 |
+| f FSR_FG=0 | 40.3 / 40.6 / 41.0 / 40.9 (40.7) | 18.07 | 50.1 / 36.0 / 42.3 | 71 |
+| o ours | 42.5 / 41.8 / 42.0 / 41.8 (42.0) | 17.72 | 51.5 / 39.0 / 43.4 | 70 |
+
+o−s per round +6.2 / +5.1 / +5.8 / +5.1 (GPU −4.0 ms); f−s +4.0 / +3.9 / +4.8 / +4.2; **o−f +2.2 / +1.2 / +1.0 / +0.9
+(mean +1.3, sd 0.6): o beats f in every round pair**, so READBACK_LATE=newest + PCACHE_LOAD=0 stay (which of the two
+does it is not split). Round a's +2.2 is partly o34a Town's lighter scene (1,182 draws against ~1,340). Hyrule Field's
+walk o−f +3.8 / +2.5 / +3.2 / +2.5. At the release's cap 36: stock's Field walk (31.3-33.9) cannot hold 36, f's
+(35.5-36.6) is on the edge, o's (38.0-39.9) holds it with room. Memory and heat are the same in all arms (GPU shared max
+~3.3 GB, working set ~5.5 GB, available RAM down to 3-24 MB in every arm, APU max 95 C, no throttling); every arm hit the
+2 GB texture budget. Walks 86-98 % of frames within 15 %, but one rough walk per arm: s34a Field (83 %, 5 ≥50 ms), f34d
+Kokiri (75 %, 9 ≥50 ms, 1 ≥100 ms), o34a Town the worst (51 %, 48 ≥50 ms, 19 ≥100 ms, available RAM 25 MB, no shader or pipeline made: memory
+pressure, not seen in o's other 3 rounds). The o arm leaves the stock 333 MB pipeline cache file in place. i33 before
+it (bench\i33.out): the installed release env held 36.0 / 36.0 / 35.9 game fps on the walks, 98-99 % even; a fresh
+first start took 1,721 s of shader preparation on top of i32's 45 min (~74 min in all). Play folder, shortcut and
+F44F...parc untouched.
 
 **Update 2026-11-16 23:58 (i32, the 4090 session's release installer `longshot-ally\` (6365e12d) on the Ally, with the
 user's "Yes, push for testing"): the installer works; the first start of a fresh folder takes over an hour.** Into a new
