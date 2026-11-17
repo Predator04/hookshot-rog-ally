@@ -21,7 +21,7 @@ flashing.
 | Longshot 6d72ca93 (rc.7's code except one Windows driver-choice fix), these settings | 40.4 / 40.2 | 19.2 / 19.4 ms |
 | The same with FSR 3.1 frame generation (Longshot's default on the Ally) | 35.7 / 35.7 | 23.1 / 23.1 ms |
 
-- **36 fps holds everywhere tested:** 94-98 % of frames within 15 % of the target. 40 dips in Hyrule Field's heaviest views.
+- **36 fps holds everywhere tested:** 98-99 % of frames within 15 % of the target, with the installer's own build. 40 dips in Hyrule Field's heaviest views.
 - **The renderer's own frame generation instead of FSR 3.1:** Longshot now uses AMD FSR 3.1 frame generation by default
   on the Ally. It looks better, but costs about 11 % of the frame rate there (3.9 ms more GPU time a frame). One line in
   `longshot_env.txt` (`RX_VK_FSR_FG=0`) keeps the renderer's own; delete it to try FSR 3.1.
@@ -39,9 +39,9 @@ flashing.
    the game into `%USERPROFILE%\Games\Longshot-Ally` (10 to 60 minutes), writes the settings, copies your saves and makes
    a desktop shortcut.
 
-**The first hours stutter in new areas** while the AMD driver builds its shaders; it settles as you play, and every new
-install folder starts cold again (the driver keeps its shaders by the game's folder). To build them all at once instead,
-change `RX_VK_LOAD=create` to `start` in `longshot_env.txt` for one start: about 80 minutes on the Ally.
+**The first start shows a start-up screen for about 75 minutes on the Ally** while it prepares the shaders (charger in,
+other apps closed). You can close it; the next start carries on from there. After that a start takes about a minute.
+Keep the game folder where it is: the AMD driver keeps its shaders by the game's folder, so a new folder starts cold.
 
 **Or keep the official build** and copy only `longshot_env.txt` into its game folder, with `HOS_FPS_MAX=36` changed to 30
 (the official build takes only 30 or 61 and up). You get everything here except the 36 fps cap.
@@ -55,4 +55,6 @@ Full guide: [longshot-ally/README.md](https://github.com/Predator04/hookshot-rog
   readily: none from the renderer in 18 runs.
 - The installer, on that laptop: a fresh install and an update into the same folder, with a Hookshot Builder; the game
   started from the installed folder with the settings read and the cap at 36.
+- The installer on the Ally: a first install with a Hookshot Builder (32 minutes), its first start (about 75 minutes of shader preparation), and 36.0 fps at all three spots; the settings read, mesh shaders on the
+  compute path, the cap at 36.
 - **Not yet tested:** the installer with the Longshot launcher's builder (same folder layout, by Longshot's setup code).

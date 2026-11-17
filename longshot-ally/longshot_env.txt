@@ -7,23 +7,13 @@
 # AMD's current driver doesn't offer mesh shaders on the Ally anyway; the line keeps you safe if a driver update does.
 RX_VK_FORCE_MESH_FALLBACK=1
 
-# Build the predicted pipelines for 60 s at most at the first start; the rest are built when first drawn.
-RX_VK_PREDICT_S=60
-
-# Smaller image memory blocks (32 MB instead of 128), kinder to the Ally's 4 GB of video memory.
-RX_VK_IMAGE_BLOCK_MB=32
-
-# No pipeline cache file: the AMD driver's own shader cache covers it (+3.5 fps and fewer stutters on the Ally). The
-# driver keeps its cache by the game's folder: keep the folder where it is, or the shaders are built again.
+# No pipeline cache file: the AMD driver's own shader cache covers it (on an earlier Longshot this gave more fps and fewer
+# stutters on the Ally). The driver keeps its cache by the game's folder: keep the folder where it is.
 RX_VK_PCACHE_LOAD=0
 
-# Load programs when the game first uses them, not all before the title: a quick first start, with some stutter in each
-# new area until the driver has its shaders. To build them all at the first start instead (about 80 minutes on the
-# Ally), change create to start for one start.
-RX_VK_LOAD=create
-
-# Readbacks: the newest frame's results are read as soon as their part of the GPU work is done (with the renderer's
-# early reads, on by default here, this is as fast as the older list of sizes and reads current data).
+# CPU reads of GPU results from the newest submission don't wait for it: they read the values a frame late (+13 % on an
+# earlier Longshot on the Ally). With this Longshot's early reads (on by default here) this alone is as fast as the older
+# list of sizes. If you see a white flash or an object popping for a frame, delete this line.
 RX_VK_READBACK_LATE=newest
 
 # Frame generation by the renderer's own maker. Longshot's default here, AMD FSR 3.1 frame generation, looks better but
