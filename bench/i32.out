@@ -1,0 +1,146 @@
+﻿22:37 i32 chain start
+  66947ED760F03CCAB0E1094909B13A50.parc  1,728 MB 14:41
+  F44F0B871E202D93B0E1094909B13A50.parc  2,432 MB 11:40
+  play build's driver file backed up in C:\Users\Admin\AppData\Local\VkCache-backup-2026-11-16
+22:37 installer start
+Longshot for the ROG Ally: install (longshot-ally-2026-11-17, Longshot v3.0.0-rc.7)
+https://github.com/Predator04/hookshot-rog-ally
+
+== Looking for a builder and your game
+   Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+   Game files: C:\Users\Admin\Games\Hookshot
+   Builds into: C:\Users\Admin\Games\Longshot-Ally-installtest
+
+== Getting Longshot v3.0.0-rc.7's source
+   Unzipping into C:\Users\Admin\AppData\Local\LongshotBuilder-ally-installtest\src\v3.0.0-rc.7
+   Patch 0007-host-HOS_FPS_MAX-20-59-on-the-hosts-30-cap-pacer.patch
+     patched: gpu\vk\fps_stats.h
+     patched: host\nn_vi.c
+     patched: tests\test_fps_stats.cpp
+     patched: tests\test_frame_rate_cap_30.py
+
+== Building (10 to 60 minutes; keep the charger in; do not play meanwhile)
+Source:  C:\Users\Admin\AppData\Local\LongshotBuilder-ally-installtest\src\v3.0.0-rc.7\longshot (longshot-ally-2026-11-17-v3.0.0-rc.7)
+Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+Game:    C:\Users\Admin\Games\Hookshot
+Out:     C:\Users\Admin\Games\Longshot-Ally-installtest
+
+== 22:37 Preparing the working tools folder
+
+== 22:37 Building
+wrote C:\Users\Admin\Games\Longshot-Ally-installtest\longshot_shaders.bin 514 MB
+texts: 16 languages reworded for a PC
+prompts: switch
+prompts: xbox
+prompts: ps4
+prompts: ps5
+prompts: steamdeck
+prompts: keyboard
+prompts: the Talk ring
+prompts: the size table lets the font have 55088 bytes
+prompts: regenerated (no stamp yet)
+the shipped pipeline state list: 63920 pipelines
+where the time went:
+  checks                                  4 s
+  read                                  395 s
+  lift                                  152 s
+    image and discovery                  25 s
+    coverage                             16 s
+    emit and write                       58 s
+    big chunks split                     10 s
+    patches                              12 s
+    output size and page-mark groups     19 s
+    runtime tables and standalone files (beside the edits)      0 s
+  compile                              1254 s
+    planning                             28 s
+    compiling                          1212 s
+    linking longshot.exe                  6 s
+    linking longshot_vk.dll               6 s
+  finish                                 49 s
+    copying the new files in              0 s
+    swap and runtimes                     1 s
+    shader list                          21 s
+    button prompts                       26 s
+    pipeline lists, icon and stamps       1 s
+    build files deleted                   0 s
+    object store                          0 s
+the build took 0:30:54, compiled in 0:20:54
+@@times 1854 1254 -1
+the shaders were not prepared now ("Prepare shaders now" is unticked): the game prepares them at its first start
+@@done C:\Users\Admin\Games\Longshot-Ally-installtest
+built in 31 min
+Done: C:\Users\Admin\Games\Longshot-Ally-installtest (longshot-ally-2026-11-17-v3.0.0-rc.7)
+
+== Writing the tested Ally settings
+   longshot_env.txt written
+   longshot_options.ini: quality_preset=1, resolution=3, upscaling=2, output_res=2048x1152, frame_generation=2, frame_pacing=1, frame_rate_cap=0, handheld_profile=1, fullscreen=1, sharpness=50, anisotropic_filtering=4, game_speed=1
+
+== Saves and shortcut
+   Saves copied from C:\Users\Admin\Games\Hookshot
+
+Done: C:\Users\Admin\Games\Longshot-Ally-installtest
+Start C:\Users\Admin\Games\Longshot-Ally-installtest\longshot.exe.
+The first start is quick, but each new area stutters for a while as the AMD driver builds its shaders; it settles as you
+play. Keep the folder where it is: the driver keeps its shaders by the game's folder. (To build them all at the first
+start instead, about 80 minutes: in longshot_env.txt change RX_VK_LOAD=create to start for one start.)
+To update later, run this installer from a newer release: it builds into the same folder and keeps your saves.
+23:08 installer exit: 0, 31.6 min
+  installed files:
+    .longshot_installed.json 1 KB
+    image.bin 98,432 KB
+    language.txt 0 KB
+    longshot.exe 505,986 KB
+    longshot_env.txt 2 KB
+    longshot_options.ini 0 KB
+    longshot_pipeline_states_shipped.bin 34,457 KB
+    longshot_shaders.bin 526,446 KB
+    longshot_version.txt 0 KB
+    longshot_vk.dll 14,072 KB
+    SDL2.dll 293 KB
+    SDL3.dll 2,782 KB
+  folder sizes (GB): game 25.9, work 5.0
+  installed longshot_options.ini:
+    quality_preset=1
+    resolution=3
+    upscaling=2
+    output_res=2048x1152
+    frame_generation=2
+    frame_pacing=1
+    frame_rate_cap=0
+    handheld_profile=1
+    fullscreen=1
+    sharpness=50
+    anisotropic_filtering=4
+    game_speed=1
+23:08 queue i32 start: 1 runs
+23:08 i32 in C:\Users\Admin\Games\Longshot-Ally-installtest env=env_i32_installed.txt spots=Kokiri,HyruleField,Town ini=i32-options.ini
+Kokiri START TIMEOUT after 15 min
+HyruleField START TIMEOUT after 15 min
+Town START TIMEOUT after 15 min
+23:54 [i32] Kokiri: private max 7,301 MB | working set max 4,566 MB | commit max 29.7 of 59.7 GB | available min 433 MB | GPU shared max 131 MB, dedicated max 42 MB | CPU perf mean 125% | disk page reads/s mean 57 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean 6% | 111 samples
+23:54 [i32] HyruleField: private max 178 MB | working set max 8 MB | commit max 39.1 of 59.7 GB | available min 86 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 125% | disk page reads/s mean 364 | APU max 89 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 133 samples
+23:54 [i32] Town: private max 7,252 MB | working set max 5,838 MB | commit max 29.6 of 59.7 GB | available min 320 MB | GPU shared max 132 MB, dedicated max 42 MB | CPU perf mean 129% | disk page reads/s mean 166 | APU max 85 C, passive limit min 100%, throttle 0 | GPU 3D mean 6% | 104 samples
+route-bench exit: 0
+23:54 queue i32 done
+  Kokiri:
+    [hos host] vi: frame rate cap 36: pacing, the game's limiter and its time step follow it
+    [hos host] vk: no mesh shaders: task and mesh programs run as compute shaders (issue 640 fallback)
+    [hos host] vk: mesh shaders: Compute, from RX_VK_FORCE_MESH_FALLBACK: the compute path
+    [hos host] vk: switches set (8): RX_VK_FRAME_LOG=<a path> (diag), RX_VK_FORCE_MESH_FALLBACK=1 (diag), RX_VK_PREDICT_S=60 (tune), RX_VK_IMAGE_BLOCK_MB=32 (tune), RX_VK_PCACHE_LOAD=0 (hw), RX_VK_LOAD=create (hw), RX_VK_READBACK_LATE=newest (attempt), RX_VK_FSR_FG=0 (player)
+    [hos host] vk: module identifiers (close): 0 known, 0 learned in this run; 0 compute pipelines made by them at a create call, 0 asked that way were in no cache (their code read, as before)
+  HyruleField:
+    [hos host] vi: frame rate cap 36: pacing, the game's limiter and its time step follow it
+    [hos host] vk: no mesh shaders: task and mesh programs run as compute shaders (issue 640 fallback)
+    [hos host] vk: mesh shaders: Compute, from RX_VK_FORCE_MESH_FALLBACK: the compute path
+    [hos host] vk: switches set (8): RX_VK_FRAME_LOG=<a path> (diag), RX_VK_FORCE_MESH_FALLBACK=1 (diag), RX_VK_PREDICT_S=60 (tune), RX_VK_IMAGE_BLOCK_MB=32 (tune), RX_VK_PCACHE_LOAD=0 (hw), RX_VK_LOAD=create (hw), RX_VK_READBACK_LATE=newest (attempt), RX_VK_FSR_FG=0 (player)
+    [hos host] vk: module identifiers (close): 0 known, 0 learned in this run; 0 compute pipelines made by them at a create call, 0 asked that way were in no cache (their code read, as before)
+  Town:
+    [hos host] vi: frame rate cap 36: pacing, the game's limiter and its time step follow it
+    [hos host] vk: no mesh shaders: task and mesh programs run as compute shaders (issue 640 fallback)
+    [hos host] vk: mesh shaders: Compute, from RX_VK_FORCE_MESH_FALLBACK: the compute path
+    [hos host] vk: switches set (8): RX_VK_FRAME_LOG=<a path> (diag), RX_VK_FORCE_MESH_FALLBACK=1 (diag), RX_VK_PREDICT_S=60 (tune), RX_VK_IMAGE_BLOCK_MB=32 (tune), RX_VK_PCACHE_LOAD=0 (hw), RX_VK_LOAD=create (hw), RX_VK_READBACK_LATE=newest (attempt), RX_VK_FSR_FG=0 (player)
+    [hos host] vk: module identifiers (close): 0 known, 0 learned in this run; 0 compute pipelines made by them at a create call, 0 asked that way were in no cache (their code read, as before)
+  66947ED760F03CCAB0E1094909B13A50.parc  1,728 MB 14:41
+  782B3ADC5724513AB0E1094909B13A50.parc  1,984 MB 23:52
+  F44F0B871E202D93B0E1094909B13A50.parc  2,432 MB 11:40
+23:54 i32 chain done

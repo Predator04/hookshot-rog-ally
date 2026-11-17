@@ -11,7 +11,9 @@ param([string]$StopAt = '23:30', [string]$Name = 'q13', [int]$WalkS = 0, [string
     'l6_b|next|env_ldc_rbl_lock30.txt', 'f6_b|next|env_ldc_rbl_lock30_fifo.txt', 's6_b|next|env_ldc_rbl.txt'),
     # (the game folders a run's second field names: the Ally's by default; another machine passes its own, e.g.
     # -Dirs @{ g = 'C:\Users\Admin\Games\Longshot-4090' } with runs 'tag|g|env|spots', called with & in-process)
-    [hashtable]$Dirs = @{ cur = 'C:\Users\Admin\Games\Longshot-Ally'; next = 'C:\Users\Admin\Games\Longshot-Ally-next' })
+    [hashtable]$Dirs = @{ cur = 'C:\Users\Admin\Games\Longshot-Ally'; next = 'C:\Users\Admin\Games\Longshot-Ally-next' },
+    # (-StartMaxMin, 2026-11-16 night: a fresh folder's first start prepares every shader for an hour or more; 15 by default)
+    [int]$StartMaxMin = 15)
 $ErrorActionPreference = 'Continue'
 $S = Split-Path $MyInvocation.MyCommand.Path -Parent
 $dirs = $Dirs
@@ -38,7 +40,7 @@ foreach ($r in $Runs) {
     if (Busy) { "ABORT before ${tag}: a game is running (the user may be playing)"; Restore; exit 2 }
     Copy-Item $(if ($ini) { "$S\$ini" } else { $ini0 }) "$g\longshot_options.ini" -Force
     "$(Get-Date -Format HH:mm) $tag in $g env=$envf spots=$($spots -join ',')$(if ($ini) { " ini=$ini" })$(if ($sh) { ' (shots)' })"
-    & "$S\bench-route-ls.ps1" -Tag $tag -Game $g -EnvFile "$S\$envf" -Spots $spots -StartMaxMin 15 -WalkS $WalkS -Shots:([bool]$sh)
+    & "$S\bench-route-ls.ps1" -Tag $tag -Game $g -EnvFile "$S\$envf" -Spots $spots -StartMaxMin $StartMaxMin -WalkS $WalkS -Shots:([bool]$sh)
     if ($LASTEXITCODE -eq 2 -or $LASTEXITCODE -eq 3) { "stopped at ${tag}: $LASTEXITCODE"; Restore; exit $LASTEXITCODE }
 }
 Restore

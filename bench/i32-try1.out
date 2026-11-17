@@ -1,0 +1,19 @@
+﻿22:35 i32 chain start
+  66947ED760F03CCAB0E1094909B13A50.parc  1,728 MB 14:41
+  F44F0B871E202D93B0E1094909B13A50.parc  2,432 MB 11:40
+  play build's driver file backed up in C:\Users\Admin\AppData\Local\VkCache-backup-2026-11-16
+22:35 installer start
+Longshot for the ROG Ally: install (longshot-ally-2026-11-17, Longshot v3.0.0-rc.7)
+https://github.com/Predator04/hookshot-rog-ally
+
+== Looking for a builder and your game
+   Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+   Game files: C:\Users\Admin\Games\Hookshot
+   Builds into: C:\Users\Admin\Games\Longshot-Ally-installtest
+
+== Getting Longshot v3.0.0-rc.7's source
+   Downloading https://git.magicbean.dev/MagicBeanDev/Longshot/archive/v3.0.0-rc.7.zip
+
+ERROR: The download failed (The remote server returned an error: (404) Not Found.). Check the connection, or download that file yourself and pass -SourceZip <file>.
+22:35 installer exit: 1, 0.0 min
+22:35 no longshot.exe: i32 ends

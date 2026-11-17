@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-16, 22:25; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-16, 23:58; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -26,6 +26,7 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
 | Previous play folder, the fallback since 2026-11-16 22:20 (desktop `Longshot (old build).lnk`) | `C:\Users\Admin\Games\Longshot-Ally-6fb` (longshot-ally-6fb13fe5-dirty: 6fb13fe5 + 0001, 0002, 0003, 0004-on-6fb13fe5, 0006; built 19:09-19:55 from the worktree `Zelda Ocrina\longshot-6fb`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-6fb`; the user's save + options; longshot_env.txt = bench\env_longshot_ally_6fb.txt, HOS_FPS_LOCK=36 since 2026-11-16 09:04, 40 before) |
 | **User's play folder (since 2026-11-16 22:20; desktop `Longshot.lnk`)** | `C:\Users\Admin\Games\Longshot-Ally-new` (longshot-ally-6d72ca93-dirty: 6d72ca93 + 0002, 0003, 0004-on-6fb13fe5, 0007; worktree `Zelda Ocrina\longshot-rc6`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-rc6`; built at the path 5c284721 had, with its program cache copied, so its driver file F44F0B87...parc is warm: don't move the folder; the user's save + options; longshot_env.txt = bench\env_longshot_ally_rc6.txt, HOS_FPS_MAX=36, RX_VK_FSR_FG=0) |
+| The release installer's test install, 2026-11-16 night (i32/i33; not for play; ~34 GB + work 5 GB + its driver file 782B3ADC...parc, delete when done) | `C:\Users\Admin\Games\Longshot-Ally-installtest` (v3.0.0-rc.7 + 0007, built by `longshot-ally\Install Longshot Ally.bat`; work folder `%LOCALAPPDATA%\LongshotBuilder-ally-installtest`) |
 | Main 5c284721, tested 2026-11-16 (q28-q30; not for play) | `C:\Users\Admin\Games\Longshot-Ally-5c2` (renamed from Longshot-Ally-new at 18:44; worktree `Zelda Ocrina\longshot-new`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-new`) |
 | Backup of the play build's AMD driver cache file | `%LOCALAPPDATA%\VkCache-backup-2026-11-16\66947ED760F03CCAB0E1094909B13A50.parc` (1,728 MB, as of 14:41; copied before q32; put it back in `%LOCALAPPDATA%\AMD\VkCache` only if 6fb loses pipelines again) |
 | Previous play folder (fallback) | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-6c9edffe-dirty + 0001-0004; rball5 + cap + lock 30; the same save) |
@@ -72,6 +73,19 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-16 23:58 (i32, the 4090 session's release installer `longshot-ally\` (6365e12d) on the Ally, with the
+user's "Yes, push for testing"): the installer works; the first start of a fresh folder takes over an hour.** Into a new
+folder `Games\Longshot-Ally-installtest` (work `%LOCALAPPDATA%\LongshotBuilder-ally-installtest`, no shortcut; the
+play folder untouched, its F44F...parc MD5 the same as the backup): exit 0 in 31.6 min (build 0:30:54), patch 0007 applied
+by apply_patch.py, the log shows "frame rate cap 36", "mesh shaders: Compute, from RX_VK_FORCE_MESH_FALLBACK" and the 7
+switches; no fsr3fi. Sizes: game 25.9 GB after the install, 34.1 GB after the first start (cache\ 8.2 GB), work 5.0 GB,
+new driver file 2.0 GB+. The installer's download URL (/archive/<tag>.zip) is 404 on git.magicbean.dev; the API's
+/api/v1/repos/MagicBeanDev/Longshot/archive/<tag>.zip works (passed as -SourceZip; the laptop fixed it). **The build
+uses --no-prepare-shaders, so the first start prepares every shader program (38,809) and noted pipeline (32,623) even with
+RX_VK_LOAD=create:** 3 bench starts of 15 min did not finish (pipelines 14,486), so no fps was measured; closing keeps the
+progress. i33 (bench\i33-chain.ps1, started 23:58) gives the first start up to 100 min, then benches the three spots.
+README fixes sent to the laptop (first start, ~45 GB free, work folder ~5 GB).
 
 **Update 2026-11-16 22:20 (the user via the 4090 session: "Switch to the new build with the old frame generation"):
 play `Games\Longshot-Ally-new`, Longshot 6d72ca93 + 0002, 0003, 0004, 0007, env bench\env_longshot_ally_rc6.txt

@@ -826,3 +826,6 @@
 22:11 [p32] HyruleField: start 78 s | game fps 35.6 | shown 70.2 (1% low 43.6) | GPU 19.22 ms | draws 1,978 | passes 183 | >=50ms 22 >=100ms 5 | views: 1_loaded 20.6 ms 36 fps; 2_left 18.3 ms 36 fps; 3_right 19.7 ms 34 fps; 4_half_left 18.4 ms 36 fps | walk: game fps 36.0 | shown 71.9 (1% low 63.2) | GPU 19.46 ms | >=50ms 0 >=100ms 0 | alive=True   env=env_longshot_ally_rc6.txt
 22:15 [p32] Town: start 81 s | game fps 35.3 | shown 70.5 (1% low 51.2) | GPU 16.79 ms | draws 1,345 | passes 175 | >=50ms 21 >=100ms 7 | views: 1_loaded 15.7 ms 35 fps; 2_left 17.5 ms 35 fps; 3_right 18.3 ms 35 fps; 4_half_left 15.7 ms 36 fps | walk: game fps 35.7 | shown 71.4 (1% low 50.6) | GPU 16.54 ms | >=50ms 2 >=100ms 0 | alive=True   env=env_longshot_ally_rc6.txt
 22:16 [p32] ROUTE (3 spots): game fps 35.2 | 1% low 50.2 | GPU 17.85 ms | draws 1,549  env=env_longshot_ally_rc6.txt
+23:24 [i32] Kokiri START TIMEOUT after 15 min  env=env_i32_installed.txt
+23:39 [i32] HyruleField START TIMEOUT after 15 min  env=env_i32_installed.txt
+23:54 [i32] Town START TIMEOUT after 15 min  env=env_i32_installed.txt
