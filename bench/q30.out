@@ -1,0 +1,32 @@
+﻿16:21 q30 chain start
+driver cache before:
+  66947ED760F03CCAB0E1094909B13A50.parc 1,728.0 MB  14:41:46
+16:21 queue q30 start: 2 runs
+16:21 a30_a in C:\Users\Admin\Games\Longshot-Ally-6fb env=env_ldc_rball5_fpcap.txt spots=Kokiri,HyruleField,Town
+16:24 [a30_a] Kokiri: start 79 s | game fps 46.0 | shown 93.1 (1% low 55.8) | GPU 17.43 ms | draws 1,296 | passes 174 | >=50ms 6 >=100ms 0 | views: 1_loaded 23.7 ms 30 fps; 2_left 15.6 ms 51 fps; 3_right 15.9 ms 50 fps; 4_half_left 17.0 ms 47 fps | walk: game fps 51.5 | shown 103.8 (1% low 73.2) | GPU 13.23 ms | >=50ms 1 >=100ms 0 | alive=True   env=env_ldc_rball5_fpcap.txt
+16:28 [a30_a] HyruleField: start 63 s | game fps 37.5 | shown 72.7 (1% low 46.6) | GPU 21.09 ms | draws 1,985 | passes 185 | >=50ms 35 >=100ms 12 | views: 1_loaded 21.8 ms 38 fps; 2_left 19.9 ms 40 fps; 3_right 23.0 ms 32 fps; 4_half_left 20.1 ms 40 fps | walk: game fps 35.5 | shown 70.7 (1% low 53.3) | GPU 21.93 ms | >=50ms 3 >=100ms 0 | alive=True   env=env_ldc_rball5_fpcap.txt
+16:31 [a30_a] Town: start 66 s | game fps 40.2 | shown 76.4 (1% low 48.4) | GPU 18.16 ms | draws 1,353 | passes 180 | >=50ms 29 >=100ms 10 | views: 1_loaded 16.0 ms 44 fps; 2_left 17.6 ms 41 fps; 3_right 25.9 ms 28 fps; 4_half_left 15.7 ms 44 fps | walk: game fps 42.1 | shown 83.7 (1% low 54.9) | GPU 15.71 ms | >=50ms 4 >=100ms 0 | alive=True   env=env_ldc_rball5_fpcap.txt
+16:32 [a30_a] ROUTE (3 spots): game fps 41.2 | 1% low 50.3 | GPU 18.90 ms | draws 1,544  env=env_ldc_rball5_fpcap.txt
+16:32 [a30_a] Kokiri: private max 178 MB | working set max 8 MB | commit max 36.4 of 59.7 GB | available min 166 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 115% | disk page reads/s mean 1,294 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 33 samples
+16:32 [a30_a] HyruleField: private max 17,490 MB | working set max 5,277 MB | commit max 36.3 of 59.7 GB | available min 77 MB | GPU shared max 3,412 MB, dedicated max 3,064 MB | CPU perf mean 107% | disk page reads/s mean 2,012 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean 75% | 24 samples
+16:32 [a30_a] Town: private max 178 MB | working set max 8 MB | commit max 37.4 of 59.7 GB | available min 60 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 113% | disk page reads/s mean 1,391 | APU max 93 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 31 samples
+route-bench exit: 
+16:32 a30_b in C:\Users\Admin\Games\Longshot-Ally-6fb env=env_ldc_rball5_fpcap.txt spots=Kokiri,HyruleField,Town
+16:35 [a30_b] Kokiri: start 63 s | game fps 45.0 | shown 90.3 (1% low 60.2) | GPU 17.91 ms | draws 1,327 | passes 175 | >=50ms 9 >=100ms 2 | views: 1_loaded 23.7 ms 31 fps; 2_left 16.1 ms 50 fps; 3_right 15.9 ms 50 fps; 4_half_left 18.1 ms 45 fps | walk: game fps 47.7 | shown 94.7 (1% low 67.5) | GPU 15.48 ms | >=50ms 3 >=100ms 0 | alive=True   env=env_ldc_rball5_fpcap.txt
+16:38 [a30_b] HyruleField: start 60 s | game fps 37.5 | shown 73.8 (1% low 46.2) | GPU 21.26 ms | draws 1,874 | passes 180 | >=50ms 37 >=100ms 10 | views: 1_loaded 22.9 ms 36 fps; 2_left 20.4 ms 40 fps; 3_right 22.3 ms 33 fps; 4_half_left 19.5 ms 41 fps | walk: game fps 39.2 | shown 78.2 (1% low 60.2) | GPU 20.09 ms | >=50ms 2 >=100ms 0 | alive=True   env=env_ldc_rball5_fpcap.txt
+16:42 [a30_b] Town: start 72 s | game fps 41.3 | shown 78.2 (1% low 45.7) | GPU 17.74 ms | draws 1,291 | passes 177 | >=50ms 33 >=100ms 9 | views: 1_loaded 15.4 ms 45 fps; 2_left 17.8 ms 41 fps; 3_right 25.2 ms 29 fps; 4_half_left 15.1 ms 46 fps | walk: game fps 41.2 | shown 81.9 (1% low 50.3) | GPU 16.01 ms | >=50ms 7 >=100ms 0 | alive=True   env=env_ldc_rball5_fpcap.txt
+16:42 [a30_b] ROUTE (3 spots): game fps 41.3 | 1% low 50.7 | GPU 18.97 ms | draws 1,497  env=env_ldc_rball5_fpcap.txt
+16:42 [a30_b] Kokiri: private max 17,216 MB | working set max 6,165 MB | commit max 36.0 of 59.7 GB | available min 127 MB | GPU shared max 2,958 MB, dedicated max 3,218 MB | CPU perf mean 108% | disk page reads/s mean 1,524 | APU max 93 C, passive limit min 100%, throttle 0 | GPU 3D mean 72% | 24 samples
+16:42 [a30_b] HyruleField: private max 17,460 MB | working set max 5,306 MB | commit max 36.2 of 59.7 GB | available min 134 MB | GPU shared max 3,268 MB, dedicated max 3,064 MB | CPU perf mean 102% | disk page reads/s mean 1,427 | APU max 91 C, passive limit min 100%, throttle 0 | GPU 3D mean 73% | 23 samples
+16:42 [a30_b] Town: private max 18,778 MB | working set max 5,030 MB | commit max 37.5 of 59.7 GB | available min 103 MB | GPU shared max 3,540 MB, dedicated max 3,513 MB | CPU perf mean 115% | disk page reads/s mean 2,063 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean 69% | 25 samples
+route-bench exit: 
+16:42 queue q30 done
+  log_route_a30_a_Kokiri.txt         listed in no cache     0 | compute in no cache  227
+  log_route_a30_a_HyruleField.txt    listed in no cache     0 | compute in no cache  244
+  log_route_a30_a_Town.txt           listed in no cache     0 | compute in no cache  213
+  log_route_a30_b_Kokiri.txt         listed in no cache     0 | compute in no cache  227
+  log_route_a30_b_HyruleField.txt    listed in no cache     0 | compute in no cache  244
+  log_route_a30_b_Town.txt           listed in no cache     0 | compute in no cache  213
+driver cache after:
+  66947ED760F03CCAB0E1094909B13A50.parc 1,728.0 MB  14:41:46
+16:42 q30 chain done

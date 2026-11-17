@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-16, 16:20; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-16, 16:50; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -73,9 +73,10 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 
 **Update 2026-11-16 16:20 (details: "Day 2026-11-16" below): Longshot main 5c284721 is a tie with the play build;
 nothing adopted.** Both warm, interleaved (q29): 6fb play env route 40.6 / 40.3, 5c284721 with the same env 41.2 / 41.1,
-5c284721 with READBACK_LATE=newest only and no cap 40.8 / 41.1; walks 84-96 % within 15 % in all three. The new build's
-78-min first start (every pipeline new, #906) filled the AMD driver cache: the play build now compiles ~227 compute
-pipelines in play on every start (0 before), and the driver doesn't keep them (the cache seems at its size limit).
+5c284721 with READBACK_LATE=newest only and no cap 40.8 / 41.1; walks 84-96 % within 15 % in all three; q30 (6fb again,
+16:21-16:42) 41.2 / 41.3. Since the re-warm the play build compiles ~227 compute pipelines in play on every start (0
+before) and the driver doesn't keep them. **Not** a full driver cache: with the new build's 2.4 GB cache file in the
+Recycle Bin (16:20, the user's "Yes, delete it"), q30 still missed the same 227 and the driver wrote nothing.
 
 **Update 2026-11-16 09:04 (the user's yes): the play env's lock is 36 (HOS_FPS_LOCK=36, 72 shown), not 40.** With the
 user's own options (q27, "Night 2026-11-16" below) 36 holds while walking everywhere, Hyrule Field too: 95-98 % of frames
@@ -611,18 +612,28 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
   same count in both rounds, so the driver doesn't keep them. `%LOCALAPPDATA%\AMD\VkCache` holds two files: 2,432 MB
   (F44F0B87...parc, last written 11:40, the end of the new build's warm-up) and 1,728 MB (66947ED7...parc, last written
   14:41, two minutes before w29's start finished, while the compute pipelines were still being made); 4.16 GB together and
-  no write since. So the driver's cache looks at its size limit, the play build's last ~227 compute pipelines didn't fit,
-  and they are compiled in play on every start (a29_b's Kokiri arrival: 30 frames over 50 ms vs 5-15 in b29). The b-over-a
-  edge (+0.7 fps route, +5 route 1% low) probably comes from that, not from the code.
+  no write since. A full cache (size limit) looked like the reason; **q30 ruled it out** (next bullet).
+- **q30 (q30-chain.ps1, 16:21-16:42; the user's "Yes, delete it" at ~16:20):** the new build's file (F44F0B87...parc) went
+  to the Recycle Bin (restorable; C: has 776 GB free), leaving only 6fb's 1,728 MB file. Two 6fb runs, play env, walks:
+  route **41.2 / 41.3** (1% low 50.3 / 50.7, GPU 18.90 / 18.97 ms), walks 85-94 % within 15 % (q30-steady.txt), still
+  **227 / 244 / 213 compute pipelines in no cache in both runs**, and the .parc kept its 14:41 write time and size. So the
+  driver had room and still stored nothing in 3-4-min game processes. The likelier cause: the driver writes its file in
+  batches during a long run (11:40 and 14:41 were both inside long start-mode runs), and what was compiled after the last
+  write is lost when the game exits. A play session of an hour or more may store them; check the next play log
+  (`Games\Longshot-Ally-6fb\logs`, "asked that way were in no cache"). Either way the cost is small: q30's 6fb route equals
+  the new build's (41.2 / 41.1), so the a29 gap was run-to-run noise, not these compiles.
 - **Verdict: a tie; the play folder stays on 6fb (the 4090 session's rule: change it only if (b) clearly beats (a)).** The
   new build's real gain is correctness: READBACK_LATE=newest alone (d) is as fast as the size list + cap and reads current
   data.
 - Play folder checked after q29: no save.routebak, options = ls-play-options.ini, HOS_FPS_LOCK=36.
 
 ## Next steps
-- **Ask the user:** delete the new build's driver cache file (`%LOCALAPPDATA%\AMD\VkCache\F44F0B871E202D93B0E1094909B13A50.parc`,
-  2.4 GB, regenerable; no game running) so the play build's ~227 compute pipelines fit again and stay after one session.
-  Then the new build would need its ~78-min first start again if it's ever used. Don't delete without the user's OK.
+- The new build's driver cache file (`F44F0B871E202D93B0E1094909B13A50.parc`, 2.4 GB) is in the Recycle Bin since
+  2026-11-16 16:20 (the user's OK). It didn't help (q30). Restoring it to `%LOCALAPPDATA%\AMD\VkCache` makes
+  Games\Longshot-Ally-new warm again; leaving it out only means a ~78-min first start if that build is ever used.
+- After the user's next long play session, read the newest log in `Games\Longshot-Ally-6fb\logs`: if the next start shows
+  "0 asked that way were in no cache", the 227 compute pipelines are stored again. If not, one start-mode session
+  (RX_VK_LOAD=start) may store them (it did on 2026-11-15 night).
 - Moving the play build to a newer main: 5c284721 was a tie (Day 2026-11-16). #906 changed the translator, so any build
   from main now needs its own long first start (~78 min) and a second large driver cache file. If the user wants it anyway:
   Games\Longshot-Ally-new is built and warm; its env needs HOS_FPS_MAX=36 in place of HOS_FPS_LOCK=36, and a lock check
@@ -683,10 +694,11 @@ as fast.
 - ~10 h without running a folder can do the same (2026-11-15: -next's first start 227 s, "1557 listed pipelines in no cache",
   GPU 22-26 ms in Hyrule/Town; the refill took a 57-min start-mode session). Symptoms look like a bad build; check the
   log's "in no cache" count first. Benches after a long idle need a warm-up start first.
-- The AMD driver's Vulkan cache (`%LOCALAPPDATA%\AMD\VkCache`) keeps one .parc file per build, and together they seem
-  capped near 4.1 GB: a second build with all-new pipelines (5c284721) pushed ~1,500 of the play build's out, and once
-  full the driver stopped writing (2026-11-16: 227 compute pipelines recompiled on every 6fb start). Test a build with
-  a new translator only when its cache file can be deleted afterwards.
+- The AMD driver's Vulkan cache (`%LOCALAPPDATA%\AMD\VkCache`) keeps one .parc file per build. While a second build
+  with all-new pipelines (5c284721) warmed up, ~1,500 of the play build's pipelines went missing (cause not proven: a size
+  limit or the ~5 h since its last run). The driver writes the file in batches during long runs, so short bench runs
+  (3-4 min per game process) don't store what they compile: 227 compute pipelines stayed missing through 4 runs, with
+  room in the cache (q29, q30).
 - Shot diffs: only Town_1_loaded holds still between runs; the turned views differ 50k-500k px in every pairing (the camera
   stops a little differently), so compare each setting against its own repeat, and look at the PNGs by eye.
 - The route line's "draws" is a mean over stat lines: it moves with timing. Compare draws per view (group the log's
