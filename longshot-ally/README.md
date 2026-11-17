@@ -103,8 +103,8 @@ itself showed none with the earlier build. Graphics memory peaks at 2.6-2.9 GB.
 
 ## Updating, and going back
 
-- **Update:** run the installer from a newer release of this fork. It builds into the same folder and keeps your saves
-  (copied aside first).
+- **Update:** run the installer from a newer release of this fork. It builds into the folder your "Longshot (ROG Ally)"
+  desktop shortcut opens and keeps your saves there (copied aside first), and the AMD driver's shaders for that folder.
 - **Undo the settings:** delete `longshot_env.txt` from the game folder; your old options are kept beside it as
   `longshot_options.ini.before-<date>`.
 - **Remove:** delete the game folder, the desktop shortcut, and `%LOCALAPPDATA%\LongshotBuilder-ally` (the build's work

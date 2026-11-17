@@ -17,7 +17,8 @@
 
   Options:
     -From <folder>      the game folder to take the game files and saves from (default: found)
-    -Out <folder>       where to build (default %USERPROFILE%\Games\Longshot-Ally); building again into it updates it
+    -Out <folder>       where to build; building again into it updates it (default: the folder the desktop shortcut
+                        "Longshot (ROG Ally)" opens, from an earlier install; else %USERPROFILE%\Games\Longshot-Ally)
     -SourceZip <file>   a Longshot source zip you already downloaded (of $LongshotTag)
     -Builder <folder>   the builder to use (the folder with tools\python in it; default: found)
     -Work <folder>      the build's working folder (default %LOCALAPPDATA%\LongshotBuilder-ally, about 5 GB)
@@ -26,7 +27,7 @@
 #>
 param(
     [string]$From = '',
-    [string]$Out = "$env:USERPROFILE\Games\Longshot-Ally",
+    [string]$Out = '',
     [string]$SourceZip = '',
     [string]$Builder = '',
     [string]$Work = "$env:LOCALAPPDATA\LongshotBuilder-ally",
@@ -51,6 +52,19 @@ Write-Host 'https://github.com/Predator04/hookshot-rog-ally' -ForegroundColor Da
 $here = $PSScriptRoot
 foreach ($need in 'tools\build-longshot-ally.ps1', 'tools\apply_patch.py', 'longshot_env.txt', 'longshot_options_ally.ini') {
     if (-not (Test-Path (Join-Path $here $need))) { Fail "This installer's $need is missing: unzip the whole release and run it from there." }
+}
+$updating = $false
+if (-not $Out) {
+    # (an earlier install's desktop shortcut names the folder you play in: update that one, so your saves and the AMD
+    #  driver's shaders, kept by the game's folder, carry on; else a new folder)
+    $Out = "$env:USERPROFILE\Games\Longshot-Ally"
+    $lnk0 = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Longshot (ROG Ally).lnk'
+    if (Test-Path -LiteralPath $lnk0) {
+        try {
+            $t = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk0).TargetPath
+            if ($t -and (Split-Path $t -Leaf) -eq 'longshot.exe' -and (Test-GameFolder (Split-Path $t -Parent))) { $Out = Split-Path $t -Parent; $updating = $true }
+        } catch {}
+    }
 }
 $Out = FullPath $Out
 $Work = FullPath $Work
@@ -114,7 +128,7 @@ if ($From) {
 }
 if ($From -eq $Out) { Fail '-Out is your game folder: choose another folder to build into' }
 Info "Game files: $From"
-Info "Builds into: $Out"
+Info "Builds into: $Out$(if ($updating) { ' (the folder your desktop shortcut opens: an update, your saves kept)' })"
 
 # ---- 2. Longshot's source, with this fork's patches ----
 Step "Getting Longshot $LongshotTag's source"
