@@ -20,7 +20,7 @@
     -Out <folder>       where to build (default %USERPROFILE%\Games\Longshot-Ally); building again into it updates it
     -SourceZip <file>   a Longshot source zip you already downloaded (of $LongshotTag)
     -Builder <folder>   the builder to use (the folder with tools\python in it; default: found)
-    -Work <folder>      the build's working folder (default %LOCALAPPDATA%\LongshotBuilder-ally, about 8 GB)
+    -Work <folder>      the build's working folder (default %LOCALAPPDATA%\LongshotBuilder-ally, about 5 GB)
     -NoShortcut         no desktop shortcut
     -NoPause            don't wait for Enter at the end
 #>
@@ -127,7 +127,8 @@ if ($SourceZip) {
     [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
     $ProgressPreference = 'SilentlyContinue'
     $zip = Join-Path $srcDir "longshot-$LongshotTag.zip"
-    $url = "https://git.magicbean.dev/MagicBeanDev/Longshot/archive/$LongshotTag.zip"
+    # (the API's archive: the web page's archive links answer 404)
+    $url = "https://git.magicbean.dev/api/v1/repos/MagicBeanDev/Longshot/archive/$LongshotTag.zip"
     Info "Downloading $url"
     try { Invoke-WebRequest $url -OutFile $zip -Headers @{ 'User-Agent' = 'longshot-ally-installer' } -UseBasicParsing }
     catch { Fail "The download failed ($($_.Exception.Message)). Check the connection, or download that file yourself and pass -SourceZip <file>." }
@@ -222,9 +223,9 @@ Write-Host @"
 
 Done: $Out
 Start $(if ($NoShortcut) { "$Out\longshot.exe" } else { "it from the desktop shortcut (or $Out\longshot.exe)" }).
-The first start is quick, but each new area stutters for a while as the AMD driver builds its shaders; it settles as you
-play. Keep the folder where it is: the driver keeps its shaders by the game's folder. (To build them all at the first
-start instead, about 80 minutes: in longshot_env.txt change RX_VK_LOAD=create to start for one start.)
+The first start shows a start-up screen for about 75 minutes on the Ally while it prepares the shaders: charger in, other apps
+closed. You can close it; the next start carries on from there. After that a start takes about a minute.
+Keep the folder where it is: the AMD driver keeps its shaders by the game's folder, so a moved folder starts cold again.
 To update later, run this installer from a newer release: it builds into the same folder and keeps your saves.
 "@ -ForegroundColor Green
 Done 0
