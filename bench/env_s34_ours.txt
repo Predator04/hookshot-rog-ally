@@ -1,0 +1,9 @@
+# s34 (2026-11-17 night, the user via the 4090 session: "Run everything all night"): stock against ours on rc.7 (the installer's
+# test folder), unlocked (no HOS_FPS_MAX), with the installer's options. Ours arm: the release's longshot_env.txt without the cap.
+RX_VK_FORCE_MESH_FALLBACK=1
+RX_VK_PREDICT_S=60
+RX_VK_IMAGE_BLOCK_MB=32
+RX_VK_PCACHE_LOAD=0
+RX_VK_LOAD=create
+RX_VK_READBACK_LATE=newest
+RX_VK_FSR_FG=0

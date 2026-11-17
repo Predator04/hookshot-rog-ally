@@ -829,3 +829,9 @@
 23:24 [i32] Kokiri START TIMEOUT after 15 min  env=env_i32_installed.txt
 23:39 [i32] HyruleField START TIMEOUT after 15 min  env=env_i32_installed.txt
 23:54 [i32] Town START TIMEOUT after 15 min  env=env_i32_installed.txt
+00:30 [i33w] Kokiri: start 1786 s | game fps 33.5 | shown 66.6 (1% low 43.4) | GPU 18.57 ms | draws 1,448 | passes 177 | >=50ms 30 >=100ms 14 | views: 1_loaded 26.1 ms 25 fps; 2_left 15.8 ms 36 fps; 3_right 16.9 ms 35 fps; 4_half_left 16.8 ms 36 fps | walk: game fps 36.0 | shown 72.0 (1% low 67.3) | GPU 15.67 ms | >=50ms 0 >=100ms 0 | alive=True   env=env_i32_installed.txt
+00:30 [i33w] ROUTE (1 spots): game fps 33.5 | 1% low 43.4 | GPU 18.57 ms | draws 1,448  env=env_i32_installed.txt
+00:34 [i33] Kokiri: start 63 s | game fps 34.2 | shown 70.2 (1% low 47.7) | GPU 17.76 ms | draws 1,424 | passes 176 | >=50ms 4 >=100ms 0 | views: 1_loaded 25.1 ms 28 fps; 2_left 15.9 ms 36 fps; 3_right 15.4 ms 36 fps; 4_half_left 15.9 ms 36 fps | walk: game fps 36.0 | shown 72.0 (1% low 65.8) | GPU 15.40 ms | >=50ms 0 >=100ms 0 | alive=True   env=env_i32_installed.txt
+00:37 [i33] HyruleField: start 72 s | game fps 35.4 | shown 70.0 (1% low 43.7) | GPU 19.66 ms | draws 1,861 | passes 177 | >=50ms 28 >=100ms 5 | views: 1_loaded 21.8 ms 35 fps; 2_left 19.2 ms 36 fps; 3_right 20.1 ms 34 fps; 4_half_left 17.6 ms 36 fps | walk: game fps 36.0 | shown 72.0 (1% low 63.3) | GPU 18.41 ms | >=50ms 0 >=100ms 0 | alive=True   env=env_i32_installed.txt
+00:41 [i33] Town: start 69 s | game fps 34.1 | shown 67.4 (1% low 42.8) | GPU 18.14 ms | draws 1,426 | passes 178 | >=50ms 29 >=100ms 13 | views: 1_loaded 16.3 ms 36 fps; 2_left 18.0 ms 35 fps; 3_right 23.7 ms 29 fps; 4_half_left 15.5 ms 36 fps | walk: game fps 35.9 | shown 71.9 (1% low 64.0) | GPU 15.51 ms | >=50ms 1 >=100ms 0 | alive=True   env=env_i32_installed.txt
+00:41 [i33] ROUTE (3 spots): game fps 34.6 | 1% low 44.8 | GPU 18.52 ms | draws 1,570  env=env_i32_installed.txt

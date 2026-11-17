@@ -25,7 +25,10 @@ $job = Start-Job -ArgumentList $csv -ScriptBlock {
     param($csv)
     'time,pid,private_mb,ws_mb,commit_gb,limit_gb,avail_mb,gpu_shared_mb,gpu_ded_mb,cpu_perf_pct,page_reads_s,apu_c,passive_pct,throttle,gpu3d_pct' | Set-Content $csv -Encoding ascii
     while ($true) {
-        $p = Get-Process longshot -ErrorAction SilentlyContinue | Select-Object -First 1
+        # (the game, not its crash-window helper: since rc.7 a second longshot.exe "--crash-watch <pid> ..." runs beside it, and
+        # the first process found was often that 8 MB helper (i32/i33's 178 MB "private max", no GPU memory))
+        $w = Get-CimInstance Win32_Process -Filter "Name='longshot.exe'" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -notmatch '--crash-watch' } | Select-Object -First 1
+        $p = if ($w) { Get-Process -Id $w.ProcessId -ErrorAction SilentlyContinue } else { $null }
         $os = Get-CimInstance Win32_OperatingSystem
         $commit = ($os.TotalVirtualMemorySize - $os.FreeVirtualMemory) / 1MB; $limit = $os.TotalVirtualMemorySize / 1MB
         $sh = 0; $de = 0

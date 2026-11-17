@@ -1,0 +1,48 @@
+﻿23:58 i33 chain start
+  66947ED760F03CCAB0E1094909B13A50.parc  1,728 MB 14:41
+  782B3ADC5724513AB0E1094909B13A50.parc  1,984 MB 23:52
+  F44F0B871E202D93B0E1094909B13A50.parc  2,432 MB 11:40
+23:58 queue i33w start: 1 runs
+23:58 i33w in C:\Users\Admin\Games\Longshot-Ally-installtest env=env_i32_installed.txt spots=Kokiri ini=i32-options.ini
+00:30 [i33w] Kokiri: start 1786 s | game fps 33.5 | shown 66.6 (1% low 43.4) | GPU 18.57 ms | draws 1,448 | passes 177 | >=50ms 30 >=100ms 14 | views: 1_loaded 26.1 ms 25 fps; 2_left 15.8 ms 36 fps; 3_right 16.9 ms 35 fps; 4_half_left 16.8 ms 36 fps | walk: game fps 36.0 | shown 72.0 (1% low 67.3) | GPU 15.67 ms | >=50ms 0 >=100ms 0 | alive=True   env=env_i32_installed.txt
+00:30 [i33w] ROUTE (1 spots): game fps 33.5 | 1% low 43.4 | GPU 18.57 ms | draws 1,448  env=env_i32_installed.txt
+00:30 [i33w] Kokiri: private max 178 MB | working set max 8 MB | commit max 44.7 of 59.7 GB | available min 7 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 126% | disk page reads/s mean 406 | APU max 95 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 291 samples
+route-bench exit: 
+00:30 queue i33w done
+  i33w Kokiri preparation lines (first and last):
+    [hos host] vk: start-up: pipelines 14486 of 36682, 39% of all, about 30 s left
+    [hos host] vk: noted pipelines: 14487 of 32623 pipelines in 15 s, about 19 s left
+    [hos host] vk: start-up: pipelines 36682 of 36682, 100% of all, a few seconds left
+    [hos host] vk: start-up: pipelines 36682 of 36682, 100% of all, a few seconds left
+    [hos host] vk: start-up: the shaders took 1721.4 s
+  cache\longshot_computes.bin 0 MB 00:30
+  cache\longshot_compute_variants.bin 0 MB 00:30
+  cache\longshot_module_ids.bin 0 MB 00:30
+  cache\longshot_pipelines.bin 845 MB 00:28
+  cache\longshot_pipelines.bin.built 0 MB 00:23
+  cache\longshot_pipeline_states.bin 0 MB 00:30
+  cache\longshot_prepared.bin 0 MB 23:27
+  cache\longshot_programs.bin 7,542 MB 23:26
+  cache\longshot_programs.idx 1 MB 23:26
+  cache\longshot_vk_pipelines.stamp 0 MB 23:08
+00:30 queue i33 start: 1 runs
+00:30 i33 in C:\Users\Admin\Games\Longshot-Ally-installtest env=env_i32_installed.txt spots=Kokiri,HyruleField,Town ini=i32-options.ini
+00:34 [i33] Kokiri: start 63 s | game fps 34.2 | shown 70.2 (1% low 47.7) | GPU 17.76 ms | draws 1,424 | passes 176 | >=50ms 4 >=100ms 0 | views: 1_loaded 25.1 ms 28 fps; 2_left 15.9 ms 36 fps; 3_right 15.4 ms 36 fps; 4_half_left 15.9 ms 36 fps | walk: game fps 36.0 | shown 72.0 (1% low 65.8) | GPU 15.40 ms | >=50ms 0 >=100ms 0 | alive=True   env=env_i32_installed.txt
+00:37 [i33] HyruleField: start 72 s | game fps 35.4 | shown 70.0 (1% low 43.7) | GPU 19.66 ms | draws 1,861 | passes 177 | >=50ms 28 >=100ms 5 | views: 1_loaded 21.8 ms 35 fps; 2_left 19.2 ms 36 fps; 3_right 20.1 ms 34 fps; 4_half_left 17.6 ms 36 fps | walk: game fps 36.0 | shown 72.0 (1% low 63.3) | GPU 18.41 ms | >=50ms 0 >=100ms 0 | alive=True   env=env_i32_installed.txt
+00:41 [i33] Town: start 69 s | game fps 34.1 | shown 67.4 (1% low 42.8) | GPU 18.14 ms | draws 1,426 | passes 178 | >=50ms 29 >=100ms 13 | views: 1_loaded 16.3 ms 36 fps; 2_left 18.0 ms 35 fps; 3_right 23.7 ms 29 fps; 4_half_left 15.5 ms 36 fps | walk: game fps 35.9 | shown 71.9 (1% low 64.0) | GPU 15.51 ms | >=50ms 1 >=100ms 0 | alive=True   env=env_i32_installed.txt
+00:41 [i33] ROUTE (3 spots): game fps 34.6 | 1% low 44.8 | GPU 18.52 ms | draws 1,570  env=env_i32_installed.txt
+00:41 [i33] Kokiri: private max 178 MB | working set max 8 MB | commit max 39.7 of 59.7 GB | available min 182 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 117% | disk page reads/s mean 1,465 | APU max 92 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 32 samples
+00:41 [i33] HyruleField: private max 178 MB | working set max 8 MB | commit max 39.8 of 59.7 GB | available min 239 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 108% | disk page reads/s mean 1,594 | APU max 92 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 33 samples
+00:41 [i33] Town: private max 178 MB | working set max 8 MB | commit max 40.5 of 59.7 GB | available min 142 MB | GPU shared max 0 MB, dedicated max 0 MB | CPU perf mean 116% | disk page reads/s mean 1,494 | APU max 94 C, passive limit min 100%, throttle 0 | GPU 3D mean % | 32 samples
+route-bench exit: 
+00:41 queue i33 done
+  Kokiri:
+    [hos host] vi: frame rate cap 36: pacing, the game's limiter and its time step follow it
+  HyruleField:
+    [hos host] vi: frame rate cap 36: pacing, the game's limiter and its time step follow it
+  Town:
+    [hos host] vi: frame rate cap 36: pacing, the game's limiter and its time step follow it
+  66947ED760F03CCAB0E1094909B13A50.parc  1,728 MB 14:41
+  782B3ADC5724513AB0E1094909B13A50.parc  2,368 MB 00:21
+  F44F0B871E202D93B0E1094909B13A50.parc  2,432 MB 11:40
+00:41 i33 chain done
