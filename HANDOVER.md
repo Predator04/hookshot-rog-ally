@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-16, 09:05; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-16, 16:20; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -25,6 +25,7 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 6c9edffe since 2026-11-14 17:28 (414f56e2 at 12:35), + our 2 patches uncommitted; push disabled) |
 | Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
 | **User's play folder (since 2026-11-15 23:10)** | `C:\Users\Admin\Games\Longshot-Ally-6fb` (longshot-ally-6fb13fe5-dirty: 6fb13fe5 + 0001, 0002, 0003, 0004-on-6fb13fe5, 0006; built 19:09-19:55 from the worktree `Zelda Ocrina\longshot-6fb`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-6fb`; the user's save + options; longshot_env.txt = bench\env_longshot_ally_6fb.txt, HOS_FPS_LOCK=36 since 2026-11-16 09:04, 40 before) |
+| Newest main, tested 2026-11-16 (not for play) | `C:\Users\Admin\Games\Longshot-Ally-new` (longshot-ally-5c284721-dirty: 5c284721 + 0002, 0003, 0004-on-6fb13fe5, 0007; worktree `Zelda Ocrina\longshot-new`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-new`; 6fb's save copied; env = env_ldc_rball5_fpcap.txt; its driver cache is warm) |
 | Previous play folder (fallback) | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-6c9edffe-dirty + 0001-0004; rball5 + cap + lock 30; the same save) |
 | User's current play build | `C:\Users\Admin\Games\Hookshot-Ally` (rog-ally-cb21687, Hookshot fork; don't touch) |
 | Copy of the play build for A/B | `C:\Users\Admin\Games\Hookshot-Ally-ref` (34 GB; delete only with the user's OK) |
@@ -69,6 +70,12 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-16 16:20 (details: "Day 2026-11-16" below): Longshot main 5c284721 is a tie with the play build;
+nothing adopted.** Both warm, interleaved (q29): 6fb play env route 40.6 / 40.3, 5c284721 with the same env 41.2 / 41.1,
+5c284721 with READBACK_LATE=newest only and no cap 40.8 / 41.1; walks 84-96 % within 15 % in all three. The new build's
+78-min first start (every pipeline new, #906) filled the AMD driver cache: the play build now compiles ~227 compute
+pipelines in play on every start (0 before), and the driver doesn't keep them (the cache seems at its size limit).
 
 **Update 2026-11-16 09:04 (the user's yes): the play env's lock is 36 (HOS_FPS_LOCK=36, 72 shown), not 40.** With the
 user's own options (q27, "Night 2026-11-16" below) 36 holds while walking everywhere, Hyrule Field too: 95-98 % of frames
@@ -571,10 +578,55 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
 - **~09:14, the 4090 session (with the user's OK) posted the findings as Longshot issue #1190** under the user's Forgejo
   account (details in "Next steps").
 
+## Day 2026-11-16: Longshot main 5c284721 (q28, q29; the user, via the 4090 session: "Yes, test it")
+- **Source:** worktree `Zelda Ocrina\longshot-new` = 5c284721 (27 commits past 7045ca7c) + 0002, 0003, 0004-on-6fb13fe5,
+  0007 (LF copies, `git apply --3way`; 0004 fell back to direct application, its code checked present). No 0001/0006: 0007
+  extends upstream's HOS_FPS_MAX, so on this build the lock line is `HOS_FPS_MAX=36`. Built 09:52-10:24 (compile 1215 s)
+  into `Games\Longshot-Ally-new` with a copy of -6fb's work folder; 6fb's save copied. The play folder was not changed (each
+  run's env is passed with HOS_ENV_FILE; options and saves put back).
+- **What reaches the Ally's path:** #977 1b2e7555 RX_VK_READBACK_EARLY (on by default without mirrors: a read waits for
+  its writer's part; log "reads of GPU results written in place wait for their writer's part"), #906 55e8fbd5 soa mesh
+  fallback records (every program re-translated, every pipeline new: the first start-mode run sat 4648 s at Kokiri,
+  44,772 noted pipelines), #1188 1aec0c3c RX_VK_COLD_CHECK.
+- **q28 (q28-chain.ps1, 11:52-13:44, after the w28 warm-up; two rounds, 25 s walks), route game fps:** a28 6fb play env
+  35.3 / 37.1 (**not valid**: 1,462-1,533 listed and 461-609 compute pipelines "in no cache", pushed out by the new build's
+  warm-up; GPU 21.4-22.2 ms); b28 new, play env 40.5 / 41.3; c28 new, no cap 40.9 / 40.9; d28 new, READBACK_LATE=newest
+  only, no cap (env_new_newest.txt) 41.3 / 40.9; e28 new, play env + RX_VK_READBACK_EARLY=0 (env_new_early0.txt)
+  41.1 / 41.2. On the new build the size list and cap add nothing, and #977's early reads add nothing over EARLY=0.
+- **4090 flash lab (same source):** 0 flashes in 24 runs (play / nocap / newest / early0, 2 rounds, 3 spots). With the
+  rball5 list the early reads never fire; with newest only they fire 160-219 times per spot (10-34 ms) and the byte probe
+  read 100/100 correct.
+- **q29 (q29-chain.ps1, 13:46-16:00): w29 re-warmed the play folder in start mode (Kokiri start 3428 s, then 0 listed
+  pipelines in no cache), then a b d d b a, both warm** (q29-steady.txt):
+
+  | Arm | Route fps | Route 1% low | GPU ms | Spots: Kokiri / Hyrule / Town | Walks: Kokiri / Hyrule / Town |
+  |---|---|---|---|---|---|
+  | a29 6fb, play env | 40.6 / 40.3 | 45.1 / 45.8 | 19.27 / 19.16 | 44.9 / 36.4 / 40.4; 43.1 / 36.7 / 41.2 | 46.8 / 36.5 / 42.4; 50.8 / 37.3 / 41.4 |
+  | b29 new, play env | 41.2 / 41.1 | 51.0 / 50.4 | 18.85 / 18.98 | 44.8 / 37.3 / 41.5; 45.1 / 37.3 / 40.9 | 50.2 / 37.3 / 40.9; 50.8 / 36.3 / 41.8 |
+  | d29 new, newest only | 40.8 / 41.1 | 49.7 / 50.3 | 19.00 / 18.87 | 45.2 / 36.8 / 40.6; 44.8 / 37.2 / 41.1 | 49.9 / 37.0 / 41.9; 50.3 / 37.3 / 42.1 |
+
+  Walks within 15 %: a 84-94 %, b 86-94 %, d 85-96 %; 0-5 frames over 50 ms per walk in every arm.
+- **The play build's cache is not fully warm again, and can't be for now:** a29 has 213-244 compute pipelines per spot
+  "asked that way were in no cache" (module identifiers; 0 in this morning's p36/p40 and in every new-build run), the
+  same count in both rounds, so the driver doesn't keep them. `%LOCALAPPDATA%\AMD\VkCache` holds two files: 2,432 MB
+  (F44F0B87...parc, last written 11:40, the end of the new build's warm-up) and 1,728 MB (66947ED7...parc, last written
+  14:41, two minutes before w29's start finished, while the compute pipelines were still being made); 4.16 GB together and
+  no write since. So the driver's cache looks at its size limit, the play build's last ~227 compute pipelines didn't fit,
+  and they are compiled in play on every start (a29_b's Kokiri arrival: 30 frames over 50 ms vs 5-15 in b29). The b-over-a
+  edge (+0.7 fps route, +5 route 1% low) probably comes from that, not from the code.
+- **Verdict: a tie; the play folder stays on 6fb (the 4090 session's rule: change it only if (b) clearly beats (a)).** The
+  new build's real gain is correctness: READBACK_LATE=newest alone (d) is as fast as the size list + cap and reads current
+  data.
+- Play folder checked after q29: no save.routebak, options = ls-play-options.ini, HOS_FPS_LOCK=36.
+
 ## Next steps
-- Moving the play build to the newest main: build 02903b04 + 0002, 0003, 0004-on-6fb13fe5, 0007 in place over
-  Games\Longshot-Ally-6fb (same translator, so its driver cache should stay warm), env HOS_FPS_MAX=36 in place of
-  HOS_FPS_LOCK=36, then a lock check (game time is real-time stepped under #609).
+- **Ask the user:** delete the new build's driver cache file (`%LOCALAPPDATA%\AMD\VkCache\F44F0B871E202D93B0E1094909B13A50.parc`,
+  2.4 GB, regenerable; no game running) so the play build's ~227 compute pipelines fit again and stay after one session.
+  Then the new build would need its ~78-min first start again if it's ever used. Don't delete without the user's OK.
+- Moving the play build to a newer main: 5c284721 was a tie (Day 2026-11-16). #906 changed the translator, so any build
+  from main now needs its own long first start (~78 min) and a second large driver cache file. If the user wants it anyway:
+  Games\Longshot-Ally-new is built and warm; its env needs HOS_FPS_MAX=36 in place of HOS_FPS_LOCK=36, and a lock check
+  first (game time is real-time stepped under #609).
 - The user plays and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none on
   the Ally or the 4090). If one shows, remove ",8b040" first.
 - The waits on whole scene submissions (e0dbf40c) are now handled as far as tested safe: readbacks (rball5) and the capture
@@ -631,6 +683,10 @@ as fast.
 - ~10 h without running a folder can do the same (2026-11-15: -next's first start 227 s, "1557 listed pipelines in no cache",
   GPU 22-26 ms in Hyrule/Town; the refill took a 57-min start-mode session). Symptoms look like a bad build; check the
   log's "in no cache" count first. Benches after a long idle need a warm-up start first.
+- The AMD driver's Vulkan cache (`%LOCALAPPDATA%\AMD\VkCache`) keeps one .parc file per build, and together they seem
+  capped near 4.1 GB: a second build with all-new pipelines (5c284721) pushed ~1,500 of the play build's out, and once
+  full the driver stopped writing (2026-11-16: 227 compute pipelines recompiled on every 6fb start). Test a build with
+  a new translator only when its cache file can be deleted afterwards.
 - Shot diffs: only Town_1_loaded holds still between runs; the turned views differ 50k-500k px in every pairing (the camera
   stops a little differently), so compare each setting against its own repeat, and look at the PNGs by eye.
 - The route line's "draws" is a mean over stat lines: it moves with timing. Compare draws per view (group the log's
