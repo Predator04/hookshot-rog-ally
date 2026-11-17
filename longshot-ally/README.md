@@ -1,8 +1,8 @@
 # Longshot for the ROG Ally
 
 Tested settings and one small patch for [Longshot](https://git.magicbean.dev/MagicBeanDev/Longshot), so it runs
-smoothly on an ASUS ROG Ally. The result is a steady **36 fps** in Kokiri Forest, Hyrule Field and Market Town, with the
-handheld picture and no flashing.
+smoothly on an ASUS ROG Ally. The result is **15 % more fps than stock Longshot** and a steady **36 fps** in Kokiri
+Forest, Hyrule Field and Market Town, with the handheld picture and no flashing.
 
 This holds only scripts, settings, a patch and this guide. The game itself is built on your PC from your own copy of
 the game; nothing of the game is in here.
@@ -60,10 +60,10 @@ You get everything here except the 36 fps cap.
 | Line | What it does |
 |---|---|
 | `RX_VK_FORCE_MESH_FALLBACK=1` | Runs the game's mesh shaders as compute shaders. With the native ones the Ally's GPU hangs or the PC restarts. AMD's current driver (32.0.32015.14001) doesn't offer mesh shaders on the Ally, but Longshot's automatic rule doesn't know the Ally's GPU, so a driver update could bring the hang back. **Keep this line.** |
-| `RX_VK_READBACK_LATE=newest` | CPU reads of the newest GPU work's results don't wait for it: they get the values a frame late (+13 % on an earlier Longshot). With this Longshot's early reads it matches the older, longer setting. |
-| `RX_VK_FSR_FG=0` | Frame generation by the renderer's own maker. Longshot's default here, AMD FSR 3.1, looks better but costs about 11 % of the frame rate on the Ally. Delete the line to try it. |
+| `RX_VK_READBACK_LATE=newest` | CPU reads of the newest GPU work's results don't wait for it: they get the values a frame late. Together with the next line, +1.3 fps on rc.7 (see Measurements). |
+| `RX_VK_PCACHE_LOAD=0` | No second shader cache next to the AMD driver's own. |
+| `RX_VK_FSR_FG=0` | Frame generation by the renderer's own maker. Longshot's default here, AMD FSR 3.1, looks better but costs about 10 % of the frame rate on the Ally (4.2 fps). Delete the line to try it. |
 | `HOS_FPS_MAX=36` | The 36 fps cap (installer build only). |
-| `RX_VK_PCACHE_LOAD=0` | No second shader cache next to the AMD driver's own (more fps and fewer stutters on an earlier Longshot; not measured again on rc.7). |
 
 `longshot_options_ally.ini` (the installer sets these rows and keeps a copy of your file first):
 Quality preset Minimum (4GB), Render resolution's 4th stop (the 3D at 1024x576), Window scaling filter Lanczos, Output
@@ -72,13 +72,18 @@ Profile Handheld, fullscreen, Sharpness 50, Anisotropic filtering 16x, Game spee
 
 ## Measurements
 
-On the Ally, game fps over Kokiri Forest, Hyrule Field and Market Town (2 rounds, no cap, both builds warmed up first):
+Stock Longshot against these settings, on the Ally with the installer's build: game fps over Kokiri Forest, Hyrule Field
+and Market Town, no cap, warmed up, 4 rounds interleaved (stock, FSR off, these, these, FSR off, stock, ...):
 
-| Build and settings | Route fps | GPU time a frame |
-|---|---|---|
-| Longshot 6fb13fe5 with the earlier tuned settings | 39.9 / 40.9 | 19.8 / 18.9 ms |
-| Longshot 6d72ca93 (rc.7's code but one Windows driver-choice fix), these settings | 40.4 / 40.2 | 19.2 / 19.4 ms |
-| The same with FSR 3.1 frame generation (Longshot's default) | 35.7 / 35.7 | 23.1 / 23.1 ms |
+| Settings | Route fps (4 rounds) | Mean | GPU time a frame | Hyrule Field walk |
+|---|---|---|---|---|
+| Stock Longshot rc.7 (FSR 3.1 frame generation) | 36.3 / 36.7 / 36.2 / 36.7 | 36.5 | 21.8 ms | 32.7 fps |
+| Stock with only `RX_VK_FSR_FG=0` | 40.3 / 40.6 / 41.0 / 40.9 | 40.7 | 18.1 ms | 36.0 fps |
+| **These settings** | **42.5 / 41.8 / 42.0 / 41.8** | **42.0** | **17.7 ms** | **39.0 fps** |
+
+These settings beat stock in every round, by 5.1 to 6.2 fps (+15 %), and beat FSR off alone in every round, by 0.9 to 2.2
+fps. In Hyrule Field, the heaviest spot, only these settings hold 36 with room to spare. Graphics memory, heat and start
+times are the same for all three.
 
 At the 36 cap, with the installer's build and settings (warm; 25 s walks; Kokiri / Hyrule Field / Market Town): 36.0 / 36.0 /
 35.9 game fps (72 shown), 99 / 98 / 98 % of frames within 15 % of the target.

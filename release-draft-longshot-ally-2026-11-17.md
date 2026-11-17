@@ -12,23 +12,24 @@
 continuation of Hookshot. This release builds Longshot v3.0.0-rc.7 with the Ally's tested settings and one small patch: a
 frame cap of any rate from 20 to 59. Longshot's own cap offers 30 or 60 and up.
 
-On the Ally that gives a steady **36 fps** in Kokiri Forest, Hyrule Field and Market Town, with the handheld picture and no
-flashing.
+On the Ally that gives **15 % more fps than stock Longshot** and a steady **36 fps** in Kokiri Forest, Hyrule Field and
+Market Town, with the handheld picture and no flashing.
 
-| On the Ally (route game fps, no cap, 2 rounds) | Route fps | GPU time a frame |
-|---|---|---|
-| Longshot 6fb13fe5 with the earlier tuned settings | 39.9 / 40.9 | 19.8 / 18.9 ms |
-| Longshot 6d72ca93 (rc.7's code except one Windows driver-choice fix), these settings | 40.4 / 40.2 | 19.2 / 19.4 ms |
-| The same with FSR 3.1 frame generation (Longshot's default on the Ally) | 35.7 / 35.7 | 23.1 / 23.1 ms |
+| On the Ally (rc.7, no cap, warm, 4 rounds interleaved) | Route fps | GPU time a frame | Hyrule Field walk |
+|---|---|---|---|
+| Stock Longshot (FSR 3.1 frame generation) | 36.5 | 21.8 ms | 32.7 fps |
+| Stock with only FSR 3.1 frame generation off | 40.7 | 18.1 ms | 36.0 fps |
+| **This release's settings** | **42.0** | **17.7 ms** | **39.0 fps** |
 
-- **36 fps holds everywhere tested:** 98-99 % of frames within 15 % of the target, with the installer's own build. 40 dips in Hyrule Field's heaviest views.
+- **Faster than stock in every round:** +5.1 to +6.2 fps, and +0.9 to +2.2 fps over only turning FSR 3.1 off.
+- **36 fps holds everywhere tested:** 98-99 % of frames within 15 % of the target, with the installer's own build. In
+  Hyrule Field only these settings hold 36 with room to spare; 40 dips there.
 - **The renderer's own frame generation instead of FSR 3.1:** Longshot now uses AMD FSR 3.1 frame generation by default
-  on the Ally. It looks better, but costs about 11 % of the frame rate there (3.9 ms more GPU time a frame). One line in
-  `longshot_env.txt` (`RX_VK_FSR_FG=0`) keeps the renderer's own; delete it to try FSR 3.1.
+  on the Ally. It looks better, but costs about 10 % of the frame rate there. One line in `longshot_env.txt`
+  (`RX_VK_FSR_FG=0`) keeps the renderer's own; delete it to try FSR 3.1.
 - **Mesh shaders as compute shaders:** the Ally's GPU hangs with the native ones. AMD's current driver doesn't offer them
   on the Ally, but Longshot's automatic rule doesn't know the Ally's GPU, and Longshot dropped the menu row for it. So
   `longshot_env.txt` sets it, in case a driver update turns them on.
-- **Less graphics memory:** 2.6-2.9 GB at peak instead of 3.0-3.5 GB.
 
 ### Install
 1. Install Longshot once with its official launcher, from your own game ([Longshot's releases](https://git.magicbean.dev/MagicBeanDev/Longshot/releases)).
@@ -49,8 +50,8 @@ Keep the game folder where it is: the AMD driver keeps its shaders by the game's
 Full guide: [longshot-ally/README.md](https://github.com/Predator04/hookshot-rog-ally/blob/longshot-ally/longshot-ally/README.md).
 
 ### Tested
-- Speed and frame caps on a ROG Ally RC71L (Z1 Extreme, 16 GB, UMA 4 GB), Windows 11, AMD driver 32.0.32015.14001, with
-  both builds warmed up and the runs interleaved.
+- Speed and frame caps on a ROG Ally RC71L (Z1 Extreme, 16 GB, UMA 4 GB), Windows 11, AMD driver 32.0.32015.14001:
+  stock against these settings in 4 interleaved rounds, warmed up, on the installer's build.
 - Flashing on an RTX 4090 laptop set up like the Ally (no VRAM mirrors, compute mesh shaders), which flashes far more
   readily: none from the renderer in 18 runs.
 - The installer, on that laptop: a fresh install and an update into the same folder, with a Hookshot Builder; the game
