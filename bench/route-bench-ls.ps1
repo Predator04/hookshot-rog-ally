@@ -121,7 +121,9 @@ foreach ($spot in $Spots) {
             # for it for good, seen at 8 GB UMA where the GPU's shared memory is 3.9 GB. Give up at once, not after the start limit)
             if (Select-String -Path (GameLog) -Pattern 'vk: submit \d+ failed \(-2\)' -Quiet -ErrorAction SilentlyContinue) { Start-Sleep 20; $failed = 'SUBMIT FAILED (-2: out of device memory) during start-up'; break }
             if ($at[1] -gt 400) { $loaded = $true; break }
-            if ($at[0] -gt 0) { Add-Content $in '0:A' -Encoding ascii }   # (presenting: the intro, the title or the file select)
+            # (presenting: the intro, the title or the file select. While the game reads the file the write can fail, "Stream was
+            # not readable" / "cannot access the file" (q31, q32): harmless, the A is written again 3 s later)
+            if ($at[0] -gt 0) { Add-Content $in '0:A' -Encoding ascii -ErrorAction SilentlyContinue }
             if ($at[0] -gt 12000) { $failed = 'LOAD FAILED'; break }      # (well past the intro and still no play)
             Start-Sleep 3
         }

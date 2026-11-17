@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-16, 18:50; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-16, 21:10; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -25,7 +25,7 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 6c9edffe since 2026-11-14 17:28 (414f56e2 at 12:35), + our 2 patches uncommitted; push disabled) |
 | Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
 | **User's play folder (since 2026-11-15 23:10)** | `C:\Users\Admin\Games\Longshot-Ally-6fb` (longshot-ally-6fb13fe5-dirty: 6fb13fe5 + 0001, 0002, 0003, 0004-on-6fb13fe5, 0006; built 19:09-19:55 from the worktree `Zelda Ocrina\longshot-6fb`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-6fb`; the user's save + options; longshot_env.txt = bench\env_longshot_ally_6fb.txt, HOS_FPS_LOCK=36 since 2026-11-16 09:04, 40 before) |
-| Newest main, q32 from 2026-11-16 18:45 (not for play) | `C:\Users\Admin\Games\Longshot-Ally-new` (longshot-ally-6d72ca93-dirty: 6d72ca93 + 0002, 0003, 0004-on-6fb13fe5, 0007; worktree `Zelda Ocrina\longshot-rc6`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-rc6`; built at the path 5c284721 had, with its program cache copied; 6fb's save copied) |
+| Newest main, tested 2026-11-16 evening (q32; not for play; warm) | `C:\Users\Admin\Games\Longshot-Ally-new` (longshot-ally-6d72ca93-dirty: 6d72ca93 + 0002, 0003, 0004-on-6fb13fe5, 0007; worktree `Zelda Ocrina\longshot-rc6`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-rc6`; built at the path 5c284721 had, with its program cache copied; 6fb's save copied) |
 | Main 5c284721, tested 2026-11-16 (q28-q30; not for play) | `C:\Users\Admin\Games\Longshot-Ally-5c2` (renamed from Longshot-Ally-new at 18:44; worktree `Zelda Ocrina\longshot-new`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-new`) |
 | Backup of the play build's AMD driver cache file | `%LOCALAPPDATA%\VkCache-backup-2026-11-16\66947ED760F03CCAB0E1094909B13A50.parc` (1,728 MB, as of 14:41; copied before q32; put it back in `%LOCALAPPDATA%\AMD\VkCache` only if 6fb loses pipelines again) |
 | Previous play folder (fallback) | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-6c9edffe-dirty + 0001-0004; rball5 + cap + lock 30; the same save) |
@@ -73,12 +73,21 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
 
+**Update 2026-11-16 21:05 (q32, details: "Day 2026-11-16" below): Longshot main 6d72ca93 ties with the play build at
+the same frame generation; its new default, FSR 3.1 frame generation, costs ~11 % on the Ally; nothing adopted.** Both
+warm, unlocked, a b c d d c b a, route game fps: 6fb play env 39.9 / 40.9; 6d72ca93 play env + RX_VK_FSR_FG=0
+40.0 / 40.4; READBACK_LATE=newest only + FSR_FG=0 40.4 / 40.2; newest only with FSR 3.1 FG (the default with the user's
+frame_generation=2) 35.7 / 35.7, GPU 23.1 ms vs 19.2-19.4 (+3.9 ms; the 4090 measured +0.8 ms). Walks 84-96 % even in
+every arm. 6d72ca93's renderer peaks ~0.5 GB lower in VRAM in Kokiri and Town (#1255 / #637), with no speed change. The
+4090 found 0 renderer flashes in 18 runs (one Navi glow). **The AMD driver names its cache file by the exe's path:**
+built at 5c284721's path with that build's file back, 6d72ca93's first start took 295 s, not ~78 min.
+
 **Update 2026-11-16 18:40 (q31, details: "Day 2026-11-16" below): the lock stays 36; 38 is no middle ground, and the
 in-game FPS counter costs nothing.** As played (the user's options, play build, two rounds), walks within 15 %: lock 36
 Kokiri 98 / 98, Hyrule 95 / 98, Town 94 / 94 (72 shown); lock 38 98 / 98, 97 / 91, 94 / 87 (Town 2 and 7 frames over
 50 ms; 72-76 shown); lock 40 97 / 97, 90 / 93, 94 / 90 (73-80 shown); lock 40 without the FPS counter 97 / 98, 93 / 96,
 88 / 92. q27's Town 80-89 % at 40 didn't repeat: Hyrule Field (GPU-bound, ~21 ms) is where 40 loses evenness, not Town.
-A newer main, 6d72ca93, is being tested (q32, from 18:45).
+q32 (above) then tested a newer main, 6d72ca93.
 
 **Update 2026-11-16 16:20 (details: "Day 2026-11-16" below): Longshot main 5c284721 is a tie with the play build;
 nothing adopted.** Both warm, interleaved (q29): 6fb play env route 40.6 / 40.3, 5c284721 with the same env 41.2 / 41.1,
@@ -652,6 +661,50 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
   there. Kept 36 (the user's choice); 40 stays the one-line alternative. One harmless error: m36_b's Kokiri walk end hit
   "Add-Content : Stream was not readable" on route_input.txt (route-bench-ls.ps1:124, the game had the file open); the next
   spot loaded normally.
+- **q32 (q32-chain.ps1, 18:45-21:00; asked by the 4090 session "with the user's yes", within the standing OK): Longshot
+  main 6d72ca93** (41 commits past 5c284721; v3.0.0-rc.6 = 181571bd is 4 earlier). Source: worktree `Zelda
+  Ocrina\longshot-rc6` = 6d72ca93 + 0002, 0003, 0004-on-6fb13fe5, 0007 (0004 fell back to direct application again, its
+  code checked present). The translator didn't change (vk_shader.cpp gained only a no-throw guard and a wait counter;
+  FSR 3.1 ships as SPIR-V headers, no DLL), so 5c284721's folder was renamed `Games\Longshot-Ally-5c2` and 6d72ca93 built
+  at its old path `Games\Longshot-Ally-new` (18:45-19:16, compile 1260 s, work folder LongshotBuilder-ally-rc6 copied from
+  -ally-new), with 5c284721's program cache copied in and its driver file (F44F0B87...parc) moved back from the Recycle
+  Bin. **w32's start-mode warm-up: Kokiri start 295 s (5c284721 cold: 4648 s), 0 pipelines in no cache at all three
+  spots, and no driver write**: the AMD driver's file name follows the exe's path, not its contents.
+- What reaches the Ally: #1103 FSR 3.1 frame generation is the default wherever DLSS FG can't run ("fsr3fi: AMD FSR 3.1
+  frame interpolation can run on this GPU"; in play 593-600 of 600 presents made by FSR 3.1, at 1536x864 from 1024x576
+  inputs); #1255 / #1256 / #637 memory handling (log: "integrated GPU texture budget: 2048 MB (system RAM 11 GB, driver
+  allows 6470 MB ...)"); #1300's start list ("switches set (9): ..."; RX_VK_FENCE_FIRST_PART and RX_CPM are named "not a
+  switch of this build", as expected).
+- Arms (unlocked, 25 s walks, a b c d d c b a, bench options with frame_generation=2; q32-steady.txt):
+
+  | Arm | Route fps | GPU ms | Spots Kokiri / Hyrule / Town (game fps) | Walks within 15 %: Kokiri / Hyrule / Town |
+  |---|---|---|---|---|
+  | a32 6fb, play env | 39.9 / 40.9 | 19.78 / 18.88 | 43.9 / 35.9 / 40.0; 43.9 / 39.0 / 39.9 | 88 / 96 / 91; 89 / 93 / 87 |
+  | b32 new, play env + FSR_FG=0 | 40.0 / 40.4 | 19.62 / 19.30 | 43.6 / 35.8 / 40.4; 43.7 / 36.5 / 40.9 | 84 / 96 / 89; 90 / 92 / 89 |
+  | c32 new, newest only + FSR_FG=0 | 40.4 / 40.2 | 19.15 / 19.36 | 43.5 / 37.3 / 40.3; 43.9 / 36.7 / 40.1 | 88 / 95 / 87; 88 / 96 / 91 |
+  | d32 new, newest only, FSR 3.1 FG | 35.7 / 35.7 | 23.12 / 23.11 | 37.8 / 32.3 / 37.2; 37.1 / 32.7 / 37.3 | 89 / 96 / 92; 89 / 95 / 88 |
+
+  Walks' shown fps, c vs d: Kokiri 97.8-99.6 vs 86.5-88.6, Hyrule 71.9-79.9 vs 64.5-66.3, Town 83.0-83.5 vs 76.1-77.1.
+  0-5 frames over 50 ms per walk in every arm. **b and c tie with a (as q29); FSR 3.1 FG costs 11-12 % of the frames
+  (+3.9 ms GPU, ~20 %)**; what it buys is less ghosting, which only the user can judge by eye.
+- Memory (#1255 / #637): renderer VRAM peak per spot, 6fb 2,961-3,498 MB vs 6d72ca93 2,576-2,928 MB (Town 3,466-3,498
+  vs 2,762-2,890); textures ~2,000 MB of the 2,048 MB budget in both. No speed effect; less pressure on the 4 GB UMA
+  (Windows' "available" fell to 20-277 MB in a32, 72-258 MB in the new arms).
+- 6fb still compiles 227 / 244 / 213 compute pipelines per start ("asked that way were in no cache"), and 0 listed
+  pipelines were missing: restoring F44F0B87...parc (4.16 GB together again) cost the play build nothing. Neither .parc
+  was written during q32 (66947ED7 14:41, F44F0B87 11:40). The backup in `%LOCALAPPDATA%\VkCache-backup-2026-11-16`
+  wasn't needed.
+- The 4090 (same source, Games\Longshot-4090-rc6): 1 detection in 18 runs, rc6_play_b Kokiri, present 4013: a white
+  oval with a purple rim at the left edge for one frame, Link unchanged, i.e. Navi's glow passing the camera, not the
+  renderer; newest and FSR 0 in 12; byte probe 100 unchanged; FSR 3.1 on its path 600 of 600 presents, +0.8 ms GPU.
+- "route-bench exit: 1" after every q32 run was robocopy's exit code (1 = files copied) left in $LASTEXITCODE by the
+  chain, not a bench failure. The route_input.txt write error (q31, q32) is now silenced in route-bench-ls.ps1 (the A is
+  written again 3 s later anyway).
+- **Verdict: no change to play.** 6d72ca93 is a tie at the same frame generation; with its default FSR 3.1 FG it is
+  ~11 % slower. If the play build ever moves to main: keep the built-in frame generation (RX_VK_FSR_FG=0, or the menu's
+  "Frame generation by" row) unless the user prefers FSR's look, use HOS_FPS_MAX in place of HOS_FPS_LOCK, and build at
+  the play folder's own path so the driver's file stays warm for what didn't change.
+- Play folder checked after q32: no save.routebak, options = ls-play-options.ini, HOS_FPS_LOCK=36.
 
 ## Next steps
 - The new build's driver cache file (`F44F0B871E202D93B0E1094909B13A50.parc`, 2.4 GB) was in the Recycle Bin from
@@ -661,9 +714,10 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
   "0 asked that way were in no cache", the 227 compute pipelines are stored again. If not, one start-mode session
   (RX_VK_LOAD=start) may store them (it did on 2026-11-15 night).
 - Moving the play build to a newer main: 5c284721 was a tie (Day 2026-11-16). #906 changed the translator, so any build
-  from main now needs its own long first start (~78 min) and a second large driver cache file. 6d72ca93 (q32) is being
-  tested in Games\Longshot-Ally-new; on main builds the lock line is HOS_FPS_MAX=36 in place of HOS_FPS_LOCK=36, and it
-  needs a lock check first (game time is real-time stepped under #609).
+  from main needs its pipelines built once (~78 min cold), unless it goes to a path whose driver file already holds them:
+  Games\Longshot-Ally-new (6d72ca93, q32: a tie at the same frame generation) is built and warm. On main builds the lock
+  line is HOS_FPS_MAX=36 in place of HOS_FPS_LOCK=36, frame generation needs RX_VK_FSR_FG=0 (or the menu's "Frame
+  generation by" row) to stay as fast, and a lock check comes first (game time is real-time stepped under #609).
 - The user plays and reports any white flash or one-frame popping (the readback ranges' risk; RX_VK_FLASH found none on
   the Ally or the 4090). If one shows, remove ",8b040" first.
 - The waits on whole scene submissions (e0dbf40c) are now handled as far as tested safe: readbacks (rball5) and the capture
@@ -720,7 +774,8 @@ as fast.
 - ~10 h without running a folder can do the same (2026-11-15: -next's first start 227 s, "1557 listed pipelines in no cache",
   GPU 22-26 ms in Hyrule/Town; the refill took a 57-min start-mode session). Symptoms look like a bad build; check the
   log's "in no cache" count first. Benches after a long idle need a warm-up start first.
-- The AMD driver's Vulkan cache (`%LOCALAPPDATA%\AMD\VkCache`) keeps one .parc file per build. While a second build
+- The AMD driver's Vulkan cache (`%LOCALAPPDATA%\AMD\VkCache`) keeps one .parc file per exe path (q32: a new build at
+  an old build's path started warm from that path's file). While a second build
   with all-new pipelines (5c284721) warmed up, ~1,500 of the play build's pipelines went missing (cause not proven: a size
   limit or the ~5 h since its last run). The driver writes the file in batches during long runs, so short bench runs
   (3-4 min per game process) don't store what they compile: 227 compute pipelines stayed missing through 4 runs, with
