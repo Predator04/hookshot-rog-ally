@@ -1,7 +1,9 @@
 # Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme): this build is Longshot main 6d72ca93 + this folder's patches 0002, 0003,
 # 0004, 0007 (play folder from 2026-11-16 night, the user: "Switch to the new build with the old frame generation").
 # The previous play build stays as it was in C:\Users\Admin\Games\Longshot-Ally-6fb (the fallback: start that folder's longshot.exe).
-# Ally Z1E: the native mesh path hangs the GPU or reboots (upstream #997). Use the compute mesh fallback (also the options file's mesh_shaders=2).
+# Ally Z1E: the native mesh path hangs the GPU or reboots (upstream #997). Use the compute mesh fallback. This line is what
+# chooses it (the options line no longer counts: mesh_shaders= is not read since the Mesh shaders row left the menu, and the
+# 780M is not on this build's own fallback list). Keep it even while the driver reports no mesh shaders (it did on 2026-11-16).
 RX_VK_FORCE_MESH_FALLBACK=1
 # main predicts ~65,000 extra pipelines (hours on the Ally): build them for 60 s at most, the rest when first drawn
 RX_VK_PREDICT_S=60
