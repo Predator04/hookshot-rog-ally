@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-17, 22:20; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-18, 07:15; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -24,6 +24,8 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot code changes (patches) | `patches\` here (the clone itself is never pushed) |
 | Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 6c9edffe since 2026-11-14 17:28 (414f56e2 at 12:35), + our 2 patches uncommitted; push disabled) |
 | **User's play folder (since 2026-11-17 12:11; desktop `Longshot (ROG Ally).lnk`, the only game shortcut)** | `C:\Users\Admin\Games\Longshot-Ally-new`: the published release longshot-ally-2026.11.17 (v3.0.0-rc.7 + 0007, source 640f91df), installed in place by `longshot-ally\Install-LongshotAlly.ps1 -From Games\Hookshot -Out Games\Longshot-Ally-new` (bench\install-play.out, build 38 min). longshot_env.txt = the release's 5 lines (cap 36); options = the release's Ally keys over the user's; the user's saves; the earlier env and options kept as `*.before-2026-11-17_12-11-39`. Its driver file F44F0B87...parc is warm (first start 16 s, 36 game fps): don't move the folder |
+| Longshot main 7daafa7a (nightly-483) + 0007, bench only (2026-11-18 night, not adopted: see s35) | `C:\Users\Admin\Games\Longshot-Ally-n483` (bench\build-n483.ps1, build 27 min; no longshot_env.txt, so it runs on defaults unless HOS_ENV_FILE is given; a copy of the play saves and options). Warm: its driver file is B9D1B79653F81CEB0E1094909B13A50.parc (2,368 MB), and its first start prepared every shader in 4,448 s. Work folder `%LOCALAPPDATA%\LongshotBuilder-ally-n483`. No shortcut |
+| Fog on/off pictures (f35; made from the game, so never in the repo) | `%LOCALAPPDATA%\LongshotBench\f35-shots` (side-by-side sheets per spot); the raw PNGs are in bench\hs\route_ffs35 and route_fns35 (gitignored) |
 | The user's save backup | `Desktop\Zelda saves 2026-11-17` (the 14 save files as of 2026-11-12 19:09, + README.txt) |
 | Backup of the play folder's AMD driver file | `%LOCALAPPDATA%\VkCache-backup-2026-11-16\F44F0B871E202D93B0E1094909B13A50.parc` (2,432 MB). Put back on 2026-11-17: `AMD\VkCache` was found empty (changed 09:44, while the Ally was in Modern Standby; cause unknown, driver unchanged) |
 | Game files the build reads (read only; the installer's choice [1]) | `C:\Users\Admin\Games\Hookshot` (romfs, .hookshot_exefs, an older 4-slot save) |
@@ -68,6 +70,70 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-18 night (the user via the 4090 session: "keep optimizeing overnight see tou in the morning. also if
+we can maybe remove fog or soemthing in zelda to gte hogher fps lets try?"): neither the newer Longshot nor leaving the
+fog out is worth taking; the play folder stays as it is.** All runs were screen on, plugged in, interleaved, with three
+spots and 25 s walks. Both builds were warm (0 draws left out, 0 shader waits). Env files went in through HOS_ENV_FILE,
+so neither folder's longshot_env.txt or options was changed. After each chain the play saves were identical to the backup
+copy (`%LOCALAPPDATA%\LongshotBench\<chain>-play-backup`). F44F...parc was not written. Every number below is game fps.
+
+- **s35 (bench\s35-chain.ps1, bench\s35.out): release vs Longshot main 7daafa7a (nightly-483, 80 commits later) + 0007.**
+  - Setup: the release env without the cap (bench\env_s35_rel.txt), in the order r n n r r n n r, after one n483 warm-up
+    (its first start: 4,448 s preparing shaders).
+  - Route fps: r 41.2 / 41.9 / 41.5 / 41.9 (mean 41.62) against n 42.0 / 41.8 / 41.7 / 41.5 (41.75). n−r is +0.12
+    (sd 0.51), and n wins 2 of 4 rounds, short of the every-round rule.
+  - Walks, r vs n: Kokiri 49.9 vs 51.3, Field 37.9 vs 36.9 (n lower in all 4 rounds), Town 43.5 vs 43.9.
+  - **n483 shows its frames less evenly.** Shown-frame 1% low in the Field walk: r 56-62 vs n 42-47. In the Town walk:
+    r 62-68 vs n 46-58. Frames of 100 ms or more in the looks: Field 17 vs 34, Town 32 vs 44.
+  - Not adopted. Its folder is kept for t35.
+- **Log check:** "left out: its targets have no view" (the default skip of 53509044401d78d2) is in none of the 5 play logs
+  (11-16 to 11-17). The Ally makes those views, so setting RX_VK_SKIP_PROG (which turns that default skip off) is safe.
+- **f35 (bench\f35-chain.ps1, bench\f35.out): fog off on the release.**
+  - Setup: env_s35_rel vs the same + `RX_VK_SKIP_PROG=ee7764a6b1ef459c,735456b1f220de07,27ee9883e2a20323,1e2fcee33a0c7209`
+    (bench\env_f35_fogoff.txt), in the order fn ff ff fn fn ff ff fn.
+  - What those keys are: the 4090 session's trace found the four compute dispatches in a row that make the volumetric
+    fog. The 1x1x1 exposure dispatches right after them must still run: leaving out 435a0138 turns the picture white.
+  - Route fps: on 42.2 / 41.7 / 41.4 / 41.3 (41.65) vs off 42.0 / 42.4 / 42.1 / 41.0 (41.88). That is +0.22 (sd 0.55),
+    and fog off wins 2 of 4 rounds.
+  - GPU −0.24 ms, which matches the 0.22-0.32 ms the 4090 measured for ee7764a6 alone.
+  - Walks, on vs off: Kokiri 50.5 vs 50.5, Field 37.9 vs 38.2, Town 44.0 vs 44.0.
+  - Field looks were 37.8 vs 38.5 (fog off wins 3 of 4 rounds), but had 9 vs 20 frames of 100 ms or more.
+  - **What it looks like** (shot runs ffs35 / fns35; sheets sent to the user):
+    - Kokiri loses its haze and light shafts and turns much darker.
+    - In Town, Link and the shaded street are darker.
+    - In Hyrule Field, without the distance haze, the low-detail far scenery shows (brown rock blobs on the horizon).
+    - No broken frames.
+  - The fog costs about a quarter of a millisecond: not worth the look.
+- **t35 (bench\chain.ps1 -Name t35, bench\t35.out): why n483 shows its frames less evenly.**
+  - Setup: n483 on env_s35_rel (n), the same + `RX_VK_FG_TIMELINE=0` (t; bench\env_t35_tl0.txt), and the release (r),
+    in the order n t r r t n.
+  - What the switch is: a kill switch in n483 from Longshot #1362 (645d58e6), not in rc.7. Its "=0" restores the old
+    presentation of frame-generation sets.
+  - **Walk shown-frame 1% low per round:**
+
+    | spot | n483 (n) | + TIMELINE=0 (t) | release (r) |
+    |---|---|---|---|
+    | Kokiri | 67.2 / 66.2 | 69.5 / 80.9 | 73.5 / 75.7 |
+    | Field | 40.6 / 46.9 | 57.8 / 51.4 | 57.3 / 61.6 |
+    | Town | 41.8 / 51.7 | 67.3 / 64.8 | 68.3 / 68.2 |
+
+  - Walk frames of 50 ms or more: n 8, t 6, r 3. So #1362's new timeline is most of what makes n483's walks uneven.
+  - The looks' frames of 100 ms or more (Field / Town) are not helped: n 19 / 17, t 23 / 18, r 12 / 13. That remaining
+    unevenness is something else, maybe #1235 (the vsync ticker).
+  - Route fps: r 41.0 / 42.0 (41.50), n 39.6 / 42.4 (41.00), t 39.6 / 41.1 (40.35). n483's round a was slow in both
+    of its arms.
+  - The release stays.
+- **c35 (bench\chain.ps1 -Name c35, bench\c35.out): the same pair at the cap, the way the user plays.**
+  - Setup: the release on its exact env (rc, bench\env_t35_cap.txt = the release's 5 lines) against n483 +
+    HOS_FPS_MAX=36 + TIMELINE=0 (nc, bench\env_t35_cap_tl0.txt), in the order rc nc nc rc.
+  - **A tie.**
+    - Walks, rc vs nc: Kokiri 36.0 vs 36.0, Field 35.3 vs 35.8 (rc 34.9 / 35.8), Town 35.8 vs 35.9.
+    - Walk shown-frame 1% low, rc vs nc: Kokiri 65 vs 67, Field 60 vs 62, Town 61 vs 62.
+    - Route: 34.65 vs 34.80.
+    - nc's GPU time is 1 ms lower (18.84 vs 19.81 ms).
+    - nc's looks had more frames of 100 ms or more (Field / Town): 18 / 21 against rc's 6 / 18.
+  - Nothing to gain from switching. The release's Field walk dipped below 36 once (34.9 in round a; i33 had 36.0).
 
 **Update 2026-11-17 22:20: the user plays the published release.** The 4090 session published
 longshot-ally-2026.11.17 (de5c3532) on the user's "Yes, publish it". On the user's "put the newest ... on desktop so i
@@ -769,10 +835,14 @@ the play env (rball5 + cap), 25 s walks, two rounds each.
   spot (FSR 3.1 made no frames), shown = 2 x game fps (the built-in maker). Driver files not written; 0 pipelines missing.
 
 ## Next steps
-- **Play folder is `Games\Longshot-Ally-new` (6d72ca93) since 2026-11-16 22:20.** Its driver file is
-  `F44F0B871E202D93B0E1094909B13A50.parc` (named by the exe's path): never move or rename the folder, or the first start
-  rebuilds every shader (~78 min). The user's save now changes only there; the fallback `Games\Longshot-Ally-6fb` keeps the
-  save as of 2026-11-16 (copy `user\save` across before playing the fallback, if ever).
+- **Play folder is `Games\Longshot-Ally-new` (the release longshot-ally-2026.11.17, rc.7 + 0007) since 2026-11-17 12:11.**
+  Its driver file is `F44F0B871E202D93B0E1094909B13A50.parc` (named by the exe's path): never move or rename the folder, or
+  the first start rebuilds every shader (~75 min). The user's save changes only there (backup: `Desktop\Zelda saves
+  2026-11-17`). The 6fb fallback was removed on 2026-11-17.
+- **A newer Longshot** (n483 = 7daafa7a was tested on 2026-11-18 and lost): bench it the s35 way against the release, in
+  its own folder (`Games\Longshot-Ally-n483` is warm and can be rebuilt in place). Add `RX_VK_FG_TIMELINE=0` to its env
+  while #1362's timeline makes the walks uneven on the Ally (t35). Adopt only if it wins every round and its shown 1% lows
+  match the release's. Leaving the fog out (f35) is not worth it.
 - The user plays and reports any white flash or one-frame popping (READBACK_LATE=newest's risk; none on the 4090 with
   this setting). If one shows: delete the RX_VK_READBACK_LATE line in Games\Longshot-Ally-new\longshot_env.txt.
 - A newer main later: build it at the play folder's own path (build-longshot.ps1 -Out Games\Longshot-Ally-new, after

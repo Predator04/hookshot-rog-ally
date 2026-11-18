@@ -1,0 +1,6 @@
+# s35 (2026-11-18 night): the release's longshot_env.txt (longshot-ally-2026.11.17) without the cap (HOS_FPS_MAX=36),
+# for both arms: the release build (Games\Longshot-Ally-new) and Longshot main 7daafa7a + 0007 (Games\Longshot-Ally-n483).
+RX_VK_FORCE_MESH_FALLBACK=1
+RX_VK_PCACHE_LOAD=0
+RX_VK_READBACK_LATE=newest
+RX_VK_FSR_FG=0

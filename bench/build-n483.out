@@ -1,0 +1,59 @@
+﻿2026-11-18 00:03:41 build start: 7daafa7a (7daafa7a perf(runtime): reduce Market frame stalls and Vulkan capture overhead (#1553))
+2026-11-18 00:03:45 patch 0007-host-HOS_FPS_MAX-20-59-on-the-hosts-30-cap-pacer.patch
+   patched: gpu\vk\fps_stats.h
+   patched: host\nn_vi.c
+   patched: tests\test_fps_stats.cpp
+   patched: tests\test_frame_rate_cap_30.py
+Source:  C:\Users\Admin\AppData\Local\LongshotBuilder-ally-n483\src\7daafa7a\longshot (longshot-ally-n483-7daafa7a)
+Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+Game:    C:\Users\Admin\Games\Hookshot
+Out:     C:\Users\Admin\Games\Longshot-Ally-n483
+
+== 00:03 Preparing the working tools folder
+
+== 00:04 Building
+wrote C:\Users\Admin\Games\Longshot-Ally-n483\longshot_shaders.bin 514 MB
+texts: 16 languages reworded for a PC
+prompts: switch
+prompts: xbox
+prompts: ps4
+prompts: ps5
+prompts: steamdeck
+prompts: keyboard
+prompts: the Talk ring
+prompts: the size table lets the font have 55088 bytes
+prompts: regenerated (no stamp yet)
+the shipped pipeline state list: 63920 pipelines
+where the time went:
+  checks                                  5 s
+  read                                  280 s
+  lift                                  135 s
+    image and discovery                  23 s
+    coverage                             14 s
+    emit and write                       56 s
+    big chunks split                      8 s
+    patches                               9 s
+    output size and page-mark groups     13 s
+    runtime tables and standalone files (beside the edits)      0 s
+  compile                              1155 s
+    planning                             27 s
+    compiling                          1115 s
+    linking longshot.exe                  6 s
+    linking longshot_vk.dll               5 s
+  finish                                 48 s
+    copying the new files in              2 s
+    swap and runtimes                     2 s
+    shader list                          18 s
+    button prompts                       25 s
+    pipeline lists, icon and stamps       1 s
+    build files deleted                   0 s
+    object store                          0 s
+the build took 0:27:03, compiled in 0:19:15
+@@times 1623 1155 -1
+the shaders were not prepared now ("Prepare shaders now" is unticked): the game prepares them at its first start
+@@done C:\Users\Admin\Games\Longshot-Ally-n483
+built in 27 min
+Done: C:\Users\Admin\Games\Longshot-Ally-n483 (longshot-ally-n483-7daafa7a)
+2026-11-18 00:31:21 build exit 0
+2026-11-18 00:31:21 saves copied: 14 files; options copied
+2026-11-18 00:31:21 done

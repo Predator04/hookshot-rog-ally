@@ -1,0 +1,11 @@
+# f35 (2026-11-18 night; the user via the 4090 session: "if we can maybe remove fog or soemthing in zelda to gte hogher fps
+# lets try?"): the release env without the cap (env_s35_rel.txt) + the fog left out: the four compute dispatches in a row
+# that make it (the 4090 session's pass trace of a Kokiri frame: ee7764a6 5x5x7, 735456b1 5x3x4, 27ee9883 9x5x7, 1e2fcee3
+# 9x5x1; skips with shots on n483). Without them Kokiri's ground haze and light shafts, Hyrule Field's cliff mist and the
+# distance haze are gone, nothing else changes. The 1x1x1 exposure dispatches right after must run (435a0138 left out: the
+# picture goes white).
+RX_VK_FORCE_MESH_FALLBACK=1
+RX_VK_PCACHE_LOAD=0
+RX_VK_READBACK_LATE=newest
+RX_VK_FSR_FG=0
+RX_VK_SKIP_PROG=ee7764a6b1ef459c,735456b1f220de07,27ee9883e2a20323,1e2fcee33a0c7209

@@ -1,0 +1,7 @@
+# t35 (2026-11-18 night; the 4090 session, on s35's uneven shown frames on n483): env_s35_rel.txt + RX_VK_FG_TIMELINE=0
+# (n483's #1362 kill switch: frame generation's sets presented the old way, not each made frame at its own time).
+RX_VK_FORCE_MESH_FALLBACK=1
+RX_VK_PCACHE_LOAD=0
+RX_VK_READBACK_LATE=newest
+RX_VK_FSR_FG=0
+RX_VK_FG_TIMELINE=0

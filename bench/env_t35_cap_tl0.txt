@@ -1,0 +1,8 @@
+# t35 (2026-11-18 night; the 4090 session, on s35's uneven shown frames on n483): the release env as played, with its cap, + RX_VK_FG_TIMELINE=0
+# (n483 only: rc.7 has no such switch).
+RX_VK_FORCE_MESH_FALLBACK=1
+RX_VK_PCACHE_LOAD=0
+RX_VK_READBACK_LATE=newest
+RX_VK_FSR_FG=0
+HOS_FPS_MAX=36
+RX_VK_FG_TIMELINE=0
