@@ -1,4 +1,4 @@
-# Longshot on the ROG Ally: hand-over (2026-11-17, 03:30; UMA back at 4 GB since 2026-11-14 09:44)
+# Longshot on the ROG Ally: hand-over (2026-11-17, 22:20; UMA back at 4 GB since 2026-11-14 09:44)
 
 Goal: the user plays Longshot on the ASUS ROG Ally (RC71L, Z1 Extreme, 16 GB) with the most FPS while it still looks
 good. Hookshot is dropped (its GitHub, NotRexed/Hookshot, is gone); Longshot (longshot.magicbean.dev, source
@@ -12,7 +12,7 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 - Never put game files, built exe, saves or anything made from the game in a repo, release or issue.
 - Never push to Longshot (the clone's push URL is disabled) or to upstream Hookshot; never change Windows/system settings.
 - The shared checkout `Desktop\Zelda Ocrina\hookshot-rog-ally` must not be stashed, reset or switched.
-- Don't touch the user's play folder `C:\Users\Admin\Games\Hookshot-Ally` or delete any Hookshot folder without the user's OK.
+- Don't move, rebuild or delete the user's play folder `C:\Users\Admin\Games\Longshot-Ally-new` or `Games\Hookshot` without the user's OK.
 - Commits (if any): `-c user.name=Predator04 -c user.email=1719393+Predator04@users.noreply.github.com`, ending with
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
@@ -23,18 +23,13 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Its GitHub copy (user asked 2026-11-14 00:1x: "update our github with all the information") | branch `longshot-ally` of https://github.com/Predator04/hookshot-rog-ally (this folder is that git repo, remote `fork`; .gitignore keeps saves, logs, dlls out). Commit + push after each milestone |
 | Longshot code changes (patches) | `patches\` here (the clone itself is never pushed) |
 | Longshot source clone | `C:\Users\Admin\Desktop\Zelda Ocrina\longshot` (at origin/main 6c9edffe since 2026-11-14 17:28 (414f56e2 at 12:35), + our 2 patches uncommitted; push disabled) |
-| Longshot game folder (built) | `C:\Users\Admin\Games\Longshot-Ally` (longshot-ally-cf605c85, the user's save + options + Ally env) |
-| Previous play folder, the fallback since 2026-11-16 22:20 (desktop `Longshot (old build).lnk`) | `C:\Users\Admin\Games\Longshot-Ally-6fb` (longshot-ally-6fb13fe5-dirty: 6fb13fe5 + 0001, 0002, 0003, 0004-on-6fb13fe5, 0006; built 19:09-19:55 from the worktree `Zelda Ocrina\longshot-6fb`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-6fb`; the user's save + options; longshot_env.txt = bench\env_longshot_ally_6fb.txt, HOS_FPS_LOCK=36 since 2026-11-16 09:04, 40 before) |
-| **User's play folder (since 2026-11-16 22:20; desktop `Longshot.lnk`)** | `C:\Users\Admin\Games\Longshot-Ally-new` (longshot-ally-6d72ca93-dirty: 6d72ca93 + 0002, 0003, 0004-on-6fb13fe5, 0007; worktree `Zelda Ocrina\longshot-rc6`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-rc6`; built at the path 5c284721 had, with its program cache copied, so its driver file F44F0B87...parc is warm: don't move the folder; the user's save + options; longshot_env.txt = bench\env_longshot_ally_rc6.txt, HOS_FPS_MAX=36, RX_VK_FSR_FG=0) |
-| The release installer's test install, 2026-11-16 night (i32/i33; not for play; ~34 GB + work 5 GB + its driver file 782B3ADC...parc, delete when done) | `C:\Users\Admin\Games\Longshot-Ally-installtest` (v3.0.0-rc.7 + 0007, built by `longshot-ally\Install Longshot Ally.bat`; work folder `%LOCALAPPDATA%\LongshotBuilder-ally-installtest`) |
-| Main 5c284721, tested 2026-11-16 (q28-q30; not for play) | `C:\Users\Admin\Games\Longshot-Ally-5c2` (renamed from Longshot-Ally-new at 18:44; worktree `Zelda Ocrina\longshot-new`, work folder `%LOCALAPPDATA%\LongshotBuilder-ally-new`) |
-| Backup of the play build's AMD driver cache file | `%LOCALAPPDATA%\VkCache-backup-2026-11-16\66947ED760F03CCAB0E1094909B13A50.parc` (1,728 MB, as of 14:41; copied before q32; put it back in `%LOCALAPPDATA%\AMD\VkCache` only if 6fb loses pipelines again) |
-| Previous play folder (fallback) | `C:\Users\Admin\Games\Longshot-Ally-next` (longshot-ally-6c9edffe-dirty + 0001-0004; rball5 + cap + lock 30; the same save) |
-| User's current play build | `C:\Users\Admin\Games\Hookshot-Ally` (rog-ally-cb21687, Hookshot fork; don't touch) |
-| Copy of the play build for A/B | `C:\Users\Admin\Games\Hookshot-Ally-ref` (34 GB; delete only with the user's OK) |
-| Game files the build reads (read only) | `C:\Users\Admin\Games\Hookshot` (romfs, .hookshot_exefs) |
+| **User's play folder (since 2026-11-17 12:11; desktop `Longshot (ROG Ally).lnk`, the only game shortcut)** | `C:\Users\Admin\Games\Longshot-Ally-new`: the published release longshot-ally-2026.11.17 (v3.0.0-rc.7 + 0007, source 640f91df), installed in place by `longshot-ally\Install-LongshotAlly.ps1 -From Games\Hookshot -Out Games\Longshot-Ally-new` (bench\install-play.out, build 38 min). longshot_env.txt = the release's 5 lines (cap 36); options = the release's Ally keys over the user's; the user's saves; the earlier env and options kept as `*.before-2026-11-17_12-11-39`. Its driver file F44F0B87...parc is warm (first start 16 s, 36 game fps): don't move the folder |
+| The user's save backup | `Desktop\Zelda saves 2026-11-17` (the 14 save files as of 2026-11-12 19:09, + README.txt) |
+| Backup of the play folder's AMD driver file | `%LOCALAPPDATA%\VkCache-backup-2026-11-16\F44F0B871E202D93B0E1094909B13A50.parc` (2,432 MB). Put back on 2026-11-17: `AMD\VkCache` was found empty (changed 09:44, while the Ally was in Modern Standby; cause unknown, driver unchanged) |
+| Game files the build reads (read only; the installer's choice [1]) | `C:\Users\Admin\Games\Hookshot` (romfs, .hookshot_exefs, an older 4-slot save) |
 | Builder tools used | `%LOCALAPPDATA%\HookshotBuilder\versions\v2.1.0\HookshotBuilder` (Longshot's tools.lock pins the same) |
-| Build work folder (kept build files) | `%LOCALAPPDATA%\LongshotBuilder-ally` |
+| Build work folder (kept build files; the installer's) | `%LOCALAPPDATA%\LongshotBuilder-ally` |
+| Removed 2026-11-17 (the user: "remove anything we dont need", relayed; "Yes" typed here 22:0x to deleting the old copies) | Deleted: Games\Longshot-Ally, -5c2, -next, -installtest, Hookshot-Ally, -b4, -ref, -main, -next, -pr1636, -rc; work folders HookshotBuilder-ally, -pr1636, -rc, LongshotBuilder-ally-6fb, -new, -rc6, -installtest; desktop Longshot.lnk, Longshot (old build).lnk, Hookshot.lnk, Hookshot (Fast).lnk. In the Recycle Bin: Games\Longshot-Ally-6fb and the 66947...parc backup. 165 GB freed (the copies shared hard-linked files), C: 900 GB free. Left alone: the Start-menu Hookshot.lnk (-> Games\Hookshot) |
 | Spot saves for the bench (read only) | `Desktop\Zelda Ocrina\hookshot-rog-ally\ally\tools\hs\route-saves` |
 | Hookshot merge worktree (old work) | `Desktop\Zelda Ocrina\hs-merge` (branch upstream-merge-e9975d6; its route-bench.ps1 benches the ref folder) |
 
@@ -73,6 +68,15 @@ through Longshot now. No more Hookshot." and lets Claude "go ahead and do everyt
 | Longshot cf605c85 (Longshot-Ally) (cur5_a / cur5_b) | 40.0 / 40.3 | 35.2 / 35.1 | 36.6 / 36.5 | 37.3 / 37.3 | 40.2 / 41.9 | 16.5-20.3 | 173-187 |
 | 6c9edffe + RX_VK_MIRROR=1: render + recorder thread (rt5_a / rt5_b) | 41.0 / 41.2 | 34.0 / 33.9 | 37.4 / 37.7 | 37.5 / 37.6 | 40.6 / 44.5 | 18.6-22.8 | 174-189 |
 | 6c9edffe + mirrors, threads off (mir5_a / mir5_b) | 40.0 / 39.6 | 32.9 / 32.3 | 37.1 / 39.7 | 36.7 / 37.2 | 45.2 / 45.9 | 17.1-22.9 | 174-187 |
+
+**Update 2026-11-17 22:20: the user plays the published release.** The 4090 session published
+longshot-ally-2026.11.17 (de5c3532) on the user's "Yes, publish it". On the user's "put the newest ... on desktop so i
+can play it" (relayed), the release was installed in place into the play folder `Games\Longshot-Ally-new`. It was a
+38-min build from the local checkout at the tag (bench\install-play.out), with the saves kept and backed up to
+`Desktop\Zelda saves 2026-11-17`. The first start took 16 s, not ~75 min: the old cache\ and the warm F44F...parc
+carried over. The user's first session held 36 game fps (72 shown, frame interpolation 2x). Old game copies and work
+folders were removed (see "Where things are"), and `Longshot (ROG Ally).lnk` is the only game shortcut. Since 4d7734d5
+(not released yet), a later double-click install updates the folder that shortcut opens.
 
 **Update 2026-11-17 03:30 (s34, the user via the 4090 session: "Run everything all night and report tomorrow"; the
 user's rule: no reason to publish unless ours beats stock): ours beats stock in every round, +5.5 game fps (+15 %).**

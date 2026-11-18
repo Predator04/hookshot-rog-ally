@@ -1,0 +1,88 @@
+﻿2026-11-17 11:33:49 install start (git de5c3532)
+Longshot for the ROG Ally: install (longshot-ally-2026-11-17, Longshot v3.0.0-rc.7)
+https://github.com/Predator04/hookshot-rog-ally
+
+== Looking for a builder and your game
+   Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+   Game files: C:\Users\Admin\Games\Hookshot
+   Builds into: C:\Users\Admin\Games\Longshot-Ally-new
+
+== Getting Longshot v3.0.0-rc.7's source
+   Downloading https://git.magicbean.dev/api/v1/repos/MagicBeanDev/Longshot/archive/v3.0.0-rc.7.zip
+   Unzipping into C:\Users\Admin\AppData\Local\LongshotBuilder-ally\src\v3.0.0-rc.7
+   Patch 0007-host-HOS_FPS_MAX-20-59-on-the-hosts-30-cap-pacer.patch
+     patched: gpu\vk\fps_stats.h
+     patched: host\nn_vi.c
+     patched: tests\test_fps_stats.cpp
+     patched: tests\test_frame_rate_cap_30.py
+   Saves in C:\Users\Admin\Games\Longshot-Ally-new copied to C:\Users\Admin\AppData\Local\LongshotBuilder-ally\save-backup-2026-11-17_11-34-02 first
+
+== Building (10 to 60 minutes; keep the charger in; do not play meanwhile)
+Source:  C:\Users\Admin\AppData\Local\LongshotBuilder-ally\src\v3.0.0-rc.7\longshot (longshot-ally-2026-11-17-v3.0.0-rc.7)
+Builder: C:\Users\Admin\AppData\Local\HookshotBuilder\versions\v2.1.0\HookshotBuilder
+Game:    C:\Users\Admin\Games\Hookshot
+Out:     C:\Users\Admin\Games\Longshot-Ally-new
+
+== 11:34 Preparing the working tools folder
+
+== 11:34 Building
+wrote C:\Users\Admin\Games\Longshot-Ally-new\longshot_shaders.bin 514 MB
+texts: 16 languages reworded for a PC
+prompts: switch
+prompts: xbox
+prompts: ps4
+prompts: ps5
+prompts: steamdeck
+prompts: keyboard
+prompts: the Talk ring
+prompts: the size table lets the font have 55088 bytes
+prompts: regenerated (builder changed)
+the shipped pipeline state list: 63920 pipelines
+where the time went:
+  checks                                  5 s
+  read                                  339 s
+  lift                                  243 s
+    image and discovery                  39 s
+    coverage                             11 s
+    emit and write                      112 s
+    big chunks split                     17 s
+    patches                              12 s
+    output size and page-mark groups     30 s
+    runtime tables and standalone files     10 s
+  compile                              1604 s
+    planning                             33 s
+    compiling                          1557 s
+    linking longshot.exe                  6 s
+    linking longshot_vk.dll               5 s
+  finish                                 59 s
+    copying the new files in              1 s
+    swap and runtimes                     1 s
+    shader list                          19 s
+    button prompts                       38 s
+    pipeline lists, icon and stamps       1 s
+    build files deleted                   0 s
+    object store                          0 s
+the build took 0:37:31, compiled in 0:26:44 (the last one 0:03:58)
+@@times 2251 1604 238
+the shaders were not prepared now ("Prepare shaders now" is unticked): the game prepares them at its first start
+@@done C:\Users\Admin\Games\Longshot-Ally-new
+built in 38 min
+Done: C:\Users\Admin\Games\Longshot-Ally-new (longshot-ally-2026-11-17-v3.0.0-rc.7)
+
+== Writing the tested Ally settings
+   Your longshot_env.txt kept as longshot_env.txt.before-2026-11-17_12-11-39
+   longshot_env.txt written
+   Your longshot_options.ini kept as longshot_options.ini.before-2026-11-17_12-11-39
+   longshot_options.ini: quality_preset=1, resolution=3, upscaling=2, output_res=2048x1152, frame_generation=2, frame_pacing=1, frame_rate_cap=0, handheld_profile=1, fullscreen=1, sharpness=50, anisotropic_filtering=4, game_speed=1
+
+== Saves and shortcut
+   Kept the saves already in C:\Users\Admin\Games\Longshot-Ally-new
+   Desktop shortcut: C:\Users\Admin\Desktop\Longshot (ROG Ally).lnk
+
+Done: C:\Users\Admin\Games\Longshot-Ally-new
+Start it from the desktop shortcut (or C:\Users\Admin\Games\Longshot-Ally-new\longshot.exe).
+The first start shows a start-up screen for about 75 minutes on the Ally while it prepares the shaders: charger in, other apps
+closed. You can close it; the next start carries on from there. After that a start takes about a minute.
+Keep the folder where it is: the AMD driver keeps its shaders by the game's folder, so a moved folder starts cold again.
+To update later, run this installer from a newer release: it builds into the same folder and keeps your saves.
+2026-11-17 12:11:40 install exit 0
